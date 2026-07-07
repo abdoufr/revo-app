@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
 
@@ -10,8 +11,6 @@ class AdminScannerScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<AdminScannerScreen> createState() => _AdminScannerScreenState();
 }
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
   final _amountController = TextEditingController();
