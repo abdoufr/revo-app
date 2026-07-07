@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
 
@@ -13,7 +14,29 @@ class AdminScannerScreen extends ConsumerStatefulWidget {
 class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
   final _amountController = TextEditingController();
   final _clientIdController = TextEditingController();
+  final MobileScannerController _scannerController = MobileScannerController();
   bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _clientIdController.dispose();
+    _scannerController.dispose();
+    super.dispose();
+  }
+
+  void _onDetect(BarcodeCapture capture) {
+    final List<Barcode> barcodes = capture.barcodes;
+    for (final barcode in barcodes) {
+      if (barcode.rawValue != null) {
+        setState(() {
+          _clientIdController.text = barcode.rawValue!;
+        });
+        // Optional: stop scanning after successful read to prevent spam
+        // _scannerController.stop(); 
+      }
+    }
+  }
 
   Future<void> _submitPoints() async {
     final amount = double.tryParse(_amountController.text);
@@ -35,6 +58,8 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
         );
         _amountController.clear();
         _clientIdController.clear();
+        // Optional: resume scanning if it was stopped
+        // _scannerController.start();
       }
     } catch (e) {
       if (mounted) {
@@ -60,24 +85,30 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Placeholder for real camera scanner
+            // Real Camera Scanner
             Container(
-              height: 250,
+              height: 300,
               decoration: BoxDecoration(
-                color: AppTheme.bgLighter,
+                color: Colors.black,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: AppTheme.accentCyan.withOpacity(0.5), width: 2),
               ),
-              child: const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.qr_code_scanner, size: 64, color: AppTheme.textGrey),
-                    SizedBox(height: 16),
-                    Text('Caméra (Scanner QR)', style: TextStyle(color: AppTheme.textGrey)),
-                    Text('(Disponible sur mobile)', style: TextStyle(color: AppTheme.textGrey, fontSize: 12)),
-                  ],
-                ),
+              clipBehavior: Clip.hardEdge,
+              child: MobileScanner(
+                controller: _scannerController,
+                onDetect: _onDetect,
+                errorBuilder: (context, error, child) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        'Erreur de caméra. Vérifiez les autorisations de votre navigateur.',
+                        style: TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             
