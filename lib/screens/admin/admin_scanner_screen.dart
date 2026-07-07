@@ -97,18 +97,6 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
               child: MobileScanner(
                 controller: _scannerController,
                 onDetect: _onDetect,
-                errorBuilder: (context, error, child) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        'Erreur de caméra. Vérifiez les autorisations de votre navigateur.',
-                        style: TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  );
-                },
               ),
             ),
             
