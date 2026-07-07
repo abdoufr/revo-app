@@ -71,7 +71,66 @@ class AdminActions {
       'user_id': userId,
       'amount_spent': amountSpent,
       'points_earned': pointsEarned,
+      'type': 'earn',
       'date': FieldValue.serverTimestamp(),
     });
   }
+
+  Future<void> claimReward(String userId, int pointsRequired) async {
+    final userRef = _firestore.collection('users').doc(userId);
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(userRef);
+      if (!snapshot.exists) {
+        throw Exception("Client introuvable!");
+      }
+      int currentPoints = snapshot.data()?['loyalty_points'] ?? 0;
+      if (currentPoints < pointsRequired) {
+        throw Exception("Points insuffisants!");
+      }
+      transaction.update(userRef, {'loyalty_points': currentPoints - pointsRequired});
+    });
+
+    await _firestore.collection('transactions').add({
+      'user_id': userId,
+      'points_deducted': pointsRequired,
+      'type': 'claim',
+      'date': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> updateAppSettings(String name, String description, String banner) async {
+    await _firestore.collection('config').doc('fastfood').set({
+      'fastfoodName': name,
+      'fastfoodDescription': description,
+      'announcementBanner': banner,
+    }, SetOptions(merge: true));
+  }
 }
+
+// Analytics Provider
+final analyticsProvider = StreamProvider<Map<String, dynamic>>((ref) {
+  // We use multiple streams combined or just a unified approach.
+  // For simplicity, we can fetch all transactions and users, but using aggregate queries is better.
+  // Since StreamProvider doesn't support aggregate queries directly in a live way easily across multiple collections,
+  // we'll return a FutureProvider or a manual Stream.
+  // Actually, we'll just query the transactions to calculate total points given and fetch user count.
+  return FirebaseFirestore.instance.collection('transactions').snapshots().asyncMap((transSnapshot) async {
+    double totalPoints = 0;
+    int rewardsClaimed = 0;
+    for (var doc in transSnapshot.docs) {
+      if (doc.data()['type'] == 'earn') {
+        totalPoints += (doc.data()['points_earned'] ?? 0);
+      } else if (doc.data()['type'] == 'claim') {
+        rewardsClaimed++;
+      }
+    }
+
+    final usersSnapshot = await FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'client').count().get();
+    
+    return {
+      'totalClients': usersSnapshot.count ?? 0,
+      'totalPoints': totalPoints.toInt(),
+      'rewardsClaimed': rewardsClaimed,
+    };
+  });
+});

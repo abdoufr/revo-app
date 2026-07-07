@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_providers.dart';
+import '../../providers/admin_providers.dart';
 import 'admin_scanner_screen.dart';
 import 'admin_menu_screen.dart';
 import 'admin_rewards_screen.dart';
+import 'admin_settings_screen.dart';
 
 class AdminHome extends ConsumerWidget {
   const AdminHome({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final analyticsAsync = ref.watch(analyticsProvider);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -65,29 +69,35 @@ class AdminHome extends ConsumerWidget {
                         ),
                         const SizedBox(height: 24),
                         
-                        // Trendy Stats Row
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildTrendyStatCard(
-                                context, 
-                                title: 'Clients', 
-                                value: '1,248', 
-                                icon: Icons.people_outline,
-                                isPrimary: true,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _buildTrendyStatCard(
-                                context, 
-                                title: 'Points donnés', 
-                                value: '45K', 
-                                icon: Icons.auto_awesome,
-                                isPrimary: false,
-                              ),
-                            ),
-                          ],
+                        // Real Analytics
+                        analyticsAsync.when(
+                          data: (stats) {
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: _buildTrendyStatCard(
+                                    context, 
+                                    title: 'Clients', 
+                                    value: '${stats['totalClients']}', 
+                                    icon: Icons.people_outline,
+                                    isPrimary: true,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _buildTrendyStatCard(
+                                    context, 
+                                    title: 'Points donnés', 
+                                    value: '${stats['totalPoints']}', 
+                                    icon: Icons.auto_awesome,
+                                    isPrimary: false,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                          loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
+                          error: (err, stack) => Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
                         ),
                         const SizedBox(height: 48),
 
@@ -124,6 +134,16 @@ class AdminHome extends ConsumerWidget {
                           icon: Icons.card_giftcard_rounded,
                           onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminRewardsScreen()));
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTrendyActionCard(
+                          context,
+                          title: 'Paramètres',
+                          subtitle: 'Nom du Fastfood & Promos',
+                          icon: Icons.settings_rounded,
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminSettingsScreen()));
                           },
                         ),
                       ],

@@ -5,15 +5,29 @@ import '../../theme/app_theme.dart';
 import '../../providers/client_providers.dart';
 import '../../providers/auth_providers.dart';
 import '../../providers/admin_providers.dart';
+import '../../providers/settings_provider.dart';
 
 class ClientHome extends ConsumerWidget {
   const ClientHome({super.key});
+
+  Color _getVipColor(int points) {
+    if (points >= 500) return Colors.amber; // Gold
+    if (points >= 200) return Colors.grey.shade300; // Silver
+    return AppTheme.accentPurple; // Bronze / Default
+  }
+
+  String _getVipTier(int points) {
+    if (points >= 500) return 'Membre GOLD';
+    if (points >= 200) return 'Membre SILVER';
+    return 'Membre BRONZE';
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(clientUserProvider);
     final rewardConfigAsync = ref.watch(rewardConfigProvider);
     final productsAsync = ref.watch(productsStreamProvider);
+    final settingsAsync = ref.watch(appSettingsProvider);
 
     return Scaffold(
       body: Stack(
@@ -41,17 +55,18 @@ class ClientHome extends ConsumerWidget {
                   backgroundColor: Colors.transparent,
                   elevation: 0,
                   pinned: true,
-                  title: Text(
-                    'REVO',
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      letterSpacing: 2,
+                  title: settingsAsync.when(
+                    data: (settings) => Text(
+                      settings.fastfoodName.toUpperCase(),
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                        letterSpacing: 2,
+                        fontSize: 22,
+                      ),
                     ),
+                    loading: () => const Text('CHARGEMENT...'),
+                    error: (_, __) => const Text('REVO APP'),
                   ),
                   actions: [
-                    IconButton(
-                      icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-                      onPressed: () {},
-                    ),
                     IconButton(
                       icon: const Icon(Icons.logout_rounded, color: Colors.white),
                       onPressed: () {
@@ -66,6 +81,28 @@ class ClientHome extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        settingsAsync.whenData((settings) {
+                          if (settings.announcementBanner.isNotEmpty) {
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 24),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppTheme.accentPurple.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: AppTheme.accentPurple),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.campaign_rounded, color: AppTheme.accentPurple),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: Text(settings.announcementBanner, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                                ],
+                              ),
+                            );
+                          }
+                          return const SizedBox();
+                        }).value ?? const SizedBox(),
+
                         userAsync.when(
                           data: (user) {
                             if (user == null) return const Text('Utilisateur introuvable', style: TextStyle(color: Colors.white));
@@ -77,6 +114,8 @@ class ClientHome extends ConsumerWidget {
                                 double progress = pointsForReward > 0 ? userPoints / pointsForReward : 0;
                                 if (progress > 1.0) progress = 1.0;
                                 
+                                final vipColor = _getVipColor(userPoints);
+
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -94,11 +133,15 @@ class ClientHome extends ConsumerWidget {
                                     // Trendy Loyalty Card
                                     Container(
                                       decoration: BoxDecoration(
-                                        gradient: AppTheme.primaryGradient,
+                                        gradient: LinearGradient(
+                                          colors: [vipColor.withOpacity(0.8), vipColor.withOpacity(0.4)],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
                                         borderRadius: BorderRadius.circular(30),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: AppTheme.accentPurple.withOpacity(0.4),
+                                            color: vipColor.withOpacity(0.4),
                                             blurRadius: 30,
                                             offset: const Offset(0, 10),
                                           ),
@@ -106,13 +149,12 @@ class ClientHome extends ConsumerWidget {
                                       ),
                                       child: Stack(
                                         children: [
-                                          // Glass effect over gradient
                                           Positioned.fill(
                                             child: Container(
                                               decoration: BoxDecoration(
                                                 borderRadius: BorderRadius.circular(30),
                                                 color: Colors.white.withOpacity(0.1),
-                                                border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                                border: Border.all(color: Colors.white.withOpacity(0.3)),
                                               ),
                                             ),
                                           ),
@@ -120,6 +162,15 @@ class ClientHome extends ConsumerWidget {
                                             padding: const EdgeInsets.all(32.0),
                                             child: Column(
                                               children: [
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black.withOpacity(0.3),
+                                                    borderRadius: BorderRadius.circular(20),
+                                                  ),
+                                                  child: Text(_getVipTier(userPoints), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                                ),
+                                                const SizedBox(height: 24),
                                                 // QR Code Container
                                                 Container(
                                                   padding: const EdgeInsets.all(16),
@@ -169,15 +220,23 @@ class ClientHome extends ConsumerWidget {
                                                   ),
                                                 ),
                                                 const SizedBox(height: 16),
-                                                Text(
-                                                  userPoints >= pointsForReward 
-                                                    ? '🎉 Félicitations! Tu as gagné: ${config.rewardDescription}'
-                                                    : 'Encore ${pointsForReward - userPoints} pts pour une surprise!',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
+                                                if (userPoints >= pointsForReward)
+                                                  Container(
+                                                    padding: const EdgeInsets.all(12),
+                                                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                                                    child: Row(
+                                                      children: [
+                                                        const Icon(Icons.card_giftcard, color: AppTheme.accentPurple),
+                                                        const SizedBox(width: 8),
+                                                        Expanded(child: Text('CADEAU DÉBLOQUÉ! \n${config.rewardDescription}', style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold))),
+                                                      ],
+                                                    ),
+                                                  )
+                                                else
+                                                  Text(
+                                                    'Encore ${pointsForReward - userPoints} pts pour une surprise!',
+                                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                                                   ),
-                                                ),
                                               ],
                                             ),
                                           ),

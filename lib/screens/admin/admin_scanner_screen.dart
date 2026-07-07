@@ -11,11 +11,16 @@ class AdminScannerScreen extends ConsumerStatefulWidget {
   ConsumerState<AdminScannerScreen> createState() => _AdminScannerScreenState();
 }
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
   final _amountController = TextEditingController();
   final _clientIdController = TextEditingController();
   final MobileScannerController _scannerController = MobileScannerController();
   bool _isLoading = false;
+  Map<String, dynamic>? _scannedUser;
+  bool _isEligibleForReward = false;
+  int _requiredPoints = 0;
 
   @override
   void dispose() {
@@ -25,16 +30,67 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
     super.dispose();
   }
 
-  void _onDetect(BarcodeCapture capture) {
+  void _onDetect(BarcodeCapture capture) async {
     final List<Barcode> barcodes = capture.barcodes;
     for (final barcode in barcodes) {
-      if (barcode.rawValue != null) {
+      if (barcode.rawValue != null && _clientIdController.text != barcode.rawValue!) {
         setState(() {
           _clientIdController.text = barcode.rawValue!;
         });
-        // Optional: stop scanning after successful read to prevent spam
-        // _scannerController.stop(); 
+        await _fetchUserDetails(barcode.rawValue!);
+        _scannerController.stop(); 
       }
+    }
+  }
+
+  Future<void> _fetchUserDetails(String userId) async {
+    setState(() => _isLoading = true);
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      if (doc.exists && doc.data() != null) {
+        final data = doc.data()!;
+        final configDoc = await FirebaseFirestore.instance.collection('config').doc('rewards').get();
+        int reqPoints = 50;
+        if (configDoc.exists && configDoc.data() != null) {
+          reqPoints = configDoc.data()!['pointsRequiredForReward'] ?? 50;
+        }
+        setState(() {
+          _scannedUser = data;
+          _requiredPoints = reqPoints;
+          _isEligibleForReward = (data['loyalty_points'] ?? 0) >= reqPoints;
+        });
+      }
+    } catch (e) {
+      // Ignore
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _claimReward() async {
+    final clientId = _clientIdController.text.trim();
+    if (clientId.isEmpty) return;
+
+    setState(() => _isLoading = true);
+    try {
+      await ref.read(adminActionsProvider).claimReward(clientId, _requiredPoints);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cadeau validé! Points déduits.'), backgroundColor: AppTheme.success),
+        );
+        _clientIdController.clear();
+        setState(() {
+          _scannedUser = null;
+          _isEligibleForReward = false;
+        });
+        _scannerController.start();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -125,6 +181,31 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
               ),
             ),
             const SizedBox(height: 32),
+            
+            if (_scannedUser != null) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: AppTheme.bgLighter, borderRadius: BorderRadius.circular(16)),
+                child: Column(
+                  children: [
+                    Text('Client: ${_scannedUser!['name']}', style: const TextStyle(color: Colors.white, fontSize: 18)),
+                    Text('Points: ${_scannedUser!['loyalty_points']}', style: const TextStyle(color: AppTheme.accentCyan, fontSize: 24, fontWeight: FontWeight.bold)),
+                    if (_isEligibleForReward) ...[
+                      const SizedBox(height: 16),
+                      const Text('🎉 Éligible pour un CADEAU !', style: TextStyle(color: AppTheme.accentPurple, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentPurple, padding: const EdgeInsets.symmetric(vertical: 16)),
+                        onPressed: _isLoading ? null : _claimReward,
+                        child: const Center(child: Text('Valider le Cadeau', style: TextStyle(color: Colors.white, fontSize: 16))),
+                      ),
+                    ]
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+
             GradientButton(
               text: 'Ajouter les Points',
               isLoading: _isLoading,
