@@ -58,12 +58,25 @@ class AuthController {
     
     if (!doc.exists) {
       await docRef.set({
-        'name': user.displayName ?? user.email?.split('@')[0] ?? 'Client',
+        'name': user.displayName ?? user.email?.split('@')[0] ?? user.phoneNumber ?? 'Client',
         'email': user.email,
+        'phone': user.phoneNumber,
         'role': 'client', 
         'loyalty_points': 0,
         'created_at': FieldValue.serverTimestamp(),
       });
+    }
+  }
+
+  Future<ConfirmationResult> verifyPhoneNumber(String phoneNumber) async {
+    // For web, Firebase automatically handles reCAPTCHA
+    return await _auth.signInWithPhoneNumber(phoneNumber);
+  }
+
+  Future<void> verifyOTP(ConfirmationResult confirmationResult, String otp) async {
+    final UserCredential userCredential = await confirmationResult.confirm(otp);
+    if (userCredential.user != null) {
+      await _createUserDoc(userCredential.user!);
     }
   }
 
