@@ -6,11 +6,13 @@ class ClientUser {
   final String id;
   final String name;
   final int loyaltyPoints;
+  final int lifetimePoints;
 
   ClientUser({
     required this.id,
     required this.name,
     required this.loyaltyPoints,
+    required this.lifetimePoints,
   });
 
   factory ClientUser.fromMap(Map<String, dynamic> data, String id) {
@@ -18,6 +20,7 @@ class ClientUser {
       id: id,
       name: data['name'] ?? 'Client',
       loyaltyPoints: data['loyalty_points'] ?? 0,
+      lifetimePoints: data['lifetime_points'] ?? (data['loyalty_points'] ?? 0),
     );
   }
 }

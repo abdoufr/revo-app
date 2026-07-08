@@ -110,11 +110,12 @@ class ClientHome extends ConsumerWidget {
                             return rewardConfigAsync.when(
                               data: (config) {
                                 int userPoints = user.loyaltyPoints;
+                                int lifetimePoints = user.lifetimePoints;
                                 int pointsForReward = config.pointsRequiredForReward;
                                 double progress = pointsForReward > 0 ? userPoints / pointsForReward : 0;
                                 if (progress > 1.0) progress = 1.0;
                                 
-                                final vipColor = _getVipColor(userPoints);
+                                final vipColor = _getVipColor(lifetimePoints);
 
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,7 +169,7 @@ class ClientHome extends ConsumerWidget {
                                                     color: Colors.black.withOpacity(0.3),
                                                     borderRadius: BorderRadius.circular(20),
                                                   ),
-                                                  child: Text(_getVipTier(userPoints), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                                  child: Text(_getVipTier(lifetimePoints), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                                                 ),
                                                 const SizedBox(height: 24),
                                                 // QR Code Container

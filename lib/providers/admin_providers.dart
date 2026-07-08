@@ -63,7 +63,12 @@ class AdminActions {
         throw Exception("Client introuvable!");
       }
       int currentPoints = snapshot.data()?['loyalty_points'] ?? 0;
-      transaction.update(userRef, {'loyalty_points': currentPoints + pointsEarned});
+      int lifetimePoints = snapshot.data()?['lifetime_points'] ?? currentPoints; // Fallback for old users
+      
+      transaction.update(userRef, {
+        'loyalty_points': currentPoints + pointsEarned,
+        'lifetime_points': lifetimePoints + pointsEarned,
+      });
     });
 
     // 3. Log transaction

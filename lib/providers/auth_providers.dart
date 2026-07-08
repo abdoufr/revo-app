@@ -63,6 +63,7 @@ class AuthController {
         'phone': user.phoneNumber,
         'role': 'client', 
         'loyalty_points': 0,
+        'lifetime_points': 0,
         'created_at': FieldValue.serverTimestamp(),
       });
     }
