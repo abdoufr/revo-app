@@ -7,12 +7,14 @@ class ClientUser {
   final String name;
   final int loyaltyPoints;
   final int lifetimePoints;
+  final bool isPublic;
 
   ClientUser({
     required this.id,
     required this.name,
     required this.loyaltyPoints,
     required this.lifetimePoints,
+    required this.isPublic,
   });
 
   factory ClientUser.fromMap(Map<String, dynamic> data, String id) {
@@ -21,6 +23,7 @@ class ClientUser {
       name: data['name'] ?? 'Client',
       loyaltyPoints: data['loyalty_points'] ?? 0,
       lifetimePoints: data['lifetime_points'] ?? (data['loyalty_points'] ?? 0),
+      isPublic: data['is_public'] ?? false,
     );
   }
 }

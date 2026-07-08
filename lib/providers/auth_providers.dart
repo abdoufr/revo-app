@@ -64,6 +64,7 @@ class AuthController {
         'role': 'client', 
         'loyalty_points': 0,
         'lifetime_points': 0,
+        'is_public': false,
         'created_at': FieldValue.serverTimestamp(),
       });
     }

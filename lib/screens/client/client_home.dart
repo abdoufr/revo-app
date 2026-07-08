@@ -6,6 +6,9 @@ import '../../providers/client_providers.dart';
 import '../../providers/auth_providers.dart';
 import '../../providers/admin_providers.dart';
 import '../../providers/settings_provider.dart';
+import 'client_history_screen.dart';
+import 'client_leaderboard_screen.dart';
+import 'client_settings_screen.dart';
 
 class ClientHome extends ConsumerWidget {
   const ClientHome({super.key});
@@ -255,9 +258,44 @@ class ClientHome extends ConsumerWidget {
                           error: (err, stack) => const Text('Erreur utilisateur', style: TextStyle(color: Colors.red)),
                         ),
 
-                        const SizedBox(height: 48),
+                        const SizedBox(height: 32),
+                        
+                        // Client Actions
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildActionCard(
+                                context,
+                                icon: Icons.history_rounded,
+                                title: 'Historique',
+                                color: AppTheme.accentPurple,
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientHistoryScreen())),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildActionCard(
+                                context,
+                                icon: Icons.leaderboard_rounded,
+                                title: 'Top Clients',
+                                color: AppTheme.accentCyan,
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientLeaderboardScreen())),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildActionCard(
+                                context,
+                                icon: Icons.settings_rounded,
+                                title: 'Paramètres',
+                                color: Colors.grey.shade400,
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientSettingsScreen())),
+                              ),
+                            ),
+                          ],
+                        ),
 
-                        // Menu Header
+                        const SizedBox(height: 48),                        // Menu Header
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -340,6 +378,38 @@ class ClientHome extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+  Widget _buildActionCard(BuildContext context, {required IconData icon, required String title, required Color color, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.bgLighter,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
       ),
     );
   }
