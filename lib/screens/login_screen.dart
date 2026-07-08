@@ -227,7 +227,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               const Expanded(child: Divider(color: AppTheme.textGrey, thickness: 0.5)),
                             ],
                           ),
-                        ]
+                        ],
                         const SizedBox(height: 16),
 
                         // Google Button
