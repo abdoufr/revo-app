@@ -17,4 +17,4 @@ flutter pub get
 
 # Compiler l'application Web
 echo "Building Web App..."
-flutter build web
+flutter build web --pwa-strategy=none
