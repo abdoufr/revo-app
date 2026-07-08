@@ -2,7 +2,11 @@
 
 # Télécharger Flutter sur le serveur Vercel
 echo "Cloning Flutter..."
-git clone https://github.com/flutter/flutter.git -b stable
+if [ ! -d "flutter" ]; then
+  git clone https://github.com/flutter/flutter.git -b stable
+else
+  echo "Flutter directory already exists, skipping clone."
+fi
 
 # Ajouter Flutter au PATH temporaire
 export PATH="$PATH:`pwd`/flutter/bin"
