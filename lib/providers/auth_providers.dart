@@ -9,13 +9,9 @@ final authStateProvider = StreamProvider<User?>((ref) {
   return ref.watch(firebaseAuthProvider).authStateChanges();
 });
 
-// To determine if user is Admin
-final isAdminProvider = FutureProvider.family<bool, String>((ref, uid) async {
-  final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-  if (doc.exists && doc.data() != null) {
-    return doc.data()!['role'] == 'admin';
-  }
-  return false;
+// To determine if user is Admin and get their live status
+final userDocStreamProvider = StreamProvider.family<DocumentSnapshot<Map<String, dynamic>>, String>((ref, uid) {
+  return FirebaseFirestore.instance.collection('users').doc(uid).snapshots();
 });
 
 final authControllerProvider = Provider((ref) => AuthController(ref));
@@ -33,7 +29,7 @@ class AuthController {
       if (e.code == 'user-not-found') {
         // Auto sign-up if user doesn't exist
         await _auth.createUserWithEmailAndPassword(email: email, password: password);
-        await _createUserDoc(_auth.currentUser!);
+        await _createUserDoc(_auth.currentUser!, isEmailSignup: true);
       } else {
         throw e.message ?? 'Erreur de connexion';
       }
@@ -52,7 +48,7 @@ class AuthController {
     }
   }
 
-  Future<void> _createUserDoc(User user) async {
+  Future<void> _createUserDoc(User user, {bool isEmailSignup = false}) async {
     final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
     final doc = await docRef.get();
     
@@ -62,6 +58,7 @@ class AuthController {
         'email': user.email,
         'phone': user.phoneNumber,
         'role': 'client', 
+        'status': isEmailSignup ? 'pending' : 'active',
         'loyalty_points': 0,
         'lifetime_points': 0,
         'is_public': false,

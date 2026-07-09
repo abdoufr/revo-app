@@ -7,6 +7,7 @@ import 'admin_scanner_screen.dart';
 import 'admin_menu_screen.dart';
 import 'admin_rewards_screen.dart';
 import 'admin_settings_screen.dart';
+import 'admin_approvals_screen.dart';
 
 class AdminHome extends ConsumerWidget {
   const AdminHome({super.key});
@@ -114,6 +115,16 @@ class AdminHome extends ConsumerWidget {
                           icon: Icons.qr_code_scanner_rounded,
                           onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminScannerScreen()));
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTrendyActionCard(
+                          context,
+                          title: 'Demandes d\'inscription',
+                          subtitle: 'Valider les nouveaux comptes',
+                          icon: Icons.person_add_alt_1_rounded,
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminApprovalsScreen()));
                           },
                         ),
                         const SizedBox(height: 16),

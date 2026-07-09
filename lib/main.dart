@@ -7,6 +7,7 @@ import 'screens/login_screen.dart';
 import 'screens/client/client_home.dart';
 import 'screens/admin/admin_home.dart';
 import 'providers/auth_providers.dart';
+import 'screens/client/pending_approval_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,13 +74,28 @@ class RoleWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final roleState = ref.watch(isAdminProvider(uid));
+    final docState = ref.watch(userDocStreamProvider(uid));
 
-    return roleState.when(
-      data: (isAdmin) {
-        if (isAdmin) {
+    return docState.when(
+      data: (doc) {
+        if (!doc.exists || doc.data() == null) {
+          // Si le document n'existe pas encore (en cours de création)
+          return const Scaffold(
+            backgroundColor: AppTheme.bgDark,
+            body: Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
+          );
+        }
+
+        final data = doc.data()!;
+        final role = data['role'] ?? 'client';
+        final status = data['status'] ?? 'active';
+
+        if (role == 'admin') {
           return const AdminHome();
         } else {
+          if (status == 'pending') {
+            return const PendingApprovalScreen();
+          }
           return const ClientHome();
         }
       },
@@ -87,9 +103,9 @@ class RoleWrapper extends ConsumerWidget {
         backgroundColor: AppTheme.bgDark,
         body: Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
       ),
-      error: (e, trace) => const Scaffold(
+      error: (e, trace) => Scaffold(
         backgroundColor: AppTheme.bgDark,
-        body: Center(child: Text('Erreur lors du chargement du rôle', style: TextStyle(color: Colors.red))),
+        body: Center(child: Text('Erreur: $e', style: const TextStyle(color: Colors.red))),
       ),
     );
   }
