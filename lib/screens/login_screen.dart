@@ -21,6 +21,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _otpController = TextEditingController();
   
   bool _isPhoneLogin = true;
+  bool _isSignUp = false;
   bool _isLoading = false;
   bool _otpSent = false;
   ConfirmationResult? _confirmationResult;
@@ -28,6 +29,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _toggleLoginType() {
     setState(() {
       _isPhoneLogin = !_isPhoneLogin;
+      _isSignUp = false;
       _otpSent = false;
       _confirmationResult = null;
     });
@@ -162,7 +164,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         
                         // Trendy Button
                         GradientButton(
-                          text: _isPhoneLogin ? (_otpSent ? 'Confirmer le Code' : 'Envoyer le Code SMS') : 'Se Connecter',
+                          text: _isPhoneLogin 
+                              ? (_otpSent ? 'Confirmer le Code' : 'Envoyer le Code SMS') 
+                              : (_isSignUp ? 'Créer mon compte' : 'Se Connecter'),
                           isLoading: _isLoading,
                           onPressed: () async {
                             if (_isPhoneLogin) {
@@ -183,7 +187,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 try {
                                   await ref.read(authControllerProvider).verifyOTP(_confirmationResult!, _otpController.text.trim());
                                 } catch (e) {
-                                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Code invalide ou expiré')));
+                                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Code invalide ou expiré')));
                                 } finally {
                                   if (mounted) setState(() => _isLoading = false);
                                 }
@@ -192,7 +196,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               if (_emailController.text.isEmpty || _passwordController.text.isEmpty) return;
                               setState(() => _isLoading = true);
                               try {
-                                await ref.read(authControllerProvider).signInWithEmail(_emailController.text, _passwordController.text);
+                                if (_isSignUp) {
+                                  await ref.read(authControllerProvider).signUpWithEmail(_emailController.text.trim(), _passwordController.text.trim());
+                                } else {
+                                  await ref.read(authControllerProvider).signInWithEmail(_emailController.text.trim(), _passwordController.text.trim());
+                                }
                               } catch (e) {
                                 if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
                               } finally {
@@ -203,6 +211,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
 
                         const SizedBox(height: 24),
+
+                        if (!_isPhoneLogin)
+                          TextButton(
+                            onPressed: () => setState(() => _isSignUp = !_isSignUp),
+                            child: Text(
+                              _isSignUp ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? S\'inscrire',
+                              style: const TextStyle(color: AppTheme.textGrey, fontWeight: FontWeight.bold),
+                            ),
+                          ),
 
                         if (!_otpSent)
                           TextButton(

@@ -26,13 +26,16 @@ class AuthController {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        // Auto sign-up if user doesn't exist
-        await _auth.createUserWithEmailAndPassword(email: email, password: password);
-        await _createUserDoc(_auth.currentUser!, isEmailSignup: true);
-      } else {
-        throw e.message ?? 'Erreur de connexion';
-      }
+      throw e.message ?? 'Erreur de connexion';
+    }
+  }
+
+  Future<void> signUpWithEmail(String email, String password) async {
+    try {
+      await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      await _createUserDoc(_auth.currentUser!, isEmailSignup: true);
+    } on FirebaseAuthException catch (e) {
+      throw e.message ?? 'Erreur d\'inscription';
     }
   }
 
