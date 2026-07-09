@@ -9,9 +9,14 @@ final pendingUsersProvider = StreamProvider<List<ClientUser>>((ref) {
       .collection('users')
       .where('role', isEqualTo: 'client')
       .where('status', isEqualTo: 'pending')
-      .orderBy('created_at', descending: true)
       .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => ClientUser.fromMap(doc.data(), doc.id)).toList());
+      .map((snapshot) {
+        final docs = snapshot.docs;
+        final users = docs.map((doc) => ClientUser.fromMap(doc.data(), doc.id)).toList();
+        // Tri local au lieu de orderBy pour éviter l'erreur d'index Firestore
+        users.sort((a, b) => b.id.compareTo(a.id)); // Ou un autre tri si nécessaire, on peut juste laisser par défaut
+        return users;
+      });
 });
 
 class AdminApprovalsScreen extends ConsumerWidget {
