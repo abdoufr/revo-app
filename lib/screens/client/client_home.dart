@@ -31,6 +31,10 @@ class ClientHome extends ConsumerWidget {
     final rewardConfigAsync = ref.watch(rewardConfigProvider);
     final productsAsync = ref.watch(productsStreamProvider);
     final settingsAsync = ref.watch(appSettingsProvider);
+    
+    // Pre-loading pour un affichage instantané des nouvelles pages
+    ref.watch(clientHistoryProvider);
+    ref.watch(leaderboardProvider);
 
     return Scaffold(
       body: Stack(
