@@ -1,9 +1,15 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
+
+// ─── Mobile-only scanner import (conditional) ────────────────────────────────
+// On Web, mobile_scanner is not available, so we guard with kIsWeb at runtime.
+// The import is still needed for type references, but the widget is never built on Web.
+import 'package:mobile_scanner/mobile_scanner.dart'
+    if (dart.library.html) 'scanner_stub.dart';
 
 class AdminScannerScreen extends ConsumerStatefulWidget {
   const AdminScannerScreen({super.key});
@@ -15,17 +21,25 @@ class AdminScannerScreen extends ConsumerStatefulWidget {
 class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
   final _amountController = TextEditingController();
   final _clientIdController = TextEditingController();
-  final MobileScannerController _scannerController = MobileScannerController();
+  MobileScannerController? _scannerController;
   bool _isLoading = false;
   Map<String, dynamic>? _scannedUser;
   bool _isEligibleForReward = false;
   int _requiredPoints = 0;
 
   @override
+  void initState() {
+    super.initState();
+    if (!kIsWeb) {
+      _scannerController = MobileScannerController();
+    }
+  }
+
+  @override
   void dispose() {
     _amountController.dispose();
     _clientIdController.dispose();
-    _scannerController.dispose();
+    _scannerController?.dispose();
     super.dispose();
   }
 
@@ -37,7 +51,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
           _clientIdController.text = barcode.rawValue!;
         });
         await _fetchUserDetails(barcode.rawValue!);
-        _scannerController.stop(); 
+        _scannerController?.stop();
       }
     }
   }
@@ -82,7 +96,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
           _scannedUser = null;
           _isEligibleForReward = false;
         });
-        _scannerController.start();
+        _scannerController?.start();
       }
     } catch (e) {
       if (mounted) {
@@ -113,8 +127,6 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
         );
         _amountController.clear();
         _clientIdController.clear();
-        // Optional: resume scanning if it was stopped
-        // _scannerController.start();
       }
     } catch (e) {
       if (mounted) {
@@ -138,33 +150,79 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Real Camera Scanner
-            Container(
-              height: 300,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.5), width: 2),
+            // ─── Camera Scanner (Mobile only) ─────────────────────────────
+            if (!kIsWeb) ...[
+              Container(
+                height: 300,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.5), width: 2),
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: MobileScanner(
+                  controller: _scannerController!,
+                  onDetect: _onDetect,
+                ),
               ),
-              clipBehavior: Clip.hardEdge,
-              child: MobileScanner(
-                controller: _scannerController,
-                onDetect: _onDetect,
+              const SizedBox(height: 32),
+            ] else ...[
+              // ─── Web alternative: info banner ──────────────────────────
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryOrange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.4), width: 1.5),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, color: AppTheme.primaryOrange, size: 32),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Mode Web',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryOrange,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Utilisez l\'application mobile pour scanner les QR codes. Sur Web, entrez l\'ID client manuellement.',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            
-            const SizedBox(height: 32),
+              const SizedBox(height: 32),
+            ],
+
+            // ─── Manual Input ─────────────────────────────────────────────
             Text(
-              'Ajout Manuel (Test)',
+              kIsWeb ? 'Entrer l\'ID Client' : 'Ajout Manuel',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _clientIdController,
               style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(
+              onSubmitted: (_) => _fetchUserDetails(_clientIdController.text.trim()),
+              decoration: InputDecoration(
                 hintText: 'ID du Client (ex: USER_ID_12345)',
-                prefixIcon: Icon(Icons.person, color: AppTheme.primaryOrange),
+                prefixIcon: const Icon(Icons.person, color: AppTheme.primaryOrange),
+                suffixIcon: kIsWeb
+                    ? IconButton(
+                        icon: const Icon(Icons.search_rounded, color: AppTheme.primaryOrange),
+                        onPressed: () => _fetchUserDetails(_clientIdController.text.trim()),
+                      )
+                    : null,
               ),
             ),
             const SizedBox(height: 16),
@@ -178,7 +236,8 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            
+
+            // ─── Scanned User Info ────────────────────────────────────────
             if (_scannedUser != null) ...[
               SoftCard(
                 padding: const EdgeInsets.all(16),
