@@ -16,5 +16,5 @@ echo "Getting dependencies..."
 flutter pub get
 
 # Compiler l'application Web
-echo "Building Web App..."
-flutter build web --pwa-strategy=none -v
+echo "Building Web App with low memory optimization..."
+flutter build web --pwa-strategy=none --dart-define=Dart2jsOptimization=O1
