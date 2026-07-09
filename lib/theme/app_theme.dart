@@ -2,112 +2,164 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Vibrant, Trendy Colors
-  static const Color bgDark = Color(0xFF0D0F16);
-  static const Color bgLighter = Color(0xFF161A25);
-  static const Color accentCyan = Color(0xFF00E5FF);
-  static const Color accentPurple = Color(0xFF8A2BE2);
+  // Purxx Style Colors (Light Theme)
+  static const Color primaryOrange = Color(0xFFFF5722);
+  static const Color primaryOrangeLight = Color(0xFFFF8A65);
+  static const Color bgWhite = Color(0xFFFFFFFF);
+  static const Color bgLightGray = Color(0xFFF9F9F9);
+  static const Color textDark = Color(0xFF1E1E1E);
+  static const Color textLightGrey = Color(0xFF9E9E9E);
+  static const Color borderLight = Color(0xFFEEEEEE);
+
+  // Dark Theme Colors
+  static const Color bgDark = Color(0xFF121212);
+  static const Color bgDarker = Color(0xFF0A0A0A);
+  static const Color bgDarkCard = Color(0xFF1E1E1E);
   static const Color textWhite = Color(0xFFFFFFFF);
-  static const Color textGrey = Color(0xFFA0AABF);
+  static const Color textDarkGrey = Color(0xFFAAAAAA);
+  static const Color borderDark = Color(0xFF333333);
+
+  // Status Colors
   static const Color success = Color(0xFF10B981);
   static const Color error = Color(0xFFEF4444);
   
-  // Gradients
-  static const LinearGradient primaryGradient = LinearGradient(
-    colors: [accentCyan, accentPurple],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
+  static ThemeData get lightTheme {
+    return ThemeData(
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: bgLightGray,
+      primaryColor: primaryOrange,
+      colorScheme: const ColorScheme.light(
+        primary: primaryOrange,
+        secondary: primaryOrangeLight,
+        surface: bgWhite,
+        error: error,
+      ),
+      textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme).copyWith(
+        displayLarge: GoogleFonts.poppins(color: textDark, fontWeight: FontWeight.w800, letterSpacing: -1),
+        displayMedium: GoogleFonts.poppins(color: textDark, fontWeight: FontWeight.w700, letterSpacing: -0.5),
+        bodyLarge: GoogleFonts.poppins(color: textDark, fontWeight: FontWeight.w500),
+        bodyMedium: GoogleFonts.poppins(color: textLightGrey, fontWeight: FontWeight.w400),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: textDark),
+        titleTextStyle: TextStyle(color: textDark, fontSize: 20, fontWeight: FontWeight.bold),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: bgWhite,
+        hintStyle: GoogleFonts.poppins(color: textLightGrey),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: borderLight),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: borderLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: primaryOrange, width: 2),
+        ),
+      ),
+    );
+  }
 
-  static ThemeData get trendyTheme {
+  static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: bgDark,
-      primaryColor: accentCyan,
+      primaryColor: primaryOrange,
       colorScheme: const ColorScheme.dark(
-        primary: accentCyan,
-        secondary: accentPurple,
-        surface: bgLighter,
-        background: bgDark,
+        primary: primaryOrange,
+        secondary: primaryOrangeLight,
+        surface: bgDarkCard,
+        error: error,
       ),
       textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme).copyWith(
         displayLarge: GoogleFonts.poppins(color: textWhite, fontWeight: FontWeight.w800, letterSpacing: -1),
         displayMedium: GoogleFonts.poppins(color: textWhite, fontWeight: FontWeight.w700, letterSpacing: -0.5),
         bodyLarge: GoogleFonts.poppins(color: textWhite, fontWeight: FontWeight.w500),
-        bodyMedium: GoogleFonts.poppins(color: textGrey, fontWeight: FontWeight.w400),
+        bodyMedium: GoogleFonts.poppins(color: textDarkGrey, fontWeight: FontWeight.w400),
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          elevation: 0,
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: textWhite),
+        titleTextStyle: TextStyle(color: textWhite, fontSize: 20, fontWeight: FontWeight.bold),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: bgLighter.withOpacity(0.5),
-        hintStyle: GoogleFonts.poppins(color: textGrey),
+        fillColor: bgDarkCard,
+        hintStyle: GoogleFonts.poppins(color: textDarkGrey),
         contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(color: textGrey.withOpacity(0.2)),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: borderDark),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(color: textGrey.withOpacity(0.2)),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: borderDark),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: accentCyan, width: 2),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: primaryOrange, width: 2),
         ),
       ),
     );
   }
 }
 
-// Custom Glassmorphism Container
-class GlassCard extends StatelessWidget {
+// Modern Soft Card adapting to theme
+class SoftCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final double borderRadius;
+  final VoidCallback? onTap;
 
-  const GlassCard({
+  const SoftCard({
     Key? key,
     required this.child,
     this.padding = const EdgeInsets.all(24),
     this.borderRadius = 24,
+    this.onTap,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: AppTheme.bgLighter.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 30,
-            spreadRadius: -5,
-          )
-        ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(borderRadius),
+          border: Border.all(color: isDark ? AppTheme.borderDark : AppTheme.borderLight),
+          boxShadow: isDark ? [] : [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 5),
+            )
+          ],
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
 }
 
-// Gradient Button
-class GradientButton extends StatelessWidget {
+// Main Primary Button
+class PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final bool isLoading;
 
-  const GradientButton({
+  const PrimaryButton({
     Key? key,
     required this.text,
     required this.onPressed,
@@ -120,13 +172,13 @@ class GradientButton extends StatelessWidget {
       width: double.infinity,
       height: 60,
       decoration: BoxDecoration(
-        gradient: AppTheme.primaryGradient,
+        color: AppTheme.primaryOrange,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.accentCyan.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: AppTheme.primaryOrange.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
@@ -138,7 +190,7 @@ class GradientButton extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         child: isLoading 
-            ? const CircularProgressIndicator(color: Colors.white)
+            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
             : Text(
                 text,
                 style: const TextStyle(

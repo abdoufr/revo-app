@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
 import '../../providers/settings_provider.dart';
+import '../../providers/theme_provider.dart';
 
 class AdminSettingsScreen extends ConsumerStatefulWidget {
   const AdminSettingsScreen({super.key});
@@ -54,12 +55,11 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(appSettingsProvider);
+    final themeState = ref.watch(themeProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Paramètres du Fastfood', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: Text('Paramètres du Fastfood', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
       ),
       body: settingsAsync.when(
         data: (settings) {
@@ -75,40 +75,89 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Informations Générales', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                SoftCard(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.palette_rounded, color: AppTheme.primaryOrange),
+                          const SizedBox(width: 12),
+                          Text('Préférences d\'Affichage', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Mode Sombre (Dark Mode)', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                          Switch(
+                            value: themeState.themeMode == ThemeMode.dark,
+                            activeColor: AppTheme.primaryOrange,
+                            onChanged: (val) => ref.read(themeProvider.notifier).toggleTheme(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Langue', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                          DropdownButton<String>(
+                            value: themeState.locale.languageCode,
+                            dropdownColor: Theme.of(context).colorScheme.surface,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                            underline: const SizedBox(),
+                            items: const [
+                              DropdownMenuItem(value: 'fr', child: Text('Français')),
+                              DropdownMenuItem(value: 'en', child: Text('English')),
+                              DropdownMenuItem(value: 'ar', child: Text('العربية')),
+                            ],
+                            onChanged: (val) {
+                              if (val != null) ref.read(themeProvider.notifier).setLanguage(val);
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Text('Informations Générales', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _nameController,
-                  style: const TextStyle(color: Colors.white),
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Nom du Fastfood',
-                    prefixIcon: Icon(Icons.storefront, color: AppTheme.textGrey),
+                    prefixIcon: Icon(Icons.storefront, color: AppTheme.primaryOrange),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _descController,
-                  style: const TextStyle(color: Colors.white),
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Description (ex: Le meilleur burger)',
-                    prefixIcon: Icon(Icons.description, color: AppTheme.textGrey),
+                    prefixIcon: Icon(Icons.description, color: AppTheme.primaryOrange),
                   ),
                 ),
                 const SizedBox(height: 32),
-                const Text('Promotion Live (Bannière Client)', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text('Promotion Live (Bannière Client)', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                const Text('Ce message s\'affichera chez tous les clients.', style: TextStyle(color: AppTheme.textGrey, fontSize: 12)),
+                Text('Ce message s\'affichera chez tous les clients.', style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _bannerController,
-                  style: const TextStyle(color: Colors.white),
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Annonce (Laisser vide pour cacher)',
-                    prefixIcon: Icon(Icons.campaign, color: AppTheme.textGrey),
+                    prefixIcon: Icon(Icons.campaign, color: AppTheme.primaryOrange),
                   ),
                 ),
                 const SizedBox(height: 32),
-                GradientButton(
+                PrimaryButton(
                   text: 'Sauvegarder',
                   isLoading: _isLoading,
                   onPressed: _saveSettings,
@@ -117,8 +166,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
-        error: (err, stack) => Center(child: Text('Erreur: $err', style: const TextStyle(color: Colors.red))),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        error: (err, stack) => Center(child: Text('Erreur: $err', style: const TextStyle(color: AppTheme.error))),
       ),
     );
   }

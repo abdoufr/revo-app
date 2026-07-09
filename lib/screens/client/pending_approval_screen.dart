@@ -9,7 +9,6 @@ class PendingApprovalScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: AppTheme.bgDark,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -20,43 +19,41 @@ class PendingApprovalScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: AppTheme.accentPurple.withValues(alpha: 0.2),
+                    color: AppTheme.primaryOrange.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.hourglass_empty_rounded,
                     size: 80,
-                    color: AppTheme.accentPurple,
+                    color: AppTheme.primaryOrange,
                   ),
                 ),
                 const SizedBox(height: 32),
                 Text(
                   'Compte en attente',
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: Colors.white,
                     fontSize: 28,
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Votre inscription a bien été enregistrée.\n\nCependant, un administrateur doit vérifier et valider votre compte avant que vous puissiez accéder à l\'application.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: AppTheme.textGrey,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontSize: 16,
                     height: 1.5,
                   ),
                 ),
                 const SizedBox(height: 48),
                 const CircularProgressIndicator(
-                  color: AppTheme.accentCyan,
+                  color: AppTheme.primaryOrange,
                 ),
                 const SizedBox(height: 24),
                 const Text(
                   'Cette page s\'actualisera automatiquement dès que votre compte sera validé.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppTheme.accentCyan,
+                    color: AppTheme.primaryOrange,
                     fontSize: 12,
                   ),
                 ),
@@ -65,10 +62,10 @@ class PendingApprovalScreen extends ConsumerWidget {
                   onPressed: () {
                     ref.read(authControllerProvider).signOut();
                   },
-                  icon: const Icon(Icons.logout, color: Colors.white54),
-                  label: const Text(
+                  icon: Icon(Icons.logout, color: Theme.of(context).iconTheme.color),
+                  label: Text(
                     'Se déconnecter',
-                    style: TextStyle(color: Colors.white54),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
               ],

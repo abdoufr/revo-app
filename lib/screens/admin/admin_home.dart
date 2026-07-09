@@ -17,154 +17,131 @@ class AdminHome extends ConsumerWidget {
     final analyticsAsync = ref.watch(analyticsProvider);
 
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background Elements
-          Positioned(
-            top: -100,
-            right: -50,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppTheme.accentPurple.withOpacity(0.3),
-                boxShadow: [
-                  BoxShadow(color: AppTheme.accentPurple.withOpacity(0.3), blurRadius: 100, spreadRadius: 50),
-                ],
-              ),
-            ),
+      appBar: AppBar(
+        title: Text(
+          'DASHBOARD',
+          style: Theme.of(context).textTheme.displayMedium?.copyWith(
+            letterSpacing: 2,
+            fontSize: 20,
           ),
-          SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  pinned: true,
-                  title: Text(
-                    'DASHBOARD',
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      letterSpacing: 2,
-                      fontSize: 20,
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout_rounded, color: Theme.of(context).iconTheme.color),
+            onPressed: () {
+              ref.read(authControllerProvider).signOut();
+            },
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Aperçu',
+                      style: Theme.of(context).textTheme.displayMedium,
                     ),
-                  ),
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.logout_rounded, color: Colors.white),
-                      onPressed: () {
-                        ref.read(authControllerProvider).signOut();
+                    const SizedBox(height: 24),
+                    
+                    // Real Analytics
+                    analyticsAsync.when(
+                      data: (stats) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: _buildTrendyStatCard(
+                                context, 
+                                title: 'Clients', 
+                                value: '${stats['totalClients']}', 
+                                icon: Icons.people_outline,
+                                isPrimary: true,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildTrendyStatCard(
+                                context, 
+                                title: 'Points donnés', 
+                                value: '${stats['totalPoints']}', 
+                                icon: Icons.auto_awesome,
+                                isPrimary: false,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+                      error: (err, stack) => Text('Erreur: $err', style: const TextStyle(color: AppTheme.error)),
+                    ),
+                    const SizedBox(height: 48),
+
+                    Text(
+                      'Actions',
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Scanner un QR',
+                      subtitle: 'Attribuer des points',
+                      icon: Icons.qr_code_scanner_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminScannerScreen()));
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Demandes d\'inscription',
+                      subtitle: 'Valider les nouveaux comptes',
+                      icon: Icons.person_add_alt_1_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminApprovalsScreen()));
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Menu & Articles',
+                      subtitle: 'Gérer les produits',
+                      icon: Icons.fastfood_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminMenuScreen()));
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Cadeaux',
+                      subtitle: 'Définir les récompenses',
+                      icon: Icons.card_giftcard_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminRewardsScreen()));
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Paramètres',
+                      subtitle: 'Nom du Fastfood & Promos',
+                      icon: Icons.settings_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminSettingsScreen()));
                       },
                     ),
                   ],
                 ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'Aperçu',
-                          style: Theme.of(context).textTheme.displayMedium,
-                        ),
-                        const SizedBox(height: 24),
-                        
-                        // Real Analytics
-                        analyticsAsync.when(
-                          data: (stats) {
-                            return Row(
-                              children: [
-                                Expanded(
-                                  child: _buildTrendyStatCard(
-                                    context, 
-                                    title: 'Clients', 
-                                    value: '${stats['totalClients']}', 
-                                    icon: Icons.people_outline,
-                                    isPrimary: true,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildTrendyStatCard(
-                                    context, 
-                                    title: 'Points donnés', 
-                                    value: '${stats['totalPoints']}', 
-                                    icon: Icons.auto_awesome,
-                                    isPrimary: false,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                          loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
-                          error: (err, stack) => Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
-                        ),
-                        const SizedBox(height: 48),
-
-                        Text(
-                          'Actions',
-                          style: Theme.of(context).textTheme.displayMedium,
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        _buildTrendyActionCard(
-                          context,
-                          title: 'Scanner un QR',
-                          subtitle: 'Attribuer des points',
-                          icon: Icons.qr_code_scanner_rounded,
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminScannerScreen()));
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTrendyActionCard(
-                          context,
-                          title: 'Demandes d\'inscription',
-                          subtitle: 'Valider les nouveaux comptes',
-                          icon: Icons.person_add_alt_1_rounded,
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminApprovalsScreen()));
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTrendyActionCard(
-                          context,
-                          title: 'Menu & Articles',
-                          subtitle: 'Gérer les produits',
-                          icon: Icons.fastfood_rounded,
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminMenuScreen()));
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTrendyActionCard(
-                          context,
-                          title: 'Cadeaux',
-                          subtitle: 'Définir les récompenses',
-                          icon: Icons.card_giftcard_rounded,
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminRewardsScreen()));
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTrendyActionCard(
-                          context,
-                          title: 'Paramètres',
-                          subtitle: 'Nom du Fastfood & Promos',
-                          icon: Icons.settings_rounded,
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminSettingsScreen()));
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -173,13 +150,12 @@ class AdminHome extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: isPrimary ? AppTheme.primaryGradient : null,
-        color: isPrimary ? null : AppTheme.bgLighter,
+        color: isPrimary ? AppTheme.primaryOrange : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: isPrimary ? null : Border.all(color: Colors.white.withOpacity(0.05)),
+        border: isPrimary ? null : Border.all(color: Theme.of(context).dividerColor),
         boxShadow: isPrimary ? [
           BoxShadow(
-            color: AppTheme.accentCyan.withOpacity(0.3),
+            color: AppTheme.primaryOrange.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           )
@@ -191,21 +167,21 @@ class AdminHome extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: isPrimary ? Colors.white.withOpacity(0.2) : AppTheme.primaryOrange.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: isPrimary ? Colors.white : AppTheme.primaryOrange, size: 24),
           ),
           const SizedBox(height: 20),
           Text(
             value,
-            style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 32, color: Colors.white),
+            style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 32, color: isPrimary ? Colors.white : null),
           ),
           const SizedBox(height: 4),
           Text(
             title,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withOpacity(0.8),
+              color: isPrimary ? Colors.white.withOpacity(0.8) : null,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -215,51 +191,48 @@ class AdminHome extends ConsumerWidget {
   }
 
   Widget _buildTrendyActionCard(BuildContext context, {required String title, required String subtitle, required IconData icon, required VoidCallback onTap}) {
-    return InkWell(
+    return SoftCard(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
-      child: GlassCard(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: AppTheme.primaryGradient,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(icon, color: Colors.white, size: 28),
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryOrange.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
             ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+            child: Icon(icon, color: AppTheme.primaryOrange, size: 28),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
             ),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.arrow_forward_ios_rounded, color: AppTheme.textGrey, size: 16),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).dividerColor.withOpacity(0.5),
+              shape: BoxShape.circle,
             ),
-          ],
-        ),
+            child: Icon(Icons.arrow_forward_ios_rounded, color: Theme.of(context).iconTheme.color, size: 16),
+          ),
+        ],
       ),
     );
   }

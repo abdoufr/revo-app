@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_providers.dart';
 import '../../providers/client_providers.dart';
+import '../../providers/theme_provider.dart';
 
 class ClientSettingsScreen extends ConsumerWidget {
   const ClientSettingsScreen({super.key});
@@ -33,52 +34,94 @@ class ClientSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(clientUserProvider);
+    final themeState = ref.watch(themeProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Paramètres', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text('Paramètres', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
       ),
       body: userAsync.when(
         data: (user) {
-          if (user == null) return const Center(child: Text('Erreur utilisateur', style: TextStyle(color: Colors.white)));
+          if (user == null) return Center(child: Text('Erreur utilisateur', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)));
           
           return ListView(
             padding: const EdgeInsets.all(24),
             children: [
-              Container(
+              SoftCard(
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppTheme.bgLighter,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
-                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.leaderboard_rounded, color: AppTheme.accentCyan),
-                        SizedBox(width: 12),
-                        Text('Classement Public', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Icon(Icons.leaderboard_rounded, color: AppTheme.primaryOrange),
+                        const SizedBox(width: 12),
+                        Text('Classement Public', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'En activant cette option, votre prénom et vos points à vie apparaîtront dans le Top Clients du Fastfood. Cela ajoute de la compétition !',
-                      style: TextStyle(color: AppTheme.textGrey, fontSize: 14),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Participer au classement', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                        Text('Participer au classement', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
                         Switch(
                           value: user.isPublic,
-                          activeColor: AppTheme.accentCyan,
+                          activeColor: AppTheme.primaryOrange,
                           onChanged: (val) => _togglePublicProfile(val, user.id, context),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              SoftCard(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.palette_rounded, color: AppTheme.primaryOrange),
+                        const SizedBox(width: 12),
+                        Text('Préférences d\'Affichage', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Mode Sombre (Dark Mode)', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                        Switch(
+                          value: themeState.themeMode == ThemeMode.dark,
+                          activeColor: AppTheme.primaryOrange,
+                          onChanged: (val) => ref.read(themeProvider.notifier).toggleTheme(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Langue', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                        DropdownButton<String>(
+                          value: themeState.locale.languageCode,
+                          dropdownColor: Theme.of(context).colorScheme.surface,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          underline: const SizedBox(),
+                          items: const [
+                            DropdownMenuItem(value: 'fr', child: Text('Français')),
+                            DropdownMenuItem(value: 'en', child: Text('English')),
+                            DropdownMenuItem(value: 'ar', child: Text('العربية')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) ref.read(themeProvider.notifier).setLanguage(val);
+                          },
                         ),
                       ],
                     ),
@@ -88,7 +131,7 @@ class ClientSettingsScreen extends ConsumerWidget {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
         error: (e, s) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );

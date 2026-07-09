@@ -23,14 +23,14 @@ class ClientLeaderboardScreen extends ConsumerWidget {
 
   Color _getVipColor(int points) {
     if (points >= 500) return Colors.amber; // Gold
-    if (points >= 200) return Colors.grey.shade300; // Silver
-    return AppTheme.accentPurple; // Bronze / Default
+    if (points >= 200) return Colors.grey.shade400; // Silver
+    return AppTheme.primaryOrange; // Basic / Default
   }
 
   String _getVipTier(int points) {
     if (points >= 500) return 'GOLD';
     if (points >= 200) return 'SILVER';
-    return 'BRONZE';
+    return 'BASIC';
   }
 
   @override
@@ -40,18 +40,15 @@ class ClientLeaderboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Top Clients 🏆', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text('Top Clients 🏆', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
       ),
       body: leaderboardAsync.when(
         data: (users) {
           if (users.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 'Aucun client public pour le moment.',
-                style: TextStyle(color: AppTheme.textGrey, fontSize: 16),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             );
           }
@@ -65,85 +62,69 @@ class ClientLeaderboardScreen extends ConsumerWidget {
               final rank = index + 1;
               final vipColor = _getVipColor(user.lifetimePoints);
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: isMe ? AppTheme.primaryGradient : null,
-                  color: isMe ? null : AppTheme.bgLighter,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isMe ? AppTheme.accentCyan.withOpacity(0.5) : vipColor.withOpacity(0.3),
-                    width: isMe ? 2 : 1,
-                  ),
-                  boxShadow: isMe ? [
-                    BoxShadow(
-                      color: AppTheme.accentCyan.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 5),
-                    )
-                  ] : null,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: rank <= 3 ? vipColor.withOpacity(0.2) : Colors.white.withOpacity(0.05),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '#$rank',
-                        style: TextStyle(
-                          color: rank <= 3 ? vipColor : Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: SoftCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: rank <= 3 ? vipColor.withOpacity(0.2) : Theme.of(context).dividerColor.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '#$rank',
+                          style: TextStyle(
+                            color: rank <= 3 ? vipColor : Theme.of(context).textTheme.bodyLarge?.color,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isMe ? 'Moi (${user.name})' : user.name,
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18, color: isMe ? AppTheme.primaryOrange : null),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Membre ${_getVipTier(user.lifetimePoints)}',
+                              style: TextStyle(color: vipColor, fontSize: 12, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            isMe ? 'Moi (${user.name})' : user.name,
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                            '${user.lifetimePoints}',
+                            style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                              fontSize: 22,
+                            ),
                           ),
-                          const SizedBox(height: 4),
                           Text(
-                            'Membre ${_getVipTier(user.lifetimePoints)}',
-                            style: TextStyle(color: vipColor, fontSize: 12, fontWeight: FontWeight.w600),
+                            'pts à vie',
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
                       ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '${user.lifetimePoints}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22,
-                          ),
-                        ),
-                        const Text(
-                          'pts à vie',
-                          style: TextStyle(color: AppTheme.textGrey, fontSize: 10),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
         error: (error, stack) => Center(child: Text('Erreur: $error', style: const TextStyle(color: AppTheme.error))),
       ),
     );

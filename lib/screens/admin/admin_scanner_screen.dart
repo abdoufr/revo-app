@@ -131,9 +131,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scanner & Ajouter Points', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: Text('Scanner & Ajouter Points', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -146,7 +144,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
               decoration: BoxDecoration(
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppTheme.accentCyan.withOpacity(0.5), width: 2),
+                border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.5), width: 2),
               ),
               clipBehavior: Clip.hardEdge,
               child: MobileScanner(
@@ -156,47 +154,46 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
             ),
             
             const SizedBox(height: 32),
-            const Text(
+            Text(
               'Ajout Manuel (Test)',
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _clientIdController,
-              style: const TextStyle(color: Colors.white),
+              style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(
                 hintText: 'ID du Client (ex: USER_ID_12345)',
-                prefixIcon: Icon(Icons.person, color: AppTheme.textGrey),
+                prefixIcon: Icon(Icons.person, color: AppTheme.primaryOrange),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _amountController,
               keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.white),
+              style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(
                 hintText: 'Montant de l\'achat (DA)',
-                prefixIcon: Icon(Icons.attach_money, color: AppTheme.textGrey),
+                prefixIcon: Icon(Icons.attach_money, color: AppTheme.primaryOrange),
               ),
             ),
             const SizedBox(height: 32),
             
             if (_scannedUser != null) ...[
-              Container(
+              SoftCard(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: AppTheme.bgLighter, borderRadius: BorderRadius.circular(16)),
                 child: Column(
                   children: [
-                    Text('Client: ${_scannedUser!['name']}', style: const TextStyle(color: Colors.white, fontSize: 18)),
-                    Text('Points: ${_scannedUser!['loyalty_points']}', style: const TextStyle(color: AppTheme.accentCyan, fontSize: 24, fontWeight: FontWeight.bold)),
+                    Text('Client: ${_scannedUser!['name']}', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18)),
+                    Text('Points: ${_scannedUser!['loyalty_points']}', style: const TextStyle(color: AppTheme.primaryOrange, fontSize: 24, fontWeight: FontWeight.bold)),
                     if (_isEligibleForReward) ...[
                       const SizedBox(height: 16),
-                      const Text('🎉 Éligible pour un CADEAU !', style: TextStyle(color: AppTheme.accentPurple, fontWeight: FontWeight.bold)),
+                      const Text('🎉 Éligible pour un CADEAU !', style: TextStyle(color: AppTheme.primaryOrange, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentPurple, padding: const EdgeInsets.symmetric(vertical: 16)),
-                        onPressed: _isLoading ? null : _claimReward,
-                        child: const Center(child: Text('Valider le Cadeau', style: TextStyle(color: Colors.white, fontSize: 16))),
+                      PrimaryButton(
+                        onPressed: _isLoading ? () {} : _claimReward,
+                        text: 'Valider le Cadeau',
+                        isLoading: _isLoading,
                       ),
                     ]
                   ],
@@ -205,7 +202,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
               const SizedBox(height: 32),
             ],
 
-            GradientButton(
+            PrimaryButton(
               text: 'Ajouter les Points',
               isLoading: _isLoading,
               onPressed: _submitPoints,

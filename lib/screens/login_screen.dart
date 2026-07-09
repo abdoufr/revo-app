@@ -20,7 +20,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _phoneController = TextEditingController();
   final _otpController = TextEditingController();
   
-  bool _isPhoneLogin = true;
+  bool _isPhoneLogin = false; // Par défaut, on met Email pour coller à la maquette Purxx
   bool _isSignUp = false;
   bool _isLoading = false;
   bool _otpSent = false;
@@ -47,241 +47,205 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background Gradient Orbs
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppTheme.accentPurple.withValues(alpha: 0.5),
-                boxShadow: [
-                  BoxShadow(color: AppTheme.accentPurple.withValues(alpha: 0.5), blurRadius: 100, spreadRadius: 50),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -50,
-            left: -100,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppTheme.accentCyan.withValues(alpha: 0.4),
-                boxShadow: [
-                  BoxShadow(color: AppTheme.accentCyan.withValues(alpha: 0.4), blurRadius: 100, spreadRadius: 50),
-                ],
-              ),
-            ),
-          ),
-          
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                child: GlassCard(
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.stars_rounded,
-                          size: 70,
-                          color: AppTheme.textWhite,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: SoftCard(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Logo and Title
+                    const Icon(
+                      Icons.fastfood_rounded, // Icône plus dans le thème food
+                      size: 70,
+                      color: AppTheme.primaryOrange,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _isSignUp ? 'Créer un compte' : 'Bienvenue sur REVO',
+                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                        fontSize: 28,
+                        color: AppTheme.primaryOrange,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Rejoignez la prochaine génération de fidélité.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 40),
+
+                    // Inputs
+                    if (_isPhoneLogin) ...[
+                      if (!_otpSent)
+                        TextFormField(
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          decoration: const InputDecoration(
+                            hintText: 'Numéro de téléphone (ex: +213...)',
+                            prefixIcon: Icon(Icons.phone, color: AppTheme.primaryOrange),
+                          ),
+                        )
+                      else
+                        TextFormField(
+                          controller: _otpController,
+                          keyboardType: TextInputType.number,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          decoration: const InputDecoration(
+                            hintText: 'Code SMS à 6 chiffres',
+                            prefixIcon: Icon(Icons.message, color: AppTheme.primaryOrange),
+                          ),
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'REVO',
-                          style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            fontSize: 36,
-                            letterSpacing: 4,
-                            foreground: Paint()
-                              ..shader = AppTheme.primaryGradient.createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
-                          ),
-                          textAlign: TextAlign.center,
+                    ] else ...[
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        decoration: const InputDecoration(
+                          hintText: 'Email',
+                          prefixIcon: Icon(Icons.email, color: AppTheme.primaryOrange),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Join the next generation of rewards.',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        decoration: const InputDecoration(
+                          hintText: 'Mot de passe',
+                          prefixIcon: Icon(Icons.lock, color: AppTheme.primaryOrange),
                         ),
-                        const SizedBox(height: 40),
+                      ),
+                    ],
 
-                        // Inputs
-                        if (_isPhoneLogin) ...[
-                          if (!_otpSent)
-                            TextFormField(
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                              style: const TextStyle(color: AppTheme.textWhite),
-                              decoration: const InputDecoration(
-                                hintText: 'Numéro de téléphone (ex: +213...)',
-                                prefixIcon: Icon(Icons.phone, color: AppTheme.textGrey),
-                              ),
-                            )
-                          else
-                            TextFormField(
-                              controller: _otpController,
-                              keyboardType: TextInputType.number,
-                              style: const TextStyle(color: AppTheme.textWhite),
-                              decoration: const InputDecoration(
-                                hintText: 'Code SMS à 6 chiffres',
-                                prefixIcon: Icon(Icons.message, color: AppTheme.textGrey),
-                              ),
-                            ),
-                        ] else ...[
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            style: const TextStyle(color: AppTheme.textWhite),
-                            decoration: const InputDecoration(
-                              hintText: 'Email',
-                              prefixIcon: Icon(Icons.email, color: AppTheme.textGrey),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: true,
-                            style: const TextStyle(color: AppTheme.textWhite),
-                            decoration: const InputDecoration(
-                              hintText: 'Mot de passe',
-                              prefixIcon: Icon(Icons.lock, color: AppTheme.textGrey),
-                            ),
-                          ),
-                        ],
-
-                        const SizedBox(height: 32),
-                        
-                        // Trendy Button
-                        GradientButton(
-                          text: _isPhoneLogin 
-                              ? (_otpSent ? 'Confirmer le Code' : 'Envoyer le Code SMS') 
-                              : (_isSignUp ? 'Créer mon compte' : 'Se Connecter'),
-                          isLoading: _isLoading,
-                          onPressed: () async {
-                            if (_isPhoneLogin) {
-                              if (!_otpSent) {
-                                if (_phoneController.text.isEmpty) return;
-                                setState(() => _isLoading = true);
-                                try {
-                                  _confirmationResult = await ref.read(authControllerProvider).verifyPhoneNumber(_phoneController.text.trim());
-                                  setState(() => _otpSent = true);
-                                } catch (e) {
-                                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
-                                } finally {
-                                  if (mounted) setState(() => _isLoading = false);
-                                }
-                              } else {
-                                if (_otpController.text.isEmpty || _confirmationResult == null) return;
-                                setState(() => _isLoading = true);
-                                try {
-                                  await ref.read(authControllerProvider).verifyOTP(_confirmationResult!, _otpController.text.trim());
-                                } catch (e) {
-                                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Code invalide ou expiré')));
-                                } finally {
-                                  if (mounted) setState(() => _isLoading = false);
-                                }
-                              }
-                            } else {
-                              if (_emailController.text.isEmpty || _passwordController.text.isEmpty) return;
-                              setState(() => _isLoading = true);
-                              try {
-                                if (_isSignUp) {
-                                  await ref.read(authControllerProvider).signUpWithEmail(_emailController.text.trim(), _passwordController.text.trim());
-                                } else {
-                                  await ref.read(authControllerProvider).signInWithEmail(_emailController.text.trim(), _passwordController.text.trim());
-                                }
-                              } catch (e) {
-                                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
-                              } finally {
-                                if (mounted) setState(() => _isLoading = false);
-                              }
-                            }
-                          },
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        if (!_isPhoneLogin)
-                          TextButton(
-                            onPressed: () => setState(() => _isSignUp = !_isSignUp),
-                            child: Text(
-                              _isSignUp ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? S\'inscrire',
-                              style: const TextStyle(color: AppTheme.textGrey, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-
-                        if (!_otpSent)
-                          TextButton(
-                            onPressed: _toggleLoginType,
-                            child: Text(
-                              _isPhoneLogin 
-                                  ? 'Utiliser l\'Email au lieu' 
-                                  : 'Utiliser le Numéro au lieu',
-                              style: const TextStyle(color: AppTheme.textWhite, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-
-                        if (!_otpSent) ...[
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              const Expanded(child: Divider(color: AppTheme.textGrey, thickness: 0.5)),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                child: Text('OU', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12)),
-                              ),
-                              const Expanded(child: Divider(color: AppTheme.textGrey, thickness: 0.5)),
-                            ],
-                          ),
-                        ],
-                        const SizedBox(height: 16),
-
-                        // Google Button
-                        OutlinedButton.icon(
-                          onPressed: () async {
+                    const SizedBox(height: 32),
+                    
+                    // Primary Button
+                    PrimaryButton(
+                      text: _isPhoneLogin 
+                          ? (_otpSent ? 'Confirmer le Code' : 'Envoyer le Code SMS') 
+                          : (_isSignUp ? 'Créer mon compte' : 'Se Connecter'),
+                      isLoading: _isLoading,
+                      onPressed: () async {
+                        if (_isPhoneLogin) {
+                          if (!_otpSent) {
+                            if (_phoneController.text.isEmpty) return;
                             setState(() => _isLoading = true);
                             try {
-                              await ref.read(authControllerProvider).signInWithGoogle();
+                              _confirmationResult = await ref.read(authControllerProvider).verifyPhoneNumber(_phoneController.text.trim());
+                              setState(() => _otpSent = true);
                             } catch (e) {
                               if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
                             } finally {
                               if (mounted) setState(() => _isLoading = false);
                             }
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            side: BorderSide(color: AppTheme.textGrey.withOpacity(0.3), width: 1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            backgroundColor: AppTheme.bgLighter.withOpacity(0.5),
-                          ),
-                          icon: const Icon(Icons.account_circle, color: Colors.white),
-                          label: const Text(
-                            'Continuer avec Google',
-                            style: TextStyle(color: AppTheme.textWhite, fontSize: 16, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
+                          } else {
+                            if (_otpController.text.isEmpty || _confirmationResult == null) return;
+                            setState(() => _isLoading = true);
+                            try {
+                              await ref.read(authControllerProvider).verifyOTP(_confirmationResult!, _otpController.text.trim());
+                            } catch (e) {
+                              if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Code invalide ou expiré')));
+                            } finally {
+                              if (mounted) setState(() => _isLoading = false);
+                            }
+                          }
+                        } else {
+                          if (_emailController.text.isEmpty || _passwordController.text.isEmpty) return;
+                          setState(() => _isLoading = true);
+                          try {
+                            if (_isSignUp) {
+                              await ref.read(authControllerProvider).signUpWithEmail(_emailController.text.trim(), _passwordController.text.trim());
+                            } else {
+                              await ref.read(authControllerProvider).signInWithEmail(_emailController.text.trim(), _passwordController.text.trim());
+                            }
+                          } catch (e) {
+                            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+                          } finally {
+                            if (mounted) setState(() => _isLoading = false);
+                          }
+                        }
+                      },
                     ),
-                  ),
+
+                    const SizedBox(height: 24),
+
+                    if (!_isPhoneLogin)
+                      TextButton(
+                        onPressed: () => setState(() => _isSignUp = !_isSignUp),
+                        child: Text(
+                          _isSignUp ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? S\'inscrire',
+                          style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+
+                    if (!_otpSent)
+                      TextButton(
+                        onPressed: _toggleLoginType,
+                        child: Text(
+                          _isPhoneLogin 
+                              ? 'Utiliser l\'Email au lieu' 
+                              : 'Utiliser le Numéro au lieu',
+                          style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+
+                    if (!_otpSent) ...[
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: Theme.of(context).dividerColor, thickness: 0.5)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text('OU', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12)),
+                          ),
+                          Expanded(child: Divider(color: Theme.of(context).dividerColor, thickness: 0.5)),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+
+                    // Google Button
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        setState(() => _isLoading = true);
+                        try {
+                          await ref.read(authControllerProvider).signInWithGoogle();
+                        } catch (e) {
+                          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+                        } finally {
+                          if (mounted) setState(() => _isLoading = false);
+                        }
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(color: Theme.of(context).dividerColor, width: 1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        backgroundColor: Theme.of(context).colorScheme.surface,
+                      ),
+                      icon: Icon(Icons.account_circle, color: Theme.of(context).iconTheme.color),
+                      label: Text(
+                        'Continuer avec Google',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 }
+

@@ -57,9 +57,7 @@ class _AdminRewardsScreenState extends ConsumerState<AdminRewardsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gérer les Cadeaux', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: Text('Gérer les Cadeaux', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
       ),
       body: configAsyncValue.when(
         data: (config) {
@@ -75,59 +73,59 @@ class _AdminRewardsScreenState extends ConsumerState<AdminRewardsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
+                Text(
                   'Configuration des Points',
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Définissez combien d\'argent le client doit dépenser pour gagner 1 point.',
-                  style: TextStyle(color: AppTheme.textGrey),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _spendingController,
                   keyboardType: TextInputType.number,
-                  style: const TextStyle(color: Colors.white),
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Dépense pour 1 Point (DA)',
-                    prefixIcon: Icon(Icons.monetization_on, color: AppTheme.textGrey),
+                    prefixIcon: Icon(Icons.monetization_on, color: AppTheme.primaryOrange),
                   ),
                 ),
                 
                 const SizedBox(height: 32),
                 
-                const Text(
+                Text(
                   'Configuration du Cadeau',
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Définissez le nombre de points requis pour obtenir le cadeau, et la description du cadeau.',
-                  style: TextStyle(color: AppTheme.textGrey),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _pointsRequiredController,
                   keyboardType: TextInputType.number,
-                  style: const TextStyle(color: Colors.white),
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Points requis pour le Cadeau',
-                    prefixIcon: Icon(Icons.star, color: AppTheme.textGrey),
+                    prefixIcon: Icon(Icons.star, color: AppTheme.primaryOrange),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _descriptionController,
-                  style: const TextStyle(color: Colors.white),
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Description du Cadeau (ex: Un café offert)',
-                    prefixIcon: Icon(Icons.card_giftcard, color: AppTheme.textGrey),
+                    prefixIcon: Icon(Icons.card_giftcard, color: AppTheme.primaryOrange),
                   ),
                 ),
 
                 const SizedBox(height: 48),
-                GradientButton(
+                PrimaryButton(
                   text: 'Sauvegarder',
                   isLoading: _isLoading,
                   onPressed: _saveConfig,
@@ -136,8 +134,8 @@ class _AdminRewardsScreenState extends ConsumerState<AdminRewardsScreen> {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
-        error: (error, stack) => Center(child: Text('Erreur: $error', style: const TextStyle(color: Colors.red))),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        error: (error, stack) => Center(child: Text('Erreur: $error', style: const TextStyle(color: AppTheme.error))),
       ),
     );
   }

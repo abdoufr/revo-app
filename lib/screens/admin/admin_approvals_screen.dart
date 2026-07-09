@@ -29,13 +29,13 @@ class AdminApprovalsScreen extends ConsumerWidget {
       });
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Compte approuvé !', style: TextStyle(color: Colors.white)), backgroundColor: Colors.green),
+          const SnackBar(content: Text('Compte approuvé !', style: TextStyle(color: Colors.white)), backgroundColor: AppTheme.success),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e', style: const TextStyle(color: Colors.white)), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erreur: $e', style: const TextStyle(color: Colors.white)), backgroundColor: AppTheme.error),
         );
       }
     }
@@ -53,7 +53,7 @@ class AdminApprovalsScreen extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e', style: const TextStyle(color: Colors.white)), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erreur: $e', style: const TextStyle(color: Colors.white)), backgroundColor: AppTheme.error),
         );
       }
     }
@@ -64,20 +64,16 @@ class AdminApprovalsScreen extends ConsumerWidget {
     final pendingAsync = ref.watch(pendingUsersProvider);
 
     return Scaffold(
-      backgroundColor: AppTheme.bgDark,
       appBar: AppBar(
-        title: const Text('Comptes en attente', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text('Comptes en attente', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
       ),
       body: pendingAsync.when(
         data: (users) {
           if (users.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 'Aucune demande en attente.',
-                style: TextStyle(color: AppTheme.textGrey, fontSize: 16),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 16),
               ),
             );
           }
@@ -86,55 +82,53 @@ class AdminApprovalsScreen extends ConsumerWidget {
             itemCount: users.length,
             itemBuilder: (context, index) {
               final user = users[index];
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: AppTheme.bgLighter,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.accentPurple.withValues(alpha: 0.3)),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(16),
-                  title: Text(
-                    user.name,
-                    style: const TextStyle(color: AppTheme.textWhite, fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  subtitle: const Padding(
-                    padding: EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      'Nouvelle inscription via Email',
-                      style: TextStyle(color: AppTheme.textGrey),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SoftCard(
+                  padding: EdgeInsets.zero,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    title: Text(
+                      user.name,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () => _rejectUser(context, user.id),
-                        icon: const Icon(Icons.close_rounded, color: Colors.red),
-                        tooltip: 'Refuser',
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.red.withValues(alpha: 0.1),
-                        ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'Nouvelle inscription via Email',
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        onPressed: () => _approveUser(context, user.id),
-                        icon: const Icon(Icons.check_rounded, color: Colors.green),
-                        tooltip: 'Accepter',
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.green.withValues(alpha: 0.1),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () => _rejectUser(context, user.id),
+                          icon: const Icon(Icons.close_rounded, color: AppTheme.error),
+                          tooltip: 'Refuser',
+                          style: IconButton.styleFrom(
+                            backgroundColor: AppTheme.error.withOpacity(0.1),
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: () => _approveUser(context, user.id),
+                          icon: const Icon(Icons.check_rounded, color: AppTheme.success),
+                          tooltip: 'Accepter',
+                          style: IconButton.styleFrom(
+                            backgroundColor: AppTheme.success.withOpacity(0.1),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentPurple)),
-        error: (e, stack) => Center(child: Text('Erreur: $e', style: const TextStyle(color: Colors.red))),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        error: (e, stack) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );
   }
