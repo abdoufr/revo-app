@@ -11,9 +11,19 @@ final clientHistoryProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
   return FirebaseFirestore.instance
       .collection('transactions')
       .where('user_id', isEqualTo: user.uid)
-      .orderBy('date', descending: true)
       .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+      .map((snapshot) {
+        final docs = snapshot.docs.map((doc) => doc.data()).toList();
+        docs.sort((a, b) {
+          final dateA = a['date'] as Timestamp?;
+          final dateB = b['date'] as Timestamp?;
+          if (dateA == null && dateB == null) return 0;
+          if (dateA == null) return 1;
+          if (dateB == null) return -1;
+          return dateB.compareTo(dateA); // descending
+        });
+        return docs;
+      });
 });
 
 class ClientHistoryScreen extends ConsumerWidget {

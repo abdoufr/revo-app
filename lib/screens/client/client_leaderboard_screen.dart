@@ -10,10 +10,12 @@ final leaderboardProvider = StreamProvider<List<ClientUser>>((ref) {
       .collection('users')
       .where('role', isEqualTo: 'client')
       .where('is_public', isEqualTo: true)
-      .orderBy('lifetime_points', descending: true)
-      .limit(10)
       .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => ClientUser.fromMap(doc.data(), doc.id)).toList());
+      .map((snapshot) {
+        final users = snapshot.docs.map((doc) => ClientUser.fromMap(doc.data(), doc.id)).toList();
+        users.sort((a, b) => b.lifetimePoints.compareTo(a.lifetimePoints));
+        return users.take(10).toList();
+      });
 });
 
 class ClientLeaderboardScreen extends ConsumerWidget {
