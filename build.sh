@@ -1,20 +1,40 @@
-#!/bin/bash
+﻿#!/bin/bash
 
-# Télécharger Flutter sur le serveur Vercel
-echo "Cleaning old Flutter cache..."
+set -e
+
+# â”€â”€â”€ Install Flutter (shallow clone for speed) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+echo ">>> Removing old Flutter installation..."
 rm -rf flutter
-echo "Cloning Flutter version 3.22.2..."
-git clone https://github.com/flutter/flutter.git -b 3.22.2
 
-# Ajouter Flutter au PATH temporaire
-export PATH="$PATH:`pwd`/flutter/bin"
+echo ">>> Cloning Flutter 3.32.4 (stable, shallow)..."
+git clone https://github.com/flutter/flutter.git \
+  -b 3.32.4 \
+  --depth 1 \
+  --single-branch \
+  flutter
 
-# Télécharger les dépendances du projet
-echo "Cleaning up..."
+# â”€â”€â”€ Add Flutter to PATH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+export PATH="$PATH:$(pwd)/flutter/bin"
+
+echo ">>> Flutter version:"
+flutter --version
+
+# â”€â”€â”€ Enable Web support â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+flutter config --enable-web
+
+# â”€â”€â”€ Project dependencies â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+echo ">>> Cleaning..."
 flutter clean
-echo "Getting dependencies..."
+
+echo ">>> Getting dependencies..."
 flutter pub get
 
-# Compiler l'application Web
-echo "Building Web App with low memory optimization..."
-flutter build web --pwa-strategy=none --dart-define=Dart2jsOptimization=O1
+# â”€â”€â”€ Build Flutter Web â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+echo ">>> Building Flutter Web..."
+flutter build web \
+  --release \
+  --pwa-strategy=none \
+  --dart-define=Dart2jsOptimization=O1 \
+  --no-tree-shake-icons
+
+echo ">>> Build complete!"

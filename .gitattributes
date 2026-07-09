@@ -1,0 +1,28 @@
+# Default: auto line endings
+* text=auto
+
+# Shell scripts MUST be LF (for Linux/Vercel)
+*.sh text eol=lf
+
+# Dart/Flutter files
+*.dart text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+
+# Windows specific
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binaries (no line ending conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
