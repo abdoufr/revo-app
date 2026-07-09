@@ -84,7 +84,7 @@ class AdminApprovalsScreen extends ConsumerWidget {
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: AppTheme.bgLight,
+                  color: AppTheme.bgLighter,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppTheme.accentPurple.withValues(alpha: 0.3)),
                 ),
