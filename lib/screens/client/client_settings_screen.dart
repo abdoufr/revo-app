@@ -31,6 +31,70 @@ class ClientSettingsScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _showEditProfileDialog(BuildContext context, ClientUser user) async {
+    final nameController = TextEditingController(text: user.name);
+    final phoneController = TextEditingController(text: user.phone ?? '');
+    
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Modifier mon profil', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryOrange)),
+                const SizedBox(height: 24),
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Prénom', prefixIcon: Icon(Icons.person_rounded)),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: phoneController,
+                  decoration: const InputDecoration(labelText: 'Téléphone', prefixIcon: Icon(Icons.phone_rounded)),
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 24),
+                PrimaryButton(
+                  text: 'Enregistrer',
+                  onPressed: () async {
+                    try {
+                      await FirebaseFirestore.instance.collection('users').doc(user.id).update({
+                        'name': nameController.text.trim(),
+                        'phone': phoneController.text.trim(),
+                      });
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Profil mis à jour !'), backgroundColor: AppTheme.success),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error),
+                        );
+                      }
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Annuler', style: TextStyle(color: Colors.grey)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(clientUserProvider);
@@ -47,6 +111,42 @@ class ClientSettingsScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(24),
             children: [
+              SoftCard(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.person_rounded, color: AppTheme.primaryOrange),
+                            const SizedBox(width: 12),
+                            Text('Mon Profil', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit_rounded, color: AppTheme.primaryOrange),
+                          onPressed: () => _showEditProfileDialog(context, user),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text('Prénom : ${user.name}', style: Theme.of(context).textTheme.bodyMedium),
+                    const SizedBox(height: 8),
+                    if (user.email != null && user.email!.isNotEmpty) ...[
+                      Text('Email : ${user.email}', style: Theme.of(context).textTheme.bodyMedium),
+                      const SizedBox(height: 8),
+                    ],
+                    if (user.phone != null && user.phone!.isNotEmpty)
+                      Text('Téléphone : ${user.phone}', style: Theme.of(context).textTheme.bodyMedium)
+                    else
+                      Text('Téléphone : Non renseigné', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey, fontStyle: FontStyle.italic)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
               SoftCard(
                 padding: const EdgeInsets.all(20),
                 child: Column(

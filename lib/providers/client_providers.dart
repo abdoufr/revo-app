@@ -5,6 +5,8 @@ import 'auth_providers.dart';
 class ClientUser {
   final String id;
   final String name;
+  final String? email;
+  final String? phone;
   final String status;
   final int loyaltyPoints;
   final int lifetimePoints;
@@ -13,6 +15,8 @@ class ClientUser {
   ClientUser({
     required this.id,
     required this.name,
+    this.email,
+    this.phone,
     required this.status,
     required this.loyaltyPoints,
     required this.lifetimePoints,
@@ -23,6 +27,8 @@ class ClientUser {
     return ClientUser(
       id: id,
       name: data['name'] ?? 'Client',
+      email: data['email'],
+      phone: data['phone'],
       status: data['status'] ?? 'active',
       loyaltyPoints: data['loyalty_points'] ?? 0,
       lifetimePoints: data['lifetime_points'] ?? (data['loyalty_points'] ?? 0),
