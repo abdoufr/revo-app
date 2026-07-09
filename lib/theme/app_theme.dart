@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 class AppTheme {
   // Purxx Style Colors (Light Theme)
@@ -34,11 +34,11 @@ class AppTheme {
         surface: bgWhite,
         error: error,
       ),
-      textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme).copyWith(
-        displayLarge: GoogleFonts.poppins(color: textDark, fontWeight: FontWeight.w800, letterSpacing: -1),
-        displayMedium: GoogleFonts.poppins(color: textDark, fontWeight: FontWeight.w700, letterSpacing: -0.5),
-        bodyLarge: GoogleFonts.poppins(color: textDark, fontWeight: FontWeight.w500),
-        bodyMedium: GoogleFonts.poppins(color: textLightGrey, fontWeight: FontWeight.w400),
+      textTheme: ThemeData.light().textTheme.copyWith(
+        displayLarge: const TextStyle(fontFamily: 'Poppins', color: textDark, fontWeight: FontWeight.w800, letterSpacing: -1),
+        displayMedium: const TextStyle(fontFamily: 'Poppins', color: textDark, fontWeight: FontWeight.w700, letterSpacing: -0.5),
+        bodyLarge: const TextStyle(fontFamily: 'Poppins', color: textDark, fontWeight: FontWeight.w500),
+        bodyMedium: const TextStyle(fontFamily: 'Poppins', color: textLightGrey, fontWeight: FontWeight.w400),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -49,7 +49,7 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: bgWhite,
-        hintStyle: GoogleFonts.poppins(color: textLightGrey),
+        hintStyle: const TextStyle(fontFamily: 'Poppins', color: textLightGrey),
         contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -78,11 +78,11 @@ class AppTheme {
         surface: bgDarkCard,
         error: error,
       ),
-      textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme).copyWith(
-        displayLarge: GoogleFonts.poppins(color: textWhite, fontWeight: FontWeight.w800, letterSpacing: -1),
-        displayMedium: GoogleFonts.poppins(color: textWhite, fontWeight: FontWeight.w700, letterSpacing: -0.5),
-        bodyLarge: GoogleFonts.poppins(color: textWhite, fontWeight: FontWeight.w500),
-        bodyMedium: GoogleFonts.poppins(color: textDarkGrey, fontWeight: FontWeight.w400),
+      textTheme: ThemeData.dark().textTheme.copyWith(
+        displayLarge: const TextStyle(fontFamily: 'Poppins', color: textWhite, fontWeight: FontWeight.w800, letterSpacing: -1),
+        displayMedium: const TextStyle(fontFamily: 'Poppins', color: textWhite, fontWeight: FontWeight.w700, letterSpacing: -0.5),
+        bodyLarge: const TextStyle(fontFamily: 'Poppins', color: textWhite, fontWeight: FontWeight.w500),
+        bodyMedium: const TextStyle(fontFamily: 'Poppins', color: textDarkGrey, fontWeight: FontWeight.w400),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -93,7 +93,7 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: bgDarkCard,
-        hintStyle: GoogleFonts.poppins(color: textDarkGrey),
+        hintStyle: const TextStyle(fontFamily: 'Poppins', color: textDarkGrey),
         contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
