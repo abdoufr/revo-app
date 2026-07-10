@@ -18,12 +18,12 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Application de fidélité Revo">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="revo_app">
+  <meta name="apple-mobile-web-app-title" content="Revo App">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
@@ -32,9 +32,26 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800&display=swap" rel="stylesheet">
 
-  <title>revo_app</title>
+  <title>Revo App</title>
   <link rel="manifest" href="manifest.json">
-  <script src="https://unpkg.com/@zxing/library@latest"></script>
+
+  <!-- jsQR: lightweight QR code scanner for web camera -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+  <script>
+    // Bridge function called from Dart via dart:js
+    // Decodes QR code from raw RGBA pixel data
+    window.revoScanQR = function(data, width, height) {
+      if (typeof jsQR === 'undefined') return null;
+      try {
+        var uint8 = new Uint8ClampedArray(data);
+        var result = jsQR(uint8, width, height, { inversionAttempts: 'dontInvert' });
+        return result ? result.data : null;
+      } catch (e) {
+        return null;
+      }
+    };
+  </script>
 </head>
 <body>
   <script>
