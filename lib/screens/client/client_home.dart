@@ -9,6 +9,9 @@ import '../../providers/settings_provider.dart';
 import 'client_history_screen.dart';
 import 'client_leaderboard_screen.dart';
 import 'client_settings_screen.dart';
+import '../../l10n/app_translations.dart';
+import 'loyalty_cards.dart';
+import 'dart:convert';
 
 class ClientHome extends ConsumerWidget {
   const ClientHome({super.key});
@@ -19,10 +22,10 @@ class ClientHome extends ConsumerWidget {
     return AppTheme.primaryOrange; // Bronze / Default
   }
 
-  String _getVipTier(int points) {
-    if (points >= 500) return 'Membre GOLD';
-    if (points >= 200) return 'Membre SILVER';
-    return 'Membre BASIC';
+  String _getVipTier(int points, BuildContext context) {
+    if (points >= 500) return 'GOLD ${'member'.tr(context)}';
+    if (points >= 200) return 'SILVER ${'member'.tr(context)}';
+    return 'BASIC ${'member'.tr(context)}';
   }
 
   @override
@@ -46,7 +49,7 @@ class ClientHome extends ConsumerWidget {
               fontSize: 22,
             ),
           ),
-          loading: () => const Text('CHARGEMENT...'),
+          loading: () => Text('loading'.tr(context)),
           error: (_, __) => const Text('REVO APP'),
         ),
         actions: [
@@ -106,126 +109,33 @@ class ClientHome extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Bonjour ${user.name},',
+                                  '${'hello'.tr(context)} ${user.name},',
                                   style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 28),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Voici votre carte de fidélité.',
+                                  'loyalty_card'.tr(context),
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                                 const SizedBox(height: 32),
 
-                                // Modern Clean Loyalty Card
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: vipColor,
-                                    borderRadius: BorderRadius.circular(30),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: vipColor.withOpacity(0.3),
-                                        blurRadius: 25,
-                                        offset: const Offset(0, 10),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(32.0),
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(0.2),
-                                            borderRadius: BorderRadius.circular(20),
-                                          ),
-                                          child: Text(_getVipTier(lifetimePoints), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                        ),
-                                        const SizedBox(height: 24),
-                                        // QR Code Container
-                                        Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(24),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withOpacity(0.1),
-                                                blurRadius: 15,
-                                                spreadRadius: 2,
-                                              ),
-                                            ],
-                                          ),
-                                          child: QrImageView(
-                                            data: user.id,
-                                            version: QrVersions.auto,
-                                            size: 150.0,
-                                            backgroundColor: Colors.white,
-                                            foregroundColor: Colors.black,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 32),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text(
-                                              'Points',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                            Text(
-                                              '$userPoints / $pointsForReward',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 24,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 16),
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: LinearProgressIndicator(
-                                            value: progress,
-                                            backgroundColor: Colors.white.withOpacity(0.3),
-                                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                                            minHeight: 12,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        if (userPoints >= pointsForReward)
-                                          Container(
-                                            padding: const EdgeInsets.all(12),
-                                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                                            child: Row(
-                                              children: [
-                                                const Icon(Icons.card_giftcard, color: AppTheme.primaryOrange),
-                                                const SizedBox(width: 8),
-                                                Expanded(child: Text('CADEAU DÉBLOQUÉ! \n${config.rewardDescription}', style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold))),
-                                              ],
-                                            ),
-                                          )
-                                        else
-                                          Text(
-                                            'Encore ${pointsForReward - userPoints} pts pour un cadeau!',
-                                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
+                                // New Swipeable Cards
+                                LoyaltyCardsCarousel(
+                                  user: user,
+                                  config: config,
+                                  vipColor: vipColor,
+                                  lifetimePoints: lifetimePoints,
+                                  vipTierName: _getVipTier(lifetimePoints, context),
                                 ),
                               ],
                             );
                           },
                           loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
-                          error: (err, stack) => const Text('Erreur config', style: TextStyle(color: AppTheme.error)),
+                          error: (err, stack) => Text('error_config'.tr(context), style: const TextStyle(color: AppTheme.error)),
                         );
                       },
                       loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
-                      error: (err, stack) => const Text('Erreur utilisateur', style: TextStyle(color: AppTheme.error)),
+                      error: (err, stack) => Text('error_user'.tr(context), style: const TextStyle(color: AppTheme.error)),
                     ),
 
                     const SizedBox(height: 32),
@@ -237,7 +147,7 @@ class ClientHome extends ConsumerWidget {
                           child: _buildActionCard(
                             context,
                             icon: Icons.history_rounded,
-                            title: 'Historique',
+                            title: 'history'.tr(context),
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientHistoryScreen())),
                           ),
                         ),
@@ -246,7 +156,7 @@ class ClientHome extends ConsumerWidget {
                           child: _buildActionCard(
                             context,
                             icon: Icons.leaderboard_rounded,
-                            title: 'Top Clients',
+                            title: 'top_clients'.tr(context),
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientLeaderboardScreen())),
                           ),
                         ),
@@ -259,7 +169,7 @@ class ClientHome extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Notre Menu',
+                          'our_menu'.tr(context),
                           style: Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 22),
                         ),
                         Icon(Icons.restaurant_menu, color: Theme.of(context).primaryColor),
@@ -271,7 +181,7 @@ class ClientHome extends ConsumerWidget {
                     productsAsync.when(
                       data: (products) {
                         if (products.isEmpty) {
-                          return Center(child: Text('Le menu est vide pour le moment.', style: Theme.of(context).textTheme.bodyMedium));
+                          return Center(child: Text('empty_menu'.tr(context), style: Theme.of(context).textTheme.bodyMedium));
                         }
                         return ListView.builder(
                           shrinkWrap: true,
@@ -292,7 +202,15 @@ class ClientHome extends ConsumerWidget {
                                       color: AppTheme.primaryOrange.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
-                                    child: const Icon(Icons.fastfood, color: AppTheme.primaryOrange),
+                                    child: product.imageUrl != null && product.imageUrl!.startsWith('data:image')
+                                        ? ClipRRect(
+                                            borderRadius: BorderRadius.circular(16),
+                                            child: Image.memory(
+                                              base64Decode(product.imageUrl!.split(',').last),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          )
+                                        : const Icon(Icons.fastfood, color: AppTheme.primaryOrange),
                                   ),
                                   title: Text(
                                     product.name,

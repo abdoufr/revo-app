@@ -1,5 +1,8 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
 import '../../models/product.dart';
@@ -74,66 +77,130 @@ class AdminMenuScreen extends ConsumerWidget {
     final nameController = TextEditingController(text: product?.name ?? '');
     final descController = TextEditingController(text: product?.description ?? '');
     final priceController = TextEditingController(text: product?.price.toString() ?? '');
+    String? base64Image = product?.imageUrl;
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          title: Text(product == null ? 'Ajouter Produit' : 'Modifier Produit', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(hintText: 'Nom du produit'),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              title: Text(product == null ? 'Ajouter Produit' : 'Modifier Produit', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Image Picker Section
+                    GestureDetector(
+                      onTap: () async {
+                        try {
+                          final picker = _getPicker(); // Will import image_picker
+                          final pickedFile = await picker.pickImage(source: _getImageSource(), maxWidth: 800, imageQuality: 85);
+                          if (pickedFile != null) {
+                            final bytes = await pickedFile.readAsBytes();
+                            // We import dart:convert at the top of file
+                            final base64String = 'data:image/jpeg;base64,' + _base64Encode(bytes);
+                            setState(() {
+                              base64Image = base64String;
+                            });
+                          }
+                        } catch (e) {
+                          // Handle error
+                        }
+                      },
+                      child: Container(
+                        height: 120,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryOrange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppTheme.primaryOrange, width: 1, style: BorderStyle.solid),
+                        ),
+                        child: base64Image != null && base64Image!.startsWith('data:image')
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.memory(
+                                  _decodeBase64(base64Image!),
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.add_photo_alternate_rounded, color: AppTheme.primaryOrange, size: 40),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Ajouter une image',
+                                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: nameController,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      decoration: const InputDecoration(hintText: 'Nom du produit'),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: descController,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      decoration: const InputDecoration(hintText: 'Description'),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: priceController,
+                      keyboardType: TextInputType.number,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      decoration: const InputDecoration(hintText: 'Prix (DA)'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: descController,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(hintText: 'Description'),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Annuler', style: Theme.of(context).textTheme.bodyMedium),
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: priceController,
-                  keyboardType: TextInputType.number,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(hintText: 'Prix (DA)'),
+                ElevatedButton(
+                  onPressed: () {
+                    final newProduct = Product(
+                      id: product?.id ?? '',
+                      name: nameController.text,
+                      description: descController.text,
+                      price: double.tryParse(priceController.text) ?? 0.0,
+                      category: 'General',
+                      imageUrl: base64Image,
+                    );
+                    
+                    if (product == null) {
+                      ref.read(adminActionsProvider).addProduct(newProduct);
+                    } else {
+                      ref.read(adminActionsProvider).updateProduct(newProduct);
+                    }
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryOrange),
+                  child: const Text('Enregistrer', style: TextStyle(color: Colors.white)),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Annuler', style: Theme.of(context).textTheme.bodyMedium),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final newProduct = Product(
-                  id: product?.id ?? '',
-                  name: nameController.text,
-                  description: descController.text,
-                  price: double.tryParse(priceController.text) ?? 0.0,
-                  category: 'General',
-                );
-                
-                if (product == null) {
-                  ref.read(adminActionsProvider).addProduct(newProduct);
-                } else {
-                  ref.read(adminActionsProvider).updateProduct(newProduct);
-                }
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryOrange),
-              child: const Text('Enregistrer', style: TextStyle(color: Colors.white)),
-            ),
-          ],
+            );
+          }
         );
       },
     );
   }
+}
+
+// Helpers at the end of the file
+
+ImagePicker _getPicker() => ImagePicker();
+ImageSource _getImageSource() => ImageSource.gallery;
+String _base64Encode(List<int> bytes) => base64Encode(bytes);
+Uint8List _decodeBase64(String str) {
+  final base64Str = str.split(',').last;
+  return base64Decode(base64Str);
 }

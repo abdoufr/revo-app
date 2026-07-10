@@ -5,6 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../providers/auth_providers.dart';
 import '../../providers/client_providers.dart';
 import '../../providers/theme_provider.dart';
+import '../../l10n/app_translations.dart';
 
 class ClientSettingsScreen extends ConsumerWidget {
   const ClientSettingsScreen({super.key});
@@ -102,11 +103,11 @@ class ClientSettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Paramètres', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
+        title: Text('settings'.tr(context), style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
       ),
       body: userAsync.when(
         data: (user) {
-          if (user == null) return Center(child: Text('Erreur utilisateur', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)));
+          if (user == null) return Center(child: Text('error_user'.tr(context), style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)));
           
           return ListView(
             padding: const EdgeInsets.all(24),
@@ -123,7 +124,7 @@ class ClientSettingsScreen extends ConsumerWidget {
                           children: [
                             const Icon(Icons.person_rounded, color: AppTheme.primaryOrange),
                             const SizedBox(width: 12),
-                            Text('Mon Profil', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                            Text('my_profile'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         IconButton(
@@ -133,16 +134,16 @@ class ClientSettingsScreen extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    Text('Prénom : ${user.name}', style: Theme.of(context).textTheme.bodyMedium),
+                    Text('${'first_name'.tr(context)} : ${user.name}', style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 8),
                     if (user.email != null && user.email!.isNotEmpty) ...[
-                      Text('Email : ${user.email}', style: Theme.of(context).textTheme.bodyMedium),
+                      Text('${'email'.tr(context)} : ${user.email}', style: Theme.of(context).textTheme.bodyMedium),
                       const SizedBox(height: 8),
                     ],
                     if (user.phone != null && user.phone!.isNotEmpty)
-                      Text('Téléphone : ${user.phone}', style: Theme.of(context).textTheme.bodyMedium)
+                      Text('${'phone'.tr(context)} : ${user.phone}', style: Theme.of(context).textTheme.bodyMedium)
                     else
-                      Text('Téléphone : Non renseigné', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey, fontStyle: FontStyle.italic)),
+                      Text('${'phone'.tr(context)} : ${'not_provided'.tr(context)}', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey, fontStyle: FontStyle.italic)),
                   ],
                 ),
               ),
@@ -156,19 +157,19 @@ class ClientSettingsScreen extends ConsumerWidget {
                       children: [
                         const Icon(Icons.leaderboard_rounded, color: AppTheme.primaryOrange),
                         const SizedBox(width: 12),
-                        Text('Classement Public', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('public_ranking'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'En activant cette option, votre prénom et vos points à vie apparaîtront dans le Top Clients du Fastfood. Cela ajoute de la compétition !',
+                      'public_ranking_desc'.tr(context),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Participer au classement', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                        Expanded(child: Text('participate_ranking'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600))),
                         Switch(
                           value: user.isPublic,
                           activeColor: AppTheme.primaryOrange,
@@ -189,14 +190,14 @@ class ClientSettingsScreen extends ConsumerWidget {
                       children: [
                         const Icon(Icons.palette_rounded, color: AppTheme.primaryOrange),
                         const SizedBox(width: 12),
-                        Text('Préférences d\'Affichage', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('display_prefs'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Mode Sombre (Dark Mode)', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                        Text('dark_mode'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
                         Switch(
                           value: themeState.themeMode == ThemeMode.dark,
                           activeColor: AppTheme.primaryOrange,
@@ -208,7 +209,7 @@ class ClientSettingsScreen extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Langue', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                        Text('language'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
                         DropdownButton<String>(
                           value: themeState.locale.languageCode,
                           dropdownColor: Theme.of(context).colorScheme.surface,
@@ -237,7 +238,7 @@ class ClientSettingsScreen extends ConsumerWidget {
                   }
                 },
                 icon: const Icon(Icons.logout_rounded),
-                label: const Text('Se déconnecter'),
+                label: Text('logout'.tr(context)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.error.withOpacity(0.1),
                   foregroundColor: AppTheme.error,

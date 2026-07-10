@@ -4,6 +4,7 @@ class Product {
   final String description;
   final double price;
   final String category;
+  final String? imageUrl; // Base64 or URL
 
   Product({
     required this.id,
@@ -11,6 +12,7 @@ class Product {
     required this.description,
     required this.price,
     required this.category,
+    this.imageUrl,
   });
 
   factory Product.fromMap(Map<String, dynamic> data, String documentId) {
@@ -20,6 +22,7 @@ class Product {
       description: data['description'] ?? '',
       price: (data['price'] ?? 0.0).toDouble(),
       category: data['category'] ?? '',
+      imageUrl: data['imageUrl'],
     );
   }
 
@@ -29,6 +32,7 @@ class Product {
       'description': description,
       'price': price,
       'category': category,
+      if (imageUrl != null) 'imageUrl': imageUrl,
     };
   }
 }
