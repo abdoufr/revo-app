@@ -1,6 +1,8 @@
-// ignore_for_file: avoid_classes_with_only_static_members
-// Web stub for mobile_scanner — provides empty classes so the code compiles on Web.
-// The real mobile_scanner is used only on mobile platforms.
+// Web stub for mobile_scanner.
+// Provides Flutter-compatible empty classes so the code compiles on Web.
+// These classes are NEVER actually used at runtime on Web (guarded by kIsWeb).
+
+import 'package:flutter/material.dart';
 
 class MobileScannerController {
   void dispose() {}
@@ -8,16 +10,24 @@ class MobileScannerController {
   void start() {}
 }
 
-class MobileScanner extends Object {
-  final MobileScannerController? controller;
-  final dynamic onDetect;
-  const MobileScanner({this.controller, this.onDetect});
-}
-
 class BarcodeCapture {
-  final List<Barcode> barcodes = [];
+  List<Barcode> get barcodes => [];
 }
 
 class Barcode {
-  final String? rawValue = null;
+  String? get rawValue => null;
+}
+
+class MobileScanner extends StatelessWidget {
+  final MobileScannerController? controller;
+  final void Function(BarcodeCapture)? onDetect;
+
+  const MobileScanner({
+    super.key,
+    this.controller,
+    this.onDetect,
+  });
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }

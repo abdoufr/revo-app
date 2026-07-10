@@ -349,7 +349,7 @@ class ClientHome extends ConsumerWidget {
               color: AppTheme.primaryOrange.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(icon, color: AppTheme.primaryOrange, size: 28),
+            child: Icon(icon, color: AppTheme.primaryOrange, size: 28),
           ),
           const SizedBox(height: 12),
           Text(
