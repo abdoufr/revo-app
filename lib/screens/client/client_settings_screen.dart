@@ -228,6 +228,28 @@ class ClientSettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  await ref.read(authControllerProvider).signOut();
+                  if (context.mounted) {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  }
+                },
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text('Se déconnecter'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.error.withOpacity(0.1),
+                  foregroundColor: AppTheme.error,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: AppTheme.error),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
             ],
           );
         },
