@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
-import 'qr_scanner_widget.dart'; // conditional: web or mobile impl
 
 class AdminScannerScreen extends ConsumerStatefulWidget {
   const AdminScannerScreen({super.key});
@@ -15,9 +15,12 @@ class AdminScannerScreen extends ConsumerStatefulWidget {
 class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
   final _amountController = TextEditingController();
   final _clientIdController = TextEditingController();
-  final GlobalKey<QrScannerWidgetState> _scannerKey = GlobalKey();
+  final MobileScannerController _scannerController = MobileScannerController(
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
 
   bool _isLoading = false;
+  bool _torchEnabled = false;
   Map<String, dynamic>? _scannedUser;
   bool _isEligibleForReward = false;
   int _requiredPoints = 0;
@@ -26,14 +29,22 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
   void dispose() {
     _amountController.dispose();
     _clientIdController.dispose();
+    _scannerController.dispose();
     super.dispose();
   }
 
-  // Called by the QrScannerWidget when a QR code is detected
-  void _onQrDetected(String value) {
-    if (_clientIdController.text == value) return;
-    setState(() => _clientIdController.text = value);
-    _fetchUserDetails(value);
+  void _onDetect(BarcodeCapture capture) async {
+    final List<Barcode> barcodes = capture.barcodes;
+    for (final barcode in barcodes) {
+      if (barcode.rawValue != null &&
+          _clientIdController.text != barcode.rawValue!) {
+        setState(() {
+          _clientIdController.text = barcode.rawValue!;
+        });
+        await _fetchUserDetails(barcode.rawValue!);
+        _scannerController.stop();
+      }
+    }
   }
 
   Future<void> _fetchUserDetails(String userId) async {
@@ -43,7 +54,6 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
           .collection('users')
           .doc(userId)
           .get();
-
       if (doc.exists && doc.data() != null) {
         final data = doc.data()!;
         final configDoc = await FirebaseFirestore.instance
@@ -57,7 +67,8 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
         setState(() {
           _scannedUser = data;
           _requiredPoints = reqPoints;
-          _isEligibleForReward = (data['loyalty_points'] ?? 0) >= reqPoints;
+          _isEligibleForReward =
+              (data['loyalty_points'] ?? 0) >= reqPoints;
         });
       } else {
         if (mounted) {
@@ -67,16 +78,13 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
               backgroundColor: AppTheme.error,
             ),
           );
-          setState(() => _scannedUser = null);
         }
+        setState(() => _scannedUser = null);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur: $e'),
-            backgroundColor: AppTheme.error,
-          ),
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error),
         );
       }
     } finally {
@@ -87,6 +95,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
   Future<void> _claimReward() async {
     final clientId = _clientIdController.text.trim();
     if (clientId.isEmpty) return;
+
     setState(() => _isLoading = true);
     try {
       await ref.read(adminActionsProvider).claimReward(clientId, _requiredPoints);
@@ -97,7 +106,12 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
             backgroundColor: AppTheme.success,
           ),
         );
-        _resetScan();
+        _clientIdController.clear();
+        setState(() {
+          _scannedUser = null;
+          _isEligibleForReward = false;
+        });
+        _scannerController.start();
       }
     } catch (e) {
       if (mounted) {
@@ -117,8 +131,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
     if (amount == null || amount <= 0 || clientId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Veuillez entrer un montant valide et un ID Client.'),
-        ),
+            content: Text('Veuillez entrer un montant valide et un ID Client.')),
       );
       return;
     }
@@ -134,7 +147,10 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
             backgroundColor: AppTheme.success,
           ),
         );
-        _resetScan();
+        _amountController.clear();
+        _clientIdController.clear();
+        setState(() => _scannedUser = null);
+        _scannerController.start();
       }
     } catch (e) {
       if (mounted) {
@@ -152,12 +168,11 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
 
   void _resetScan() {
     _clientIdController.clear();
-    _amountController.clear();
     setState(() {
       _scannedUser = null;
       _isEligibleForReward = false;
     });
-    _scannerKey.currentState?.resetScan();
+    _scannerController.start();
   }
 
   @override
@@ -169,12 +184,16 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
           style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
         ),
         actions: [
-          if (_scannedUser != null || _clientIdController.text.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.refresh_rounded),
-              tooltip: 'Nouveau scan',
-              onPressed: _resetScan,
+          IconButton(
+            icon: Icon(
+              _torchEnabled ? Icons.flash_on_rounded : Icons.flash_off_rounded,
+              color: _torchEnabled ? AppTheme.primaryOrange : null,
             ),
+            onPressed: () {
+              _scannerController.toggleTorch();
+              setState(() => _torchEnabled = !_torchEnabled);
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -182,7 +201,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ─── Camera Scanner (Web uses dart:html, Mobile uses mobile_scanner) ──
+            // ─── Camera Scanner ──────────────────────────────────────────
             Container(
               height: 280,
               decoration: BoxDecoration(
@@ -203,11 +222,11 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
               clipBehavior: Clip.hardEdge,
               child: Stack(
                 children: [
-                  QrScannerWidget(
-                    key: _scannerKey,
-                    onScan: _onQrDetected,
+                  MobileScanner(
+                    controller: _scannerController,
+                    onDetect: _onDetect,
                   ),
-                  // Scan frame overlay
+                  // Scan overlay frame
                   Center(
                     child: Container(
                       width: 180,
@@ -221,15 +240,14 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                       ),
                     ),
                   ),
-                  // Bottom label
+                  // "Scan QR" label
                   Positioned(
-                    bottom: 12,
+                    bottom: 16,
                     left: 0,
                     right: 0,
                     child: Center(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.black54,
                           borderRadius: BorderRadius.circular(20),
@@ -247,7 +265,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
 
             const SizedBox(height: 28),
 
-            // ─── Manual Input ─────────────────────────────────────────────
+            // ─── Manual ID Input ─────────────────────────────────────────
             Row(
               children: [
                 Expanded(
@@ -255,9 +273,8 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                     controller: _clientIdController,
                     style: Theme.of(context).textTheme.bodyLarge,
                     decoration: InputDecoration(
-                      hintText: 'ID Client (scan auto ou manuel)',
-                      prefixIcon:
-                          const Icon(Icons.person, color: AppTheme.primaryOrange),
+                      hintText: 'ID Client (scan auto ou saisie manuelle)',
+                      prefixIcon: const Icon(Icons.person, color: AppTheme.primaryOrange),
                       suffixIcon: _clientIdController.text.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.close_rounded),
@@ -265,29 +282,28 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                             )
                           : null,
                     ),
-                    onChanged: (_) => setState(() {}),
                     onSubmitted: (val) {
                       if (val.trim().isNotEmpty) {
                         _fetchUserDetails(val.trim());
                       }
                     },
+                    onChanged: (_) => setState(() {}),
                   ),
                 ),
                 const SizedBox(width: 12),
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: () {
                     final id = _clientIdController.text.trim();
                     if (id.isNotEmpty) _fetchUserDetails(id);
                   },
+                  icon: const Icon(Icons.search_rounded),
+                  label: const Text('Chercher'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryOrange,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Icon(Icons.search_rounded),
                 ),
               ],
             ),
@@ -300,24 +316,20 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(
                 hintText: 'Montant de l\'achat (DA)',
-                prefixIcon:
-                    Icon(Icons.attach_money, color: AppTheme.primaryOrange),
+                prefixIcon: Icon(Icons.attach_money, color: AppTheme.primaryOrange),
               ),
             ),
 
             const SizedBox(height: 28),
 
-            // ─── Loading ──────────────────────────────────────────────────
+            // ─── Scanned User Info ────────────────────────────────────────
             if (_isLoading)
               const Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
-                  child: CircularProgressIndicator(
-                      color: AppTheme.primaryOrange),
+                  child: CircularProgressIndicator(color: AppTheme.primaryOrange),
                 ),
               )
-
-            // ─── Scanned User Info ────────────────────────────────────────
             else if (_scannedUser != null) ...[
               SoftCard(
                 padding: const EdgeInsets.all(20),
@@ -331,8 +343,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                             color: AppTheme.primaryOrange.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.person_rounded,
-                              color: AppTheme.primaryOrange, size: 28),
+                          child: const Icon(Icons.person_rounded, color: AppTheme.primaryOrange, size: 28),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -341,13 +352,10 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                             children: [
                               Text(
                                 _scannedUser!['name'] ?? 'Client',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.copyWith(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               Text(
                                 '${_scannedUser!['loyalty_points'] ?? 0} points',
@@ -369,20 +377,19 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                         decoration: BoxDecoration(
                           color: AppTheme.success.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                              color: AppTheme.success.withOpacity(0.3)),
+                          border: Border.all(color: AppTheme.success.withOpacity(0.3)),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.card_giftcard,
-                                color: AppTheme.success),
+                            Icon(Icons.card_giftcard, color: AppTheme.success),
                             SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 '🎉 Éligible pour un CADEAU !',
                                 style: TextStyle(
-                                    color: AppTheme.success,
-                                    fontWeight: FontWeight.bold),
+                                  color: AppTheme.success,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],

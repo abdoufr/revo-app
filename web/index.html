@@ -13,149 +13,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800&display=swap" rel="stylesheet">
   <title>Revo App</title>
   <link rel="manifest" href="manifest.json">
-
-  <!-- jsQR: QR code decoder -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-
-  <style>
-    #revo-scanner-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.95);
-      z-index: 999999;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Poppins', sans-serif;
-    }
-    #revo-scanner-overlay.active { display: flex; }
-
-    #revo-scanner-video {
-      width: 100%;
-      max-width: 480px;
-      max-height: 50vh;
-      border-radius: 20px;
-      border: 2.5px solid #FF6B35;
-      object-fit: cover;
-    }
-    #revo-scanner-frame {
-      position: absolute;
-      width: 200px; height: 200px;
-      border: 3px solid #FF6B35;
-      border-radius: 16px;
-      pointer-events: none;
-      box-shadow: 0 0 0 4000px rgba(0,0,0,0.4);
-    }
-    #revo-scanner-label {
-      color: rgba(255,255,255,0.85);
-      margin-top: 20px;
-      font-size: 15px;
-      text-align: center;
-    }
-    #revo-scanner-close {
-      margin-top: 20px;
-      padding: 12px 32px;
-      background: #FF6B35;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-family: 'Poppins', sans-serif;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    #revo-scanner-close:hover { background: #e55a25; }
-    #revo-scanner-error {
-      color: #ff6b6b;
-      text-align: center;
-      max-width: 300px;
-      margin-top: 12px;
-      font-size: 14px;
-    }
-    #revo-scanner-video-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  </style>
-
-  <script>
-    var _revoStream    = null;
-    var _revoAnimFrame = null;
-    var _revoActive    = false;
-    var _revoCallback  = null;
-
-    // Called from Dart via dart:js
-    window.revoStartScanner = function(onResult) {
-      if (_revoActive) return;
-      _revoActive  = true;
-      _revoCallback = onResult;
-
-      var overlay  = document.getElementById('revo-scanner-overlay');
-      var video    = document.getElementById('revo-scanner-video');
-      var canvas   = document.getElementById('revo-scanner-canvas');
-      var errorEl  = document.getElementById('revo-scanner-error');
-
-      overlay.classList.add('active');
-      errorEl.textContent = '';
-
-      navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } },
-        audio: false
-      }).then(function(stream) {
-        _revoStream = stream;
-        video.srcObject = stream;
-        video.play();
-        _revoScanLoop(video, canvas);
-      }).catch(function(err) {
-        errorEl.textContent = 'Caméra indisponible: ' + err.message;
-        _revoActive = false;
-      });
-    };
-
-    function _revoScanLoop(video, canvas) {
-      if (!_revoActive) return;
-      if (video.readyState >= 2) {
-        var ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        var code    = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'dontInvert' });
-        if (code && code.data && code.data.length > 0) {
-          window.revoStopScanner();
-          if (_revoCallback) _revoCallback(code.data);
-          return;
-        }
-      }
-      _revoAnimFrame = requestAnimationFrame(function() { _revoScanLoop(video, canvas); });
-    }
-
-    window.revoStopScanner = function() {
-      _revoActive = false;
-      if (_revoAnimFrame) { cancelAnimationFrame(_revoAnimFrame); _revoAnimFrame = null; }
-      if (_revoStream)    { _revoStream.getTracks().forEach(function(t) { t.stop(); }); _revoStream = null; }
-      var overlay = document.getElementById('revo-scanner-overlay');
-      if (overlay) overlay.classList.remove('active');
-      var video   = document.getElementById('revo-scanner-video');
-      if (video)  { video.srcObject = null; }
-    };
-  </script>
 </head>
 <body>
-  <!-- QR Scanner overlay — lives outside Flutter canvas, always on top -->
-  <div id="revo-scanner-overlay">
-    <div id="revo-scanner-video-wrap">
-      <video id="revo-scanner-video" autoplay muted playsinline></video>
-      <div id="revo-scanner-frame"></div>
-    </div>
-    <canvas id="revo-scanner-canvas" width="320" height="240" style="display:none;"></canvas>
-    <p id="revo-scanner-label">Pointez la caméra vers le QR Code du client</p>
-    <p id="revo-scanner-error"></p>
-    <button id="revo-scanner-close" onclick="revoStopScanner()">✕ Fermer</button>
-  </div>
-
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -163,6 +22,6 @@
       });
     }
   </script>
-  <script src="flutter_bootstrap.js?v=2" async></script>
+  <script src="flutter_bootstrap.js?v=3" async></script>
 </body>
 </html>
