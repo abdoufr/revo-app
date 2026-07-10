@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeState>((ref) {
+// ─── Riverpod 3: use NotifierProvider instead of StateNotifierProvider ────────
+final themeProvider = NotifierProvider<ThemeNotifier, ThemeState>(() {
   return ThemeNotifier();
 });
 
@@ -26,17 +27,20 @@ class ThemeState {
   }
 }
 
-class ThemeNotifier extends StateNotifier<ThemeState> {
-  ThemeNotifier() : super(ThemeState(themeMode: ThemeMode.light, locale: const Locale('fr'))) {
+// ─── Riverpod 3: use Notifier instead of StateNotifier ───────────────────────
+class ThemeNotifier extends Notifier<ThemeState> {
+  @override
+  ThemeState build() {
+    // Load saved settings asynchronously after init
     _loadSettings();
+    return ThemeState(themeMode: ThemeMode.light, locale: const Locale('fr'));
   }
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    // Par défaut on est en light (style Purxx)
-    final isDark = prefs.getBool('isDark') ?? false; 
+    final isDark = prefs.getBool('isDark') ?? false;
     final langCode = prefs.getString('lang') ?? 'fr';
-    
+
     state = state.copyWith(
       themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
       locale: Locale(langCode),
@@ -47,7 +51,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
     final isDark = state.themeMode == ThemeMode.dark;
     final newMode = isDark ? ThemeMode.light : ThemeMode.dark;
     state = state.copyWith(themeMode: newMode);
-    
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isDark', !isDark);
   }

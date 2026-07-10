@@ -33,8 +33,6 @@ flutter pub get
 echo ">>> Building Flutter Web..."
 flutter build web \
   --release \
-  --pwa-strategy=none \
-  --dart-define=Dart2jsOptimization=O1 \
   --no-tree-shake-icons
 
 echo ">>> Build complete!"
