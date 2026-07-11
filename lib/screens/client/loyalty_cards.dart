@@ -219,7 +219,22 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
     return _buildCardBase(
       vipColor: vipColor,
       children: [
-        const Icon(Icons.stars_rounded, color: Colors.white, size: 64),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            const Align(
+              alignment: Alignment.center,
+              child: Icon(Icons.stars_rounded, color: Colors.white, size: 64),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: const Icon(Icons.info_outline_rounded, color: Colors.white),
+                onPressed: () => _showVipTiersInfo(context),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
         Text(vipTierName, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
@@ -248,6 +263,40 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showVipTiersInfo(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Paliers VIP', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: VipTierService.allTiers.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final tier = VipTierService.allTiers[index];
+                    return ListTile(
+                      leading: Icon(Icons.stars_rounded, color: tier['color'], size: 32),
+                      title: Text(tier['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                      trailing: Text('${tier['minPoints']} pts', style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.grey)),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

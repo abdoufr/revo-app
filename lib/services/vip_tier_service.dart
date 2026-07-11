@@ -28,4 +28,14 @@ class VipTierService {
     if (points >= 100) return colorMembre;
     return colorNouveau;
   }
+
+  static const List<Map<String, dynamic>> allTiers = [
+    {'name': 'Diamant', 'minPoints': 5000, 'color': colorDiamond},
+    {'name': 'Platine', 'minPoints': 2000, 'color': colorPlatinum},
+    {'name': 'Or', 'minPoints': 1000, 'color': colorGold},
+    {'name': 'Argent', 'minPoints': 600, 'color': colorSilver},
+    {'name': 'Bronze', 'minPoints': 300, 'color': colorBronze},
+    {'name': 'Membre', 'minPoints': 100, 'color': colorMembre},
+    {'name': 'Nouveau', 'minPoints': 0, 'color': colorNouveau},
+  ];
 }
