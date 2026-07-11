@@ -3,30 +3,24 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../theme/app_theme.dart';
 import '../../models/reward.dart';
 import '../../providers/client_providers.dart'; // for ClientUser
+import '../../providers/admin_providers.dart'; // for rewardConfigProvider
 import '../../l10n/app_translations.dart';
 import 'rewards_catalog_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LoyaltyCardsCarousel extends StatefulWidget {
+class LoyaltyCardsCarousel extends ConsumerStatefulWidget {
   final ClientUser user;
-  final RewardConfig config;
-  final Color vipColor;
-  final int lifetimePoints;
-  final String vipTierName;
 
   const LoyaltyCardsCarousel({
     super.key,
     required this.user,
-    required this.config,
-    required this.vipColor,
-    required this.lifetimePoints,
-    required this.vipTierName,
   });
 
   @override
-  State<LoyaltyCardsCarousel> createState() => _LoyaltyCardsCarouselState();
+  ConsumerState<LoyaltyCardsCarousel> createState() => _LoyaltyCardsCarouselState();
 }
 
-class _LoyaltyCardsCarouselState extends State<LoyaltyCardsCarousel> {
+class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -38,10 +32,31 @@ class _LoyaltyCardsCarouselState extends State<LoyaltyCardsCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    int userPoints = widget.user.loyaltyPoints;
-    int pointsForReward = widget.config.pointsRequiredForReward;
-    double progress = pointsForReward > 0 ? userPoints / pointsForReward : 0;
-    if (progress > 1.0) progress = 1.0;
+    final configAsync = ref.watch(rewardConfigProvider);
+
+    return configAsync.when(
+      data: (config) {
+        int userPoints = widget.user.loyaltyPoints;
+        int lifetimePoints = widget.user.lifetimePoints;
+        int pointsForReward = config.pointsRequiredForReward;
+        double progress = pointsForReward > 0 ? userPoints / pointsForReward : 0;
+        if (progress > 1.0) progress = 1.0;
+
+        String vipTierName = 'Nouveau';
+        Color vipColor = Colors.grey;
+        if (lifetimePoints >= 2000) {
+          vipTierName = 'Gold';
+          vipColor = const Color(0xFFFFD700);
+        } else if (lifetimePoints >= 500) {
+          vipTierName = 'Silver';
+          vipColor = const Color(0xFFC0C0C0);
+        } else if (lifetimePoints >= 100) {
+          vipTierName = 'Bronze';
+          vipColor = const Color(0xFFCD7F32);
+        } else {
+          vipTierName = 'Membre';
+          vipColor = AppTheme.primaryRed;
+        }
 
     return Column(
       children: [
@@ -54,42 +69,46 @@ class _LoyaltyCardsCarouselState extends State<LoyaltyCardsCarousel> {
                 _currentPage = page;
               });
             },
-            children: [
-              _buildQrCard(progress, userPoints, pointsForReward),
-              _buildStatsCard(progress, userPoints, pointsForReward),
-              _buildVipCard(progress, userPoints, pointsForReward),
-            ],
+              children: [
+                _buildQrCard(progress, userPoints, pointsForReward, vipTierName, vipColor),
+                _buildStatsCard(progress, userPoints, pointsForReward, vipColor),
+                _buildVipCard(progress, userPoints, pointsForReward, vipTierName, vipColor, lifetimePoints, config),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(3, (index) {
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              height: 8,
-              width: _currentPage == index ? 24 : 8,
-              decoration: BoxDecoration(
-                color: _currentPage == index ? widget.vipColor : widget.vipColor.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(4),
-              ),
-            );
-          }),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(3, (index) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                height: 8,
+                width: _currentPage == index ? 24 : 8,
+                decoration: BoxDecoration(
+                  color: _currentPage == index ? vipColor : vipColor.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              );
+            }),
         ),
       ],
     );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const SizedBox(),
+    );
   }
 
-  Widget _buildCardBase({required List<Widget> children}) {
+  Widget _buildCardBase({required List<Widget> children, required Color vipColor}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: widget.vipColor,
+        color: vipColor,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: widget.vipColor.withOpacity(0.3),
+            color: vipColor.withOpacity(0.3),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
@@ -105,8 +124,9 @@ class _LoyaltyCardsCarouselState extends State<LoyaltyCardsCarousel> {
   }
 
   // Card 1: QR Code
-  Widget _buildQrCard(double progress, int userPoints, int pointsForReward) {
+  Widget _buildQrCard(double progress, int userPoints, int pointsForReward, String vipTierName, Color vipColor) {
     return _buildCardBase(
+      vipColor: vipColor,
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -114,7 +134,7 @@ class _LoyaltyCardsCarouselState extends State<LoyaltyCardsCarousel> {
             color: Colors.white.withOpacity(0.2),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Text(widget.vipTierName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          child: Text(vipTierName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
         const SizedBox(height: 24),
         Container(
@@ -157,8 +177,9 @@ class _LoyaltyCardsCarouselState extends State<LoyaltyCardsCarousel> {
   }
 
   // Card 2: Stats
-  Widget _buildStatsCard(double progress, int userPoints, int pointsForReward) {
+  Widget _buildStatsCard(double progress, int userPoints, int pointsForReward, Color vipColor) {
     return _buildCardBase(
+      vipColor: vipColor,
       children: [
         Text('stats'.tr(context), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
         const SizedBox(height: 32),
@@ -195,7 +216,7 @@ class _LoyaltyCardsCarouselState extends State<LoyaltyCardsCarousel> {
             label: const Text('Boutique de Cadeaux', style: TextStyle(fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
-              foregroundColor: widget.vipColor,
+              foregroundColor: vipColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
@@ -206,14 +227,15 @@ class _LoyaltyCardsCarouselState extends State<LoyaltyCardsCarousel> {
   }
 
   // Card 3: VIP Rank
-  Widget _buildVipCard(double progress, int userPoints, int pointsForReward) {
+  Widget _buildVipCard(double progress, int userPoints, int pointsForReward, String vipTierName, Color vipColor, int lifetimePoints, RewardConfig config) {
     return _buildCardBase(
+      vipColor: vipColor,
       children: [
         const Icon(Icons.stars_rounded, color: Colors.white, size: 64),
         const SizedBox(height: 16),
-        Text(widget.vipTierName, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+        Text(vipTierName, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        Text('total_points_earned'.tr(context) + ': ${widget.lifetimePoints}', style: const TextStyle(color: Colors.white70, fontSize: 16)),
+        Text('total_points_earned'.tr(context) + ': $lifetimePoints', style: const TextStyle(color: Colors.white70, fontSize: 16)),
         const Spacer(),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -231,7 +253,7 @@ class _LoyaltyCardsCarouselState extends State<LoyaltyCardsCarousel> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('total_spent'.tr(context), style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                  Text('${(widget.lifetimePoints * widget.config.spendingPerPoint).toStringAsFixed(0)} DA', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                  Text('${(lifetimePoints * config.spendingPerPoint).toStringAsFixed(0)} DA', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
                 ],
               ),
             ],

@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/product.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/app_translations.dart';
+import '../../providers/client_providers.dart';
+import '../../providers/admin_providers.dart';
 import '../../providers/admin_providers.dart';
 import 'product_details_screen.dart'; // We'll create this next
 
@@ -165,6 +167,7 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
 
   Widget _buildProductCard(Product product) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final favoriteIds = ref.watch(favoriteProductsProvider);
     return GestureDetector(
       onTap: () {
         if (product.isAvailable) {
