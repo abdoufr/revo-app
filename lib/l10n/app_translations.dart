@@ -37,6 +37,11 @@ class AppTranslations {
       'remaining_for_reward': 'Restants pour cadeau',
       'total_points_earned': 'Points gagnés (à vie)',
       'scan_vip': 'Scannez pour gagner plus!',
+      'total_spent': 'Total dépensé',
+      'search_menu': 'Rechercher dans le menu...',
+      'all_categories': 'Tout',
+      'category': 'Catégorie',
+      'category_hint': 'Ex: Burgers, Boissons...',
     },
     'en': {
       'hello': 'Hello',
@@ -73,6 +78,11 @@ class AppTranslations {
       'remaining_for_reward': 'Remaining for reward',
       'total_points_earned': 'Total points earned',
       'scan_vip': 'Scan to earn more!',
+      'total_spent': 'Total spent',
+      'search_menu': 'Search menu...',
+      'all_categories': 'All',
+      'category': 'Category',
+      'category_hint': 'E.g., Burgers, Drinks...',
     },
     'ar': {
       'hello': 'مرحباً',
@@ -109,6 +119,11 @@ class AppTranslations {
       'remaining_for_reward': 'متبقي للحصول على الهدية',
       'total_points_earned': 'مجموع النقاط المكتسبة',
       'scan_vip': 'امسح الرمز لكسب المزيد!',
+      'total_spent': 'إجمالي الإنفاق',
+      'search_menu': 'البحث في القائمة...',
+      'all_categories': 'الكل',
+      'category': 'الفئة',
+      'category_hint': 'مثل: برجر، مشروبات...',
     },
   };
 

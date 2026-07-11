@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
 import '../../models/product.dart';
+import '../../l10n/app_translations.dart';
 
 class AdminMenuScreen extends ConsumerWidget {
   const AdminMenuScreen({super.key});
@@ -77,6 +78,7 @@ class AdminMenuScreen extends ConsumerWidget {
     final nameController = TextEditingController(text: product?.name ?? '');
     final descController = TextEditingController(text: product?.description ?? '');
     final priceController = TextEditingController(text: product?.price.toString() ?? '');
+    final categoryController = TextEditingController(text: product?.category ?? '');
     String? base64Image = product?.imageUrl;
 
     showDialog(
@@ -157,6 +159,12 @@ class AdminMenuScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.bodyLarge,
                       decoration: const InputDecoration(hintText: 'Prix (DA)'),
                     ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: categoryController,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      decoration: InputDecoration(hintText: 'category_hint'.tr(context)),
+                    ),
                   ],
                 ),
               ),
@@ -172,7 +180,7 @@ class AdminMenuScreen extends ConsumerWidget {
                       name: nameController.text,
                       description: descController.text,
                       price: double.tryParse(priceController.text) ?? 0.0,
-                      category: 'General',
+                      category: categoryController.text.isEmpty ? 'General' : categoryController.text.trim(),
                       imageUrl: base64Image,
                     );
                     

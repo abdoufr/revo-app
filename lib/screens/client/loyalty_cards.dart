@@ -226,9 +226,16 @@ class _LoyaltyCardsCarouselState extends State<LoyaltyCardsCarousel> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.qr_code_scanner_rounded, color: Colors.white),
+              const Icon(Icons.account_balance_wallet_rounded, color: Colors.white),
               const SizedBox(width: 12),
-              Text('scan_vip'.tr(context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('total_spent'.tr(context), style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                  Text('${(widget.lifetimePoints * widget.config.spendingPerPoint).toStringAsFixed(0)} DA', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                ],
+              ),
             ],
           ),
         ),

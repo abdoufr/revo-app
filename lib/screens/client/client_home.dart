@@ -11,6 +11,7 @@ import 'client_leaderboard_screen.dart';
 import 'client_settings_screen.dart';
 import '../../l10n/app_translations.dart';
 import 'loyalty_cards.dart';
+import 'client_menu_section.dart';
 import 'dart:convert';
 
 class ClientHome extends ConsumerWidget {
@@ -179,69 +180,7 @@ class ClientHome extends ConsumerWidget {
 
                     // Soft Menu List
                     productsAsync.when(
-                      data: (products) {
-                        if (products.isEmpty) {
-                          return Center(child: Text('empty_menu'.tr(context), style: Theme.of(context).textTheme.bodyMedium));
-                        }
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: products.length,
-                          itemBuilder: (context, index) {
-                            final product = products[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: SoftCard(
-                                padding: EdgeInsets.zero,
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.all(16),
-                                  leading: Container(
-                                    width: 60,
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.primaryOrange.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: product.imageUrl != null && product.imageUrl!.startsWith('data:image')
-                                        ? ClipRRect(
-                                            borderRadius: BorderRadius.circular(16),
-                                            child: Image.memory(
-                                              base64Decode(product.imageUrl!.split(',').last),
-                                              fit: BoxFit.cover,
-                                            ),
-                                          )
-                                        : const Icon(Icons.fastfood, color: AppTheme.primaryOrange),
-                                  ),
-                                  title: Text(
-                                    product.name,
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
-                                  ),
-                                  subtitle: Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Text(
-                                      product.description,
-                                      style: Theme.of(context).textTheme.bodyMedium,
-                                    ),
-                                  ),
-                                  trailing: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        '${product.price} DA',
-                                        style: const TextStyle(
-                                          color: AppTheme.primaryOrange,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
+                      data: (products) => ClientMenuSection(products: products),
                       loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
                       error: (err, stack) => const Text('Erreur chargement menu', style: TextStyle(color: AppTheme.error)),
                     ),
