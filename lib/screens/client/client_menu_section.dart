@@ -17,6 +17,7 @@ class ClientMenuSection extends ConsumerStatefulWidget {
 class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
   String _searchQuery = '';
   String _selectedCategory = 'All';
+  final Set<String> _favorites = {}; // To hold favorite product IDs
 
   @override
   Widget build(BuildContext context) {
@@ -64,15 +65,6 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
                       contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryRed,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(Icons.tune_rounded, color: Colors.white),
                 ),
               ],
             ),
@@ -227,26 +219,10 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
                     ),
                     const SizedBox(height: 8),
                     
-                    // Price & Add button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${product.price.toStringAsFixed(1)} DA',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                        ),
-                        if (product.isAvailable)
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primaryRed,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Icon(Icons.add, color: Colors.white, size: 16),
-                          )
-                        else
-                          const Text('Rupture', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
-                      ],
+                    // Price 
+                    Text(
+                      '${product.price.toStringAsFixed(1)} DA',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   ],
                 ),
@@ -256,7 +232,22 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
               Positioned(
                 top: 12,
                 right: 12,
-                child: Icon(Icons.favorite_border_rounded, color: isDark ? Colors.white54 : Colors.grey, size: 20),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (_favorites.contains(product.id)) {
+                        _favorites.remove(product.id);
+                      } else {
+                        _favorites.add(product.id);
+                      }
+                    });
+                  },
+                  child: Icon(
+                    _favorites.contains(product.id) ? Icons.favorite_rounded : Icons.favorite_border_rounded, 
+                    color: _favorites.contains(product.id) ? AppTheme.primaryRed : (isDark ? Colors.white54 : Colors.grey), 
+                    size: 20
+                  ),
+                ),
               ),
             ],
           ),

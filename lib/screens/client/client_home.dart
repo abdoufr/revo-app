@@ -65,7 +65,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                         IconButton(
                           icon: const Icon(Icons.notifications_none_rounded, size: 28),
                           onPressed: () {
-                            // Notifications handler (could show a bottom sheet with past announcements)
+                            _showNotificationsSheet(context, ref);
                           },
                         ),
                       ],
@@ -143,22 +143,6 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                     // Menu Section (Search, Categories, Grids)
                     const ClientMenuSection(),
                     
-                    const SizedBox(height: 32),
-                    
-                    // Mini Actions (History, Leaderboard, Wheel, Composer) - Kept as small pills or row
-                    Text('Plus d\'options', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
-                    const SizedBox(height: 16),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _buildMiniAction(context, icon: Icons.history, label: 'Historique', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientHistoryScreen()))),
-                          _buildMiniAction(context, icon: Icons.emoji_events, label: 'Classement', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientLeaderboardScreen()))),
-                          _buildMiniAction(context, icon: Icons.casino, label: 'Roue', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WheelOfFortuneScreen()))),
-                          _buildMiniAction(context, icon: Icons.restaurant, label: 'Composer', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComposerScreen()))),
-                        ],
-                      ),
-                    ),
                     const SizedBox(height: 100), // Padding for bottom nav bar
                   ],
                 ),
@@ -171,26 +155,89 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
     );
   }
 
-  Widget _buildMiniAction(BuildContext context, {required IconData icon, required String label, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: AppTheme.primaryRed, size: 20),
-            const SizedBox(width: 8),
-            Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          ],
-        ),
-      ),
+  void _showNotificationsSheet(BuildContext context, WidgetRef ref) {
+    final announcementsAsync = ref.read(announcementsProvider);
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              Container(width: 50, height: 5, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10))),
+              const SizedBox(height: 16),
+              Text('Notifications', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Expanded(
+                child: announcementsAsync.when(
+                  data: (announcements) {
+                    if (announcements.isEmpty) {
+                      return Center(child: Text('Aucune notification', style: Theme.of(context).textTheme.bodyMedium));
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(24),
+                      itemCount: announcements.length,
+                      itemBuilder: (context, index) {
+                        final ann = announcements[index];
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppTheme.primaryRed.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(color: AppTheme.primaryRed.withOpacity(0.1), shape: BoxShape.circle),
+                                child: const Icon(Icons.campaign, color: AppTheme.primaryRed),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(ann.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                    const SizedBox(height: 4),
+                                    Text(ann.message, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color)),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      _formatDate(ann.createdAt),
+                                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+                  error: (_, __) => const Center(child: Text('Erreur de chargement')),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year} à ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 
   Widget _buildBottomNavigationBar() {

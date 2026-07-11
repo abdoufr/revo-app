@@ -7,6 +7,9 @@ import '../../providers/client_providers.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/referral_provider.dart';
 import '../../l10n/app_translations.dart';
+import 'client_history_screen.dart';
+import 'wheel_of_fortune_screen.dart';
+import 'composer_screen.dart';
 
 class _ReferralSection extends ConsumerStatefulWidget {
   final String userId;
@@ -239,6 +242,41 @@ class ClientSettingsScreen extends ConsumerWidget {
                       Text('${'phone'.tr(context)} : ${user.phone}', style: Theme.of(context).textTheme.bodyMedium)
                     else
                       Text('${'phone'.tr(context)} : ${'not_provided'.tr(context)}', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey, fontStyle: FontStyle.italic)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              SoftCard(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.explore_rounded, color: AppTheme.primaryRed),
+                        const SizedBox(width: 12),
+                        Text('Plus d\'options', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      leading: const Icon(Icons.history_rounded, color: AppTheme.primaryRed),
+                      title: Text('history'.tr(context)),
+                      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientHistoryScreen())),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.casino_rounded, color: AppTheme.primaryRed),
+                      title: const Text('Roue de la Fortune'),
+                      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WheelOfFortuneScreen())),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.restaurant_rounded, color: AppTheme.primaryRed),
+                      title: const Text('Composer mon Plat'),
+                      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComposerScreen())),
+                    ),
                   ],
                 ),
               ),

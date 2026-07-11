@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/product.dart';
 import '../../theme/app_theme.dart';
-import 'product_reviews_sheet.dart'; // Just to re-use the review list if we want, or implement it here
+import '../../providers/reviews_provider.dart';
+import '../../providers/auth_providers.dart';
+import '../../providers/gamification_provider.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final Product product;
@@ -15,11 +18,14 @@ class ProductDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
-  int _quantity = 1;
-  bool _showDetails = true; // true = Details tab, false = Reviews tab
+  int _rating = 5;
+  final _commentController = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -146,71 +152,12 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                         
                         // Tab Content
                         Expanded(
-                          child: SingleChildScrollView(
-                            child: _showDetails 
-                                ? _buildDetailsContent() 
-                                : _buildReviewsContent(),
-                          ),
+                          child: _showDetails 
+                              ? SingleChildScrollView(child: _buildDetailsContent()) 
+                              : _buildReviewsContent(),
                         ),
                       ],
                     ),
-                  ),
-                ),
-                
-                // Bottom Bar
-                Container(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
-                  ),
-                  child: Row(
-                    children: [
-                      // Quantity Selector
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryRed,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () => setState(() { if (_quantity > 1) _quantity--; }),
-                              child: const Icon(Icons.remove, color: Colors.white, size: 20),
-                            ),
-                            const SizedBox(width: 16),
-                            Text('$_quantity', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-                            const SizedBox(width: 16),
-                            GestureDetector(
-                              onTap: () => setState(() => _quantity++),
-                              child: const Icon(Icons.add, color: Colors.white, size: 20),
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      const SizedBox(width: 24),
-                      
-                      // Add to Cart Button
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // TODO: Add to cart logic here
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${widget.product.name} ajouté au panier !'), backgroundColor: AppTheme.success),
-                            );
-                            Navigator.pop(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primaryRed,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          ),
-                          child: const Text('Add to Cart', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ],
@@ -263,21 +210,220 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   }
 
   Widget _buildReviewsContent() {
+    final reviewsAsync = ref.watch(productReviewsProvider(widget.product.id));
+    
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ElevatedButton.icon(
-          onPressed: () {
-            // Show old review bottom sheet
-            showProductReviews(context, widget.product);
-          },
-          icon: const Icon(Icons.star, color: Colors.white),
-          label: const Text('Ouvrir les avis complets', style: TextStyle(color: Colors.white)),
-          style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+        // Add review button
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => _showAddReviewDialog(context),
+            icon: const Icon(Icons.rate_review_rounded, color: Colors.white),
+            label: const Text('Laisser un avis', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryRed,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
         ),
         const SizedBox(height: 16),
-        Text('Les avis sont gérés dans l\'onglet dédié.', style: Theme.of(context).textTheme.bodyMedium),
+        
+        // Reviews list
+        Expanded(
+          child: reviewsAsync.when(
+            data: (reviews) {
+              if (reviews.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.speaker_notes_off_rounded, size: 60, color: Colors.grey.withOpacity(0.5)),
+                      const SizedBox(height: 16),
+                      Text('Aucun avis pour le moment.\nSoyez le premier !', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.withOpacity(0.8))),
+                    ],
+                  ),
+                );
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.only(bottom: 24),
+                itemCount: reviews.length,
+                itemBuilder: (context, index) {
+                  final review = reviews[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: AppTheme.primaryRed.withOpacity(0.1),
+                                  child: Text(
+                                    review.userName.isNotEmpty ? review.userName[0].toUpperCase() : 'U',
+                                    style: const TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(review.userName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            RatingBarIndicator(
+                              rating: review.rating.toDouble(),
+                              itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+                              itemCount: 5,
+                              itemSize: 16.0,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(review.comment, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4)),
+                        if (review.restaurantReply != null && review.restaurantReply!.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryRed.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppTheme.primaryRed.withOpacity(0.2)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Row(
+                                  children: [
+                                    Icon(Icons.storefront_rounded, size: 16, color: AppTheme.primaryRed),
+                                    SizedBox(width: 8),
+                                    Text('Réponse du restaurant', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryRed, fontSize: 12)),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(review.restaurantReply!, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+            error: (e, s) => const Center(child: Text('Erreur de chargement des avis.')),
+          ),
+        ),
       ],
+    );
+  }
+
+  void _showAddReviewDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Donnez votre avis', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 24),
+                    RatingBar.builder(
+                      initialRating: _rating.toDouble(),
+                      minRating: 1,
+                      direction: Axis.horizontal,
+                      allowHalfRating: false,
+                      itemCount: 5,
+                      itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+                      onRatingUpdate: (rating) => setStateDialog(() => _rating = rating.toInt()),
+                    ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: _commentController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: 'Qu\'avez-vous pensé de ce plat ?',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Annuler', style: TextStyle(color: Colors.grey)),
+                          ),
+                        ),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              if (_commentController.text.trim().isEmpty) return;
+                              
+                              final authUser = ref.read(authStateProvider).value;
+                              final clientUser = ref.read(clientUserProvider).value;
+                              
+                              if (authUser == null || clientUser == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez vous connecter.')));
+                                return;
+                              }
+
+                              try {
+                                await ref.read(reviewActionsProvider).submitReview(
+                                  productId: widget.product.id,
+                                  userId: authUser.uid,
+                                  userName: clientUser.name,
+                                  rating: _rating,
+                                  comment: _commentController.text.trim(),
+                                );
+                                
+                                // Gain points
+                                await ref.read(gamificationProvider.notifier).awardPointsForAction('leave_review', context: context);
+                                
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                  _commentController.clear();
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Merci pour votre avis !', style: TextStyle(color: Colors.white)), backgroundColor: AppTheme.success));
+                                }
+                              } catch (e) {
+                                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error));
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryRed,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                            child: const Text('Envoyer', style: TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+        );
+      },
     );
   }
 }
