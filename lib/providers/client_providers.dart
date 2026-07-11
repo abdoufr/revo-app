@@ -64,3 +64,5 @@ class ClientActions {
 }
 
 final clientActionsProvider = Provider((ref) => ClientActions());
+
+final favoriteProductsProvider = StateProvider<Set<String>>((ref) => {});

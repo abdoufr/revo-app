@@ -9,6 +9,7 @@ import '../../providers/settings_provider.dart';
 import '../../providers/story_provider.dart';
 import '../../providers/notification_provider.dart';
 import 'client_settings_screen.dart';
+import 'plus_options_screen.dart';
 import 'client_menu_section.dart';
 import 'story_viewer_screen.dart';
 import 'client_history_screen.dart';
@@ -141,7 +142,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                     ),
 
                     // Menu Section (Search, Categories, Grids)
-                    const ClientMenuSection(),
+                    ClientMenuSection(showFavoritesOnly: _selectedIndex == 1),
                     
                     const SizedBox(height: 100), // Padding for bottom nav bar
                   ],
@@ -155,9 +156,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
     );
   }
 
-  void _showNotificationsSheet(BuildContext context, WidgetRef ref) {
-    final announcementsAsync = ref.read(announcementsProvider);
-    
+  void _showNotificationsSheet(BuildContext context, WidgetRef initialRef) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -177,8 +176,11 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
               Text('Notifications', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               Expanded(
-                child: announcementsAsync.when(
-                  data: (announcements) {
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final announcementsAsync = ref.watch(announcementsProvider);
+                    return announcementsAsync.when(
+                      data: (announcements) {
                     if (announcements.isEmpty) {
                       return Center(child: Text('Aucune notification', style: Theme.of(context).textTheme.bodyMedium));
                     }
@@ -225,8 +227,10 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                       },
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
-                  error: (_, __) => const Center(child: Text('Erreur de chargement')),
+                      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+                      error: (err, stack) => Center(child: Text('Erreur de chargement: $err')),
+                    );
+                  }
                 ),
               ),
             ],
@@ -252,12 +256,11 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavItem(0, Icons.home_filled),
           _buildNavItem(1, Icons.favorite_border_rounded),
-          _buildNavItem(2, Icons.shopping_cart_outlined),
-          _buildNavItem(3, Icons.person_outline_rounded),
+          _buildNavItem(2, Icons.explore_rounded),
         ],
       ),
     );
@@ -267,9 +270,10 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
     final isSelected = _selectedIndex == index;
     return GestureDetector(
       onTap: () {
-        setState(() => _selectedIndex = index);
-        if (index == 3) {
-           Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientSettingsScreen()));
+        if (index == 2) {
+           Navigator.push(context, MaterialPageRoute(builder: (_) => const PlusOptionsScreen()));
+        } else {
+           setState(() => _selectedIndex = index);
         }
       },
       child: AnimatedContainer(

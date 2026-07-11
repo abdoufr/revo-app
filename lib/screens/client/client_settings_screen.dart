@@ -246,41 +246,6 @@ class ClientSettingsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              SoftCard(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.explore_rounded, color: AppTheme.primaryRed),
-                        const SizedBox(width: 12),
-                        Text('Plus d\'options', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ListTile(
-                      leading: const Icon(Icons.history_rounded, color: AppTheme.primaryRed),
-                      title: Text('history'.tr(context)),
-                      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientHistoryScreen())),
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.casino_rounded, color: AppTheme.primaryRed),
-                      title: const Text('Roue de la Fortune'),
-                      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WheelOfFortuneScreen())),
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.restaurant_rounded, color: AppTheme.primaryRed),
-                      title: const Text('Composer mon Plat'),
-                      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComposerScreen())),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
               _ReferralSection(userId: user.id),
               const SizedBox(height: 24),
               SoftCard(

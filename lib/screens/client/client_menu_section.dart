@@ -8,7 +8,9 @@ import '../../providers/admin_providers.dart';
 import 'product_details_screen.dart'; // We'll create this next
 
 class ClientMenuSection extends ConsumerStatefulWidget {
-  const ClientMenuSection({super.key});
+  final bool showFavoritesOnly;
+  
+  const ClientMenuSection({super.key, this.showFavoritesOnly = false});
 
   @override
   ConsumerState<ClientMenuSection> createState() => _ClientMenuSectionState();
@@ -17,11 +19,11 @@ class ClientMenuSection extends ConsumerStatefulWidget {
 class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
   String _searchQuery = '';
   String _selectedCategory = 'All';
-  final Set<String> _favorites = {}; // To hold favorite product IDs
 
   @override
   Widget build(BuildContext context) {
     final productsAsync = ref.watch(productsStreamProvider);
+    final favoriteIds = ref.watch(favoriteProductsProvider);
 
     return productsAsync.when(
       data: (products) {
@@ -35,10 +37,11 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
 
         // 2. Filter products
         final filteredProducts = products.where((p) {
-          final matchesSearch = p.name.toLowerCase().contains(_searchQuery.toLowerCase()) || 
+          bool matchesSearch = p.name.toLowerCase().contains(_searchQuery.toLowerCase()) || 
                                 p.description.toLowerCase().contains(_searchQuery.toLowerCase());
-          final matchesCategory = _selectedCategory == 'All' || p.category == _selectedCategory;
-          return matchesSearch && matchesCategory;
+          bool matchesCategory = _selectedCategory == 'All' || p.category == _selectedCategory;
+          bool matchesFavorites = !widget.showFavoritesOnly || favoriteIds.contains(p.id);
+          return matchesSearch && matchesCategory && matchesFavorites;
         }).toList();
 
         final popularProducts = filteredProducts.take(4).toList(); // Just a sample for "Popular"
@@ -234,17 +237,16 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
                 right: 12,
                 child: GestureDetector(
                   onTap: () {
-                    setState(() {
-                      if (_favorites.contains(product.id)) {
-                        _favorites.remove(product.id);
-                      } else {
-                        _favorites.add(product.id);
-                      }
-                    });
+                    final currentFavs = ref.read(favoriteProductsProvider);
+                    if (currentFavs.contains(product.id)) {
+                      ref.read(favoriteProductsProvider.notifier).state = {...currentFavs}..remove(product.id);
+                    } else {
+                      ref.read(favoriteProductsProvider.notifier).state = {...currentFavs}..add(product.id);
+                    }
                   },
                   child: Icon(
-                    _favorites.contains(product.id) ? Icons.favorite_rounded : Icons.favorite_border_rounded, 
-                    color: _favorites.contains(product.id) ? AppTheme.primaryRed : (isDark ? Colors.white54 : Colors.grey), 
+                    favoriteIds.contains(product.id) ? Icons.favorite_rounded : Icons.favorite_border_rounded, 
+                    color: favoriteIds.contains(product.id) ? AppTheme.primaryRed : (isDark ? Colors.white54 : Colors.grey), 
                     size: 20
                   ),
                 ),
