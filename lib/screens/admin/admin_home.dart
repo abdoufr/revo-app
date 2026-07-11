@@ -14,6 +14,7 @@ import 'admin_wheel_config_screen.dart';
 import 'admin_rewards_catalog_screen.dart';
 import 'admin_referral_config_screen.dart';
 import 'admin_analytics_screen.dart';
+import 'admin_ingredients_screen.dart';
 import '../../providers/notification_provider.dart';
 
 class AdminHome extends ConsumerWidget {
@@ -221,6 +222,16 @@ class AdminHome extends ConsumerWidget {
                       icon: Icons.people_alt_rounded,
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminUsersScreen()));
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Ingrédients & Compositions',
+                      subtitle: 'Gérer les ingrédients par catégorie',
+                      icon: Icons.restaurant_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminIngredientsScreen()));
                       },
                     ),
                     const SizedBox(height: 16),

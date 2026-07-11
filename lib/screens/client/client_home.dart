@@ -14,6 +14,7 @@ import 'loyalty_cards.dart';
 import 'client_menu_section.dart';
 import 'story_viewer_screen.dart';
 import 'wheel_of_fortune_screen.dart';
+import 'composer_screen.dart';
 import '../../providers/story_provider.dart';
 import '../../providers/notification_provider.dart';
 import 'dart:convert';
@@ -267,7 +268,14 @@ class ClientHome extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        const Expanded(child: SizedBox()), // Placeholder for rewards catalog
+                        Expanded(
+                          child: _buildActionCard(
+                            context,
+                            icon: Icons.tune_rounded,
+                            title: 'Composer mon Plat',
+                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComposerScreen())),
+                          ),
+                        ),
                       ],
                     ),
 
