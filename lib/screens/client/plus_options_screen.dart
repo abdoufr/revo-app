@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/client_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/app_translations.dart';
 import 'loyalty_cards.dart';
@@ -14,6 +15,8 @@ class PlusOptionsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(clientUserProvider);
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Plus d\'options', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -27,9 +30,13 @@ class PlusOptionsScreen extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          const SizedBox(
+          SizedBox(
             height: 220,
-            child: LoyaltyCardsCarousel(),
+            child: userAsync.when(
+              data: (user) => user == null ? const SizedBox() : LoyaltyCardsCarousel(user: user),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => const SizedBox(),
+            ),
           ),
           const SizedBox(height: 32),
           

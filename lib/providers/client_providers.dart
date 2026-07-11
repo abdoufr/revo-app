@@ -64,5 +64,21 @@ class ClientActions {
 }
 
 final clientActionsProvider = Provider((ref) => ClientActions());
+class FavoriteProductsNotifier extends Notifier<Set<String>> {
+  @override
+  Set<String> build() => <String>{};
 
-final favoriteProductsProvider = StateProvider<Set<String>>((ref) => {});
+  void toggle(String productId) {
+    final newState = Set<String>.from(state);
+    if (newState.contains(productId)) {
+      newState.remove(productId);
+    } else {
+      newState.add(productId);
+    }
+    state = newState;
+  }
+}
+
+final favoriteProductsProvider = NotifierProvider<FavoriteProductsNotifier, Set<String>>(() {
+  return FavoriteProductsNotifier();
+});

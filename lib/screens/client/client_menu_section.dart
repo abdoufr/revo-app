@@ -237,12 +237,7 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
                 right: 12,
                 child: GestureDetector(
                   onTap: () {
-                    final currentFavs = ref.read(favoriteProductsProvider);
-                    if (currentFavs.contains(product.id)) {
-                      ref.read(favoriteProductsProvider.notifier).state = {...currentFavs}..remove(product.id);
-                    } else {
-                      ref.read(favoriteProductsProvider.notifier).state = {...currentFavs}..add(product.id);
-                    }
+                    ref.read(favoriteProductsProvider.notifier).toggle(product.id);
                   },
                   child: Icon(
                     favoriteIds.contains(product.id) ? Icons.favorite_rounded : Icons.favorite_border_rounded, 
