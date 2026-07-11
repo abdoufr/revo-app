@@ -84,8 +84,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                 Hero(
                   tag: 'product_image_${widget.product.id}',
                   child: Container(
-                    height: 250,
-                    width: 250,
+                    height: 180,
+                    width: 180,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       boxShadow: [
@@ -101,7 +101,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   ),
                 ),
                 
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 
                 // Content Section
                 Expanded(
@@ -141,7 +141,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
                         
                         // Tabs (Details / Reviews)
                         Row(
@@ -152,7 +152,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                           ],
                         ),
                         
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
                         
                         // Tab Content
                         Expanded(

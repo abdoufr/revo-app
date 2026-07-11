@@ -31,7 +31,7 @@ class PlusOptionsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 220,
+            height: 420,
             child: userAsync.when(
               data: (user) => user == null ? const SizedBox() : LoyaltyCardsCarousel(user: user),
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -58,13 +58,7 @@ class PlusOptionsScreen extends ConsumerWidget {
                   title: 'Roue de la Fortune',
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WheelOfFortuneScreen())),
                 ),
-                const Divider(height: 1, indent: 56),
-                _buildOptionTile(
-                  context,
-                  icon: Icons.restaurant_rounded,
-                  title: 'Composer mon Plat',
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComposerScreen())),
-                ),
+
                 const Divider(height: 1, indent: 56),
                 _buildOptionTile(
                   context,

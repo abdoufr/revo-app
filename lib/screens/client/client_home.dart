@@ -12,6 +12,7 @@ import 'client_settings_screen.dart';
 import 'plus_options_screen.dart';
 import 'client_menu_section.dart';
 import 'story_viewer_screen.dart';
+import 'composer_screen.dart';
 import 'client_history_screen.dart';
 import 'client_leaderboard_screen.dart';
 import 'wheel_of_fortune_screen.dart';
@@ -139,6 +140,50 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                       },
                       loading: () => const SizedBox(),
                       error: (err, stack) => const SizedBox(),
+                    ),
+
+                    // Composer mon Plat Banner
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComposerScreen())),
+                      child: Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 24),
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppTheme.primaryRed, Color(0xFFC00000)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(color: AppTheme.primaryRed.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8)),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Composer mon plat', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 8),
+                                  const Text('Créez le plat de vos rêves avec vos ingrédients préférés.', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.restaurant_rounded, color: Colors.white, size: 32),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
 
                     // Menu Section (Search, Categories, Grids)
