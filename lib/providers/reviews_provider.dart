@@ -50,10 +50,12 @@ final productReviewsProvider = StreamProvider.family<List<Review>, String>((ref,
   return FirebaseFirestore.instance
       .collection('reviews')
       .where('product_id', isEqualTo: productId)
-      .orderBy('created_at', descending: true)
       .snapshots()
       .map((snapshot) {
-    return snapshot.docs.map((doc) => Review.fromMap(doc.data(), doc.id)).toList();
+    final reviews = snapshot.docs.map((doc) => Review.fromMap(doc.data(), doc.id)).toList();
+    // Tri côté client pour éviter l'index composite Firestore
+    reviews.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return reviews;
   });
 });
 
