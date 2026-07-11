@@ -123,12 +123,6 @@ class _ClientMenuSectionState extends State<ClientMenuSection> {
               final product = filteredProducts[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: SoftCard(
-                  padding: EdgeInsets.zero,
-                  child: ListTile(
-                    onTap: () => showProductReviews(context, product),
-                    contentPadding: const EdgeInsets.all(16),
-                    leading: Container(
                 child: Opacity(
                   opacity: product.isAvailable ? 1.0 : 0.6,
                   child: SoftCard(
