@@ -4,6 +4,7 @@ class Product {
   final String description;
   final double price;
   final String category;
+  final bool isAvailable;
   final String? imageUrl; // Base64 or URL
 
   Product({
@@ -12,6 +13,7 @@ class Product {
     required this.description,
     required this.price,
     required this.category,
+    this.isAvailable = true,
     this.imageUrl,
   });
 
@@ -22,6 +24,7 @@ class Product {
       description: data['description'] ?? '',
       price: (data['price'] ?? 0.0).toDouble(),
       category: data['category'] ?? '',
+      isAvailable: data['is_available'] ?? true,
       imageUrl: data['imageUrl'],
     );
   }
@@ -32,6 +35,7 @@ class Product {
       'description': description,
       'price': price,
       'category': category,
+      'is_available': isAvailable,
       if (imageUrl != null) 'imageUrl': imageUrl,
     };
   }

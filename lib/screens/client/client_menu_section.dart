@@ -129,45 +129,75 @@ class _ClientMenuSectionState extends State<ClientMenuSection> {
                     onTap: () => showProductReviews(context, product),
                     contentPadding: const EdgeInsets.all(16),
                     leading: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryOrange.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16),
+                child: Opacity(
+                  opacity: product.isAvailable ? 1.0 : 0.6,
+                  child: SoftCard(
+                    padding: EdgeInsets.zero,
+                    child: ListTile(
+                      onTap: () => showProductReviews(context, product),
+                      contentPadding: const EdgeInsets.all(16),
+                      leading: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryOrange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: product.imageUrl != null && product.imageUrl!.startsWith('data:image')
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.memory(
+                                  base64Decode(product.imageUrl!.split(',').last),
+                                  fit: BoxFit.cover,
+                                  color: product.isAvailable ? null : Colors.black.withOpacity(0.5),
+                                  colorBlendMode: product.isAvailable ? null : BlendMode.darken,
+                                ),
+                              )
+                            : Icon(Icons.fastfood, color: product.isAvailable ? AppTheme.primaryOrange : Colors.grey),
                       ),
-                      child: product.imageUrl != null && product.imageUrl!.startsWith('data:image')
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Image.memory(
-                                base64Decode(product.imageUrl!.split(',').last),
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : const Icon(Icons.fastfood, color: AppTheme.primaryOrange),
-                    ),
-                    title: Text(
-                      product.name,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(
-                        product.description,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                      title: Text(
+                        product.name,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: product.isAvailable ? null : Colors.grey,
+                        ),
                       ),
-                    ),
-                    trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${product.price} DA',
-                          style: const TextStyle(
-                            color: AppTheme.primaryOrange,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          product.description,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: product.isAvailable ? null : Colors.grey.withOpacity(0.5),
                           ),
                         ),
-                      ],
+                      ),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (!product.isAvailable)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                'Indisponible',
+                                style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                            )
+                          else
+                            Text(
+                              '${product.price} DA',
+                              style: const TextStyle(
+                                color: AppTheme.primaryOrange,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -60,6 +60,10 @@ class AdminActions {
     await _firestore.collection('products').doc(id).delete();
   }
 
+  Future<void> toggleProductAvailability(String id, bool isAvailable) async {
+    await _firestore.collection('products').doc(id).update({'is_available': isAvailable});
+  }
+
   Future<void> updateRewardConfig(RewardConfig config) async {
     await _firestore.collection('config').doc('rewards').set(config.toMap());
   }

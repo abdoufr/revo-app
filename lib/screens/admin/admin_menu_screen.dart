@@ -50,6 +50,13 @@ class AdminMenuScreen extends ConsumerWidget {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        Switch(
+                          value: product.isAvailable,
+                          activeColor: AppTheme.primaryOrange,
+                          onChanged: (val) {
+                            ref.read(adminActionsProvider).toggleProductAvailability(product.id, val);
+                          },
+                        ),
                         IconButton(
                           icon: Icon(Icons.edit, color: Theme.of(context).iconTheme.color),
                           onPressed: () {
@@ -208,6 +215,7 @@ class AdminMenuScreen extends ConsumerWidget {
                       description: descController.text,
                       price: double.tryParse(priceController.text) ?? 0.0,
                       category: selectedCategory,
+                      isAvailable: product?.isAvailable ?? true,
                       imageUrl: base64Image,
                     );
                     
