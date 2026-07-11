@@ -48,3 +48,19 @@ final clientUserProvider = StreamProvider<ClientUser?>((ref) {
     return ClientUser.fromMap(doc.data()!, doc.id);
   });
 });
+
+class ClientActions {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> deductPoints(String userId, int points) async {
+    await _firestore.runTransaction((tx) async {
+      final ref = _firestore.collection('users').doc(userId);
+      final snap = await tx.get(ref);
+      final data = snap.data() as Map<String, dynamic>?;
+      final current = (data?['loyalty_points'] ?? 0) as int;
+      tx.update(ref, {'loyalty_points': (current - points).clamp(0, 999999)});
+    });
+  }
+}
+
+final clientActionsProvider = Provider((ref) => ClientActions());

@@ -6,6 +6,7 @@ import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/gamification_provider.dart';
 import '../../providers/client_providers.dart';
+import '../../providers/auth_providers.dart';
 
 class WheelOfFortuneScreen extends ConsumerStatefulWidget {
   const WheelOfFortuneScreen({super.key});
@@ -36,7 +37,10 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
     setState(() => _isSpinning = true);
 
     // Deduct points
-    await ref.read(clientUserProvider.notifier).claimReward(config.wheelCost);
+    final authUser = ref.read(authStateProvider).value;
+    if (authUser != null) {
+      await ref.read(clientActionsProvider).deductPoints(authUser.uid, config.wheelCost);
+    }
 
     // Random prize
     final randomIndex = Random().nextInt(config.wheelPrizes.length);

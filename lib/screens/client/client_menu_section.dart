@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../models/product.dart';
-import '../../models/product.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/app_translations.dart';
 import 'product_reviews_sheet.dart';

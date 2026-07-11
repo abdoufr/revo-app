@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/reward_catalog_provider.dart';
 import '../../providers/client_providers.dart';
+import '../../providers/auth_providers.dart';
 
 class RewardsCatalogScreen extends ConsumerWidget {
   const RewardsCatalogScreen({super.key});
@@ -27,7 +28,10 @@ class RewardsCatalogScreen extends ConsumerWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              await ref.read(clientUserProvider.notifier).claimReward(item.pointsCost);
+              final authUser = ref.read(authStateProvider).value;
+              if (authUser != null) {
+                await ref.read(clientActionsProvider).deductPoints(authUser.uid, item.pointsCost);
+              }
               if (context.mounted) {
                 showDialog(
                   context: context,

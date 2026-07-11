@@ -99,12 +99,15 @@ class ReferralActions {
       final freshUserDoc = await transaction.get(userDocRef);
       final freshReferrerDoc = await transaction.get(referrerDoc!.reference);
 
-      if (freshUserDoc.data()?['referred_by'] != null) {
+      final freshUserData = freshUserDoc.data() as Map<String, dynamic>?;
+      final freshReferrerData = freshReferrerDoc.data() as Map<String, dynamic>?;
+
+      if (freshUserData?['referred_by'] != null) {
         throw Exception("Vous avez déjà été parrainé.");
       }
 
-      final currentUserPoints = freshUserDoc.data()?['loyalty_points'] ?? 0;
-      final currentReferrerPoints = freshReferrerDoc.data()?['loyalty_points'] ?? 0;
+      final currentUserPoints = (freshUserData?['loyalty_points'] ?? 0) as int;
+      final currentReferrerPoints = (freshReferrerData?['loyalty_points'] ?? 0) as int;
 
       transaction.update(userDocRef, {
         'loyalty_points': currentUserPoints + pointsReferred,
