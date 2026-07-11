@@ -4,6 +4,7 @@ import '../../theme/app_theme.dart';
 import '../../models/reward.dart';
 import '../../providers/client_providers.dart'; // for ClientUser
 import '../../l10n/app_translations.dart';
+import 'rewards_catalog_screen.dart';
 
 class LoyaltyCardsCarousel extends StatefulWidget {
   final ClientUser user;
@@ -186,23 +187,20 @@ class _LoyaltyCardsCarouselState extends State<LoyaltyCardsCarousel> {
           ),
         ),
         const Spacer(),
-        if (userPoints >= pointsForReward)
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-            child: Row(
-              children: [
-                const Icon(Icons.card_giftcard, color: AppTheme.primaryOrange),
-                const SizedBox(width: 8),
-                Expanded(child: Text('unlocked_gift'.tr(context) + '\n${widget.config.rewardDescription}', style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold))),
-              ],
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RewardsCatalogScreen())),
+            icon: const Icon(Icons.storefront_rounded),
+            label: const Text('Boutique de Cadeaux', style: TextStyle(fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: widget.vipColor,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
-          )
-        else
-          Text(
-            'points_to_go'.tr(context, (pointsForReward - userPoints).toString()),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
           ),
+        ),
       ],
     );
   }

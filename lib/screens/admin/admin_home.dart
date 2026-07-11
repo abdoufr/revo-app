@@ -9,9 +9,64 @@ import 'admin_rewards_screen.dart';
 import 'admin_settings_screen.dart';
 import 'admin_approvals_screen.dart';
 import 'admin_users_screen.dart';
+import 'admin_stories_screen.dart';
+import 'admin_wheel_config_screen.dart';
+import 'admin_rewards_catalog_screen.dart';
+import 'admin_referral_config_screen.dart';
+import 'admin_analytics_screen.dart';
+import '../../providers/notification_provider.dart';
 
 class AdminHome extends ConsumerWidget {
   const AdminHome({super.key});
+
+  void _showSendNotificationDialog(BuildContext context, WidgetRef ref) {
+    final titleController = TextEditingController();
+    final messageController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          title: Text('Envoyer une Notification', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Titre de la notification', hintText: 'ex: Promo ce soir !'),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: messageController,
+                decoration: const InputDecoration(labelText: 'Message', hintText: 'Texte complet de la notification'),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Annuler', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (titleController.text.isNotEmpty && messageController.text.isNotEmpty) {
+                  ref.read(notificationActionsProvider).sendNotification(titleController.text.trim(), messageController.text.trim());
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Notification envoyée avec succès !'), backgroundColor: AppTheme.success),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryOrange),
+              child: const Text('Envoyer', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,34 +106,37 @@ class AdminHome extends ConsumerWidget {
                     const SizedBox(height: 24),
                     
                     // Real Analytics
-                    analyticsAsync.when(
-                      data: (stats) {
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: _buildTrendyStatCard(
-                                context, 
-                                title: 'Clients', 
-                                value: '${stats['totalClients']}', 
-                                icon: Icons.people_outline,
-                                isPrimary: true,
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminAnalyticsScreen())),
+                      child: analyticsAsync.when(
+                        data: (stats) {
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: _buildTrendyStatCard(
+                                  context, 
+                                  title: 'Clients', 
+                                  value: '${stats['totalClients']}', 
+                                  icon: Icons.people_outline,
+                                  isPrimary: true,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _buildTrendyStatCard(
-                                context, 
-                                title: 'Points donnés', 
-                                value: '${stats['totalPoints']}', 
-                                icon: Icons.auto_awesome,
-                                isPrimary: false,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _buildTrendyStatCard(
+                                  context, 
+                                  title: 'Points donnés', 
+                                  value: '${stats['totalPoints']}', 
+                                  icon: Icons.auto_awesome,
+                                  isPrimary: false,
+                                ),
                               ),
-                            ),
-                          ],
-                        );
-                      },
-                      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
-                      error: (err, stack) => Text('Erreur: $err', style: const TextStyle(color: AppTheme.error)),
+                            ],
+                          );
+                        },
+                        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+                        error: (err, stack) => Text('Erreur: $err', style: const TextStyle(color: AppTheme.error)),
+                      ),
                     ),
                     const SizedBox(height: 48),
 
@@ -88,6 +146,54 @@ class AdminHome extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
                     
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Actualités & Stories',
+                      subtitle: 'Partager des nouveautés aux clients',
+                      icon: Icons.amp_stories_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminStoriesScreen()));
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Notifications Push',
+                      subtitle: 'Envoyer une alerte à tous les clients',
+                      icon: Icons.notifications_active_rounded,
+                      onTap: () => _showSendNotificationDialog(context, ref),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'La Roue de la Fortune',
+                      subtitle: 'Gérer les lots et le coût',
+                      icon: Icons.casino_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminWheelConfigScreen()));
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Boutique de Cadeaux',
+                      subtitle: 'Gérer la liste des récompenses',
+                      icon: Icons.storefront_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminRewardsCatalogScreen()));
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Système de Parrainage',
+                      subtitle: 'Configurer les points bonus',
+                      icon: Icons.handshake_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminReferralConfigScreen()));
+                      },
+                    ),
+                    const SizedBox(height: 16),
                     _buildTrendyActionCard(
                       context,
                       title: 'Scanner un QR',

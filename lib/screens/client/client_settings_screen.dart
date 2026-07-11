@@ -5,7 +5,102 @@ import '../../theme/app_theme.dart';
 import '../../providers/auth_providers.dart';
 import '../../providers/client_providers.dart';
 import '../../providers/theme_provider.dart';
+import '../../providers/referral_provider.dart';
 import '../../l10n/app_translations.dart';
+
+class _ReferralSection extends ConsumerStatefulWidget {
+  final String userId;
+  const _ReferralSection({required this.userId});
+
+  @override
+  ConsumerState<_ReferralSection> createState() => _ReferralSectionState();
+}
+
+class _ReferralSectionState extends ConsumerState<_ReferralSection> {
+  final _codeController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
+  void _applyCode() async {
+    final code = _codeController.text.trim();
+    if (code.isEmpty) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final msg = await ref.read(referralActionsProvider).applyReferralCode(code, ref);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: AppTheme.success));
+        _codeController.clear();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: AppTheme.error));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SoftCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.handshake_rounded, color: AppTheme.primaryOrange),
+              const SizedBox(width: 12),
+              Text('Parrainage', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text('Partagez ce code avec vos amis. S\'ils l\'utilisent, vous gagnez tous les deux des points bonus !', style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(color: AppTheme.primaryOrange.withOpacity(0.1), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.primaryOrange)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Mon Code :', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(widget.userId.substring(0, 6).toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryOrange, letterSpacing: 2)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text('J\'ai un code parrain :', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _codeController,
+                  decoration: const InputDecoration(hintText: 'Code à 6 lettres', isDense: true),
+                  textCapitalization: TextCapitalization.characters,
+                ),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _applyCode,
+                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryOrange),
+                child: _isLoading 
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text('Valider', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class ClientSettingsScreen extends ConsumerWidget {
   const ClientSettingsScreen({super.key});
@@ -147,6 +242,8 @@ class ClientSettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 24),
+              _ReferralSection(userId: user.id),
               const SizedBox(height: 24),
               SoftCard(
                 padding: const EdgeInsets.all(20),

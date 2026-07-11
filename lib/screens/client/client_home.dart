@@ -12,6 +12,10 @@ import 'client_settings_screen.dart';
 import '../../l10n/app_translations.dart';
 import 'loyalty_cards.dart';
 import 'client_menu_section.dart';
+import 'story_viewer_screen.dart';
+import 'wheel_of_fortune_screen.dart';
+import '../../providers/story_provider.dart';
+import '../../providers/notification_provider.dart';
 import 'dart:convert';
 
 class ClientHome extends ConsumerWidget {
@@ -35,10 +39,41 @@ class ClientHome extends ConsumerWidget {
     final rewardConfigAsync = ref.watch(rewardConfigProvider);
     final productsAsync = ref.watch(productsStreamProvider);
     final settingsAsync = ref.watch(appSettingsProvider);
+    final storiesAsync = ref.watch(storiesProvider);
     
     // Pre-loading pour un affichage instantané des nouvelles pages
     ref.watch(clientHistoryProvider);
     ref.watch(leaderboardProvider);
+
+    ref.listen(announcementsProvider, (previous, next) {
+      if (previous != null && previous.value != null && next.value != null) {
+        if (next.value!.isNotEmpty && (previous.value!.isEmpty || next.value!.first.id != previous.value!.first.id)) {
+          final newAnnouncement = next.value!.first;
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: Row(
+                children: [
+                  const Icon(Icons.notifications_active_rounded, color: AppTheme.primaryOrange),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(newAnnouncement.title, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color))),
+                ],
+              ),
+              content: Text(newAnnouncement.message, style: Theme.of(context).textTheme.bodyMedium),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryOrange),
+                  child: const Text('OK', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -90,6 +125,63 @@ class ClientHome extends ConsumerWidget {
                       }
                       return const SizedBox();
                     }).value ?? const SizedBox(),
+
+                    storiesAsync.when(
+                      data: (stories) {
+                        if (stories.isEmpty) return const SizedBox();
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              height: 100,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: stories.length,
+                                itemBuilder: (context, index) {
+                                  final story = stories[index];
+                                  return GestureDetector(
+                                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => StoryViewerScreen(stories: stories, initialIndex: index))),
+                                    child: Container(
+                                      margin: const EdgeInsets.only(right: 16),
+                                      width: 80,
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            height: 70,
+                                            width: 70,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(color: AppTheme.primaryOrange, width: 3),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(35),
+                                              child: story.imageUrl.startsWith('data:image') 
+                                                  ? Image.memory(base64Decode(story.imageUrl.split(',').last), fit: BoxFit.cover)
+                                                  : Container(color: Colors.grey),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            story.title,
+                                            style: Theme.of(context).textTheme.bodySmall,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                        );
+                      },
+                      loading: () => const SizedBox(),
+                      error: (err, stack) => const SizedBox(),
+                    ),
 
                     userAsync.when(
                       data: (user) {
@@ -161,6 +253,21 @@ class ClientHome extends ConsumerWidget {
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientLeaderboardScreen())),
                           ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildActionCard(
+                            context,
+                            icon: Icons.casino_rounded,
+                            title: 'Roue de la Fortune',
+                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WheelOfFortuneScreen())),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const Expanded(child: SizedBox()), // Placeholder for rewards catalog
                       ],
                     ),
 

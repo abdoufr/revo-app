@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../models/product.dart';
+import '../../models/product.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/app_translations.dart';
+import 'product_reviews_sheet.dart';
 
 class ClientMenuSection extends StatefulWidget {
   final List<Product> products;
@@ -125,6 +127,7 @@ class _ClientMenuSectionState extends State<ClientMenuSection> {
                 child: SoftCard(
                   padding: EdgeInsets.zero,
                   child: ListTile(
+                    onTap: () => showProductReviews(context, product),
                     contentPadding: const EdgeInsets.all(16),
                     leading: Container(
                       width: 60,
