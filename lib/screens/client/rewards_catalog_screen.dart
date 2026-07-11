@@ -78,7 +78,7 @@ class RewardsCatalogScreen extends ConsumerWidget {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor.withOpacity(0.1),
-                  border: const Border(bottom: BorderSide(color: Theme.of(context).primaryColor, width: 2)),
+                  border: Border(bottom: BorderSide(color: Theme.of(context).primaryColor, width: 2)),
                 ),
                 child: Column(
                   children: [
@@ -86,7 +86,7 @@ class RewardsCatalogScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(
                       '${user.loyaltyPoints}',
-                      style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+                      style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
                     ),
                   ],
                 ),
@@ -153,14 +153,14 @@ class RewardsCatalogScreen extends ConsumerWidget {
                       },
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+                  loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
                   error: (e, s) => Center(child: Text('Erreur: $e')),
                 ),
               ),
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (e, s) => Center(child: Text('Erreur: $e')),
       ),
     );

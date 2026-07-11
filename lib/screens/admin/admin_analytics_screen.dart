@@ -15,7 +15,7 @@ class AdminAnalyticsScreen extends ConsumerWidget {
         title: Text('Tableau de Bord', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Theme.of(context).primaryColor),
+            icon: Icon(Icons.refresh_rounded, color: Theme.of(context).primaryColor),
             onPressed: () => ref.refresh(advancedAnalyticsProvider),
           ),
         ],
@@ -81,7 +81,7 @@ class AdminAnalyticsScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (e, s) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );

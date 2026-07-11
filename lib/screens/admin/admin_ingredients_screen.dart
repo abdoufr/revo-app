@@ -60,7 +60,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(40),
                               child: Image.memory(base64Decode(base64Image!.split(',').last), fit: BoxFit.cover),
                             )
-                          : const Icon(Icons.add_photo_alternate_rounded, color: Theme.of(context).primaryColor, size: 30),
+                          : Icon(Icons.add_photo_alternate_rounded, color: Theme.of(context).primaryColor, size: 30),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -192,14 +192,14 @@ class AdminIngredientsScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(26),
                               child: Image.memory(base64Decode(item.imageUrl!.split(',').last), fit: BoxFit.cover),
                             )
-                          : const Icon(Icons.egg_alt_rounded, color: Theme.of(context).primaryColor),
+                          : Icon(Icons.egg_alt_rounded, color: Theme.of(context).primaryColor),
                     ),
                     title: Text(item.name, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 4),
-                        Text('${item.price.toStringAsFixed(0)} DA', style: const TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+                        Text('${item.price.toStringAsFixed(0)} DA', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
                         Wrap(
                           spacing: 4,
@@ -235,7 +235,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (e, s) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );

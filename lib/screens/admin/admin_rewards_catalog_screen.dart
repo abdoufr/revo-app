@@ -57,11 +57,11 @@ class AdminRewardsCatalogScreen extends ConsumerWidget {
                                   fit: BoxFit.cover,
                                 ),
                               )
-                            : const Column(
+                            : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.add_photo_alternate_rounded, color: Theme.of(context).primaryColor, size: 30),
-                                  SizedBox(height: 4),
+                                  const SizedBox(height: 4),
                                   Text('Image', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 12)),
                                 ],
                               ),
@@ -151,7 +151,7 @@ class AdminRewardsCatalogScreen extends ConsumerWidget {
                       ),
                     ),
                     title: Text(item.name, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
-                    subtitle: Text('${item.pointsCost} points', style: const TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+                    subtitle: Text('${item.pointsCost} points', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline, color: AppTheme.error),
                       onPressed: () {
@@ -164,7 +164,7 @@ class AdminRewardsCatalogScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (err, stack) => Center(child: Text('Erreur: $err', style: const TextStyle(color: AppTheme.error))),
       ),
     );

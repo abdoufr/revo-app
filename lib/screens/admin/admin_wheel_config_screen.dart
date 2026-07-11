@@ -80,7 +80,7 @@ class _AdminWheelConfigScreenState extends ConsumerState<AdminWheelConfigScreen>
         title: Text('Configuration Roue', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save_rounded, color: Theme.of(context).primaryColor),
+            icon: Icon(Icons.save_rounded, color: Theme.of(context).primaryColor),
             onPressed: _saveConfig,
           ),
         ],
@@ -128,7 +128,7 @@ class _AdminWheelConfigScreenState extends ConsumerState<AdminWheelConfigScreen>
                 TextField(
                   controller: _costController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     prefixIcon: Icon(Icons.stars_rounded, color: Theme.of(context).primaryColor),
                     hintText: 'ex: 50',
                   ),
@@ -139,7 +139,7 @@ class _AdminWheelConfigScreenState extends ConsumerState<AdminWheelConfigScreen>
                   children: [
                     Text('Lots sur la roue (${_prizes.length})', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                     IconButton(
-                      icon: const Icon(Icons.add_circle_outline, color: Theme.of(context).primaryColor),
+                      icon: Icon(Icons.add_circle_outline, color: Theme.of(context).primaryColor),
                       onPressed: _addPrize,
                     ),
                   ],
@@ -165,7 +165,7 @@ class _AdminWheelConfigScreenState extends ConsumerState<AdminWheelConfigScreen>
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (e, s) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );

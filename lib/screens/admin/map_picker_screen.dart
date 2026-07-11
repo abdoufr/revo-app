@@ -115,7 +115,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                             point: _selectedLocation!,
                             width: 80,
                             height: 80,
-                            child: const Icon(
+                            child: Icon(
                               Icons.location_on,
                               color: Theme.of(context).primaryColor,
                               size: 50,

@@ -124,7 +124,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             ),
                             Text(
                               '${widget.product.price.toStringAsFixed(1)} DA',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).primaryColor,
@@ -207,7 +207,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () {},
-          child: const Text('See more.', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+          child: Text('See more.', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
         ),
       ],
     );
@@ -279,7 +279,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                                   backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
                                   child: Text(
                                     review.userName.isNotEmpty ? review.userName[0].toUpperCase() : 'U',
-                                    style: const TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                                    style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -302,7 +302,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                 },
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+            loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
             error: (e, s) => const Center(child: Text('Erreur de chargement des avis.')),
           ),
         ),

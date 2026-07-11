@@ -75,10 +75,10 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                             child: userAsync.when(
                               data: (user) => Text(
                                 user?.name.isNotEmpty == true ? user!.name[0].toUpperCase() : 'U',
-                                style: const TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 20),
+                                style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 20),
                               ),
                               loading: () => const CircularProgressIndicator(strokeWidth: 2),
-                              error: (_, __) => const Icon(Icons.person, color: Theme.of(context).primaryColor),
+                              error: (_, __) => Icon(Icons.person, color: Theme.of(context).primaryColor),
                             ),
                           ),
                         ),
@@ -168,7 +168,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                         margin: const EdgeInsets.only(bottom: 24),
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             colors: [Theme.of(context).primaryColor, Color(0xFFC00000)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -266,7 +266,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.1), shape: BoxShape.circle),
-                                child: const Icon(Icons.campaign, color: Theme.of(context).primaryColor),
+                                child: Icon(Icons.campaign, color: Theme.of(context).primaryColor),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -290,7 +290,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                       },
                     );
                   },
-                      loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+                      loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
                       error: (err, stack) => Center(child: Text('Erreur de chargement: $err')),
                     );
                   }

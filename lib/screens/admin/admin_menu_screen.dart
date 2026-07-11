@@ -46,7 +46,7 @@ class AdminMenuScreen extends ConsumerWidget {
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16),
                     title: Text(product.name, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
-                    subtitle: Text('${product.price} DA', style: const TextStyle(color: Theme.of(context).primaryColor)),
+                    subtitle: Text('${product.price} DA', style: TextStyle(color: Theme.of(context).primaryColor)),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -77,7 +77,7 @@ class AdminMenuScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (error, stack) => Center(child: Text('Erreur: $error', style: const TextStyle(color: AppTheme.error))),
       ),
     );
@@ -150,7 +150,7 @@ class AdminMenuScreen extends ConsumerWidget {
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.add_photo_alternate_rounded, color: Theme.of(context).primaryColor, size: 40),
+                                  Icon(Icons.add_photo_alternate_rounded, color: Theme.of(context).primaryColor, size: 40),
                                   const SizedBox(height: 8),
                                   Text(
                                     'Ajouter une image',

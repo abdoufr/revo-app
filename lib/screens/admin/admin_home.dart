@@ -135,7 +135,7 @@ class AdminHome extends ConsumerWidget {
                             ],
                           );
                         },
-                        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+                        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
                         error: (err, stack) => Text('Erreur: $err', style: const TextStyle(color: AppTheme.error)),
                       ),
                     ),

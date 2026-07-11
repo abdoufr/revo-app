@@ -59,7 +59,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Logo and Title
-                    const Icon(
+                    Icon(
                       Icons.fastfood_rounded, // Icône plus dans le thème food
                       size: 70,
                       color: Theme.of(context).primaryColor,
@@ -88,7 +88,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
                           style: Theme.of(context).textTheme.bodyLarge,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: 'Numéro de téléphone (ex: +213...)',
                             prefixIcon: Icon(Icons.phone, color: Theme.of(context).primaryColor),
                           ),
@@ -98,7 +98,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           controller: _otpController,
                           keyboardType: TextInputType.number,
                           style: Theme.of(context).textTheme.bodyLarge,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: 'Code SMS à 6 chiffres',
                             prefixIcon: Icon(Icons.message, color: Theme.of(context).primaryColor),
                           ),
@@ -108,7 +108,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         style: Theme.of(context).textTheme.bodyLarge,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Email',
                           prefixIcon: Icon(Icons.email, color: Theme.of(context).primaryColor),
                         ),
@@ -118,7 +118,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         controller: _passwordController,
                         obscureText: true,
                         style: Theme.of(context).textTheme.bodyLarge,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Mot de passe',
                           prefixIcon: Icon(Icons.lock, color: Theme.of(context).primaryColor),
                         ),
@@ -248,4 +248,3 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
-

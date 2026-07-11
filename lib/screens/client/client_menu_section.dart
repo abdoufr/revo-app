@@ -127,7 +127,7 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
           ],
         );
       },
-      loading: () => const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator(color: Theme.of(context).primaryColor))),
+      loading: () => Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator(color: Theme.of(context).primaryColor))),
       error: (e, s) => Center(child: Text('Erreur: $e')),
     );
   }

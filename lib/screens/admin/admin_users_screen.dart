@@ -84,7 +84,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
               },
               decoration: InputDecoration(
                 hintText: 'Rechercher un client (nom, tél...)',
-                prefixIcon: const Icon(Icons.search, color: Theme.of(context).primaryColor),
+                prefixIcon: Icon(Icons.search, color: Theme.of(context).primaryColor),
                 filled: true,
                 fillColor: Theme.of(context).cardColor,
                 border: OutlineInputBorder(
@@ -133,7 +133,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                           ),
                           leading: CircleAvatar(
                             backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
-                            child: const Icon(Icons.person, color: Theme.of(context).primaryColor),
+                            child: Icon(Icons.person, color: Theme.of(context).primaryColor),
                           ),
                           children: [
                             Padding(
@@ -143,7 +143,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                                 children: [
                                   Column(
                                     children: [
-                                      Text('${client.loyaltyPoints}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
+                                      Text('${client.loyaltyPoints}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
                                       const Text('Points Actuels', style: TextStyle(fontSize: 12)),
                                     ],
                                   ),
@@ -161,8 +161,8 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                               children: [
                                 TextButton.icon(
                                   onPressed: () => _confirmReset(context, client),
-                                  icon: const Icon(Icons.refresh, color: Theme.of(context).primaryColor),
-                                  label: const Text('Zéro points', style: TextStyle(color: Theme.of(context).primaryColor)),
+                                  icon: Icon(Icons.refresh, color: Theme.of(context).primaryColor),
+                                  label: Text('Zéro points', style: TextStyle(color: Theme.of(context).primaryColor)),
                                 ),
                                 TextButton.icon(
                                   onPressed: () => _confirmDelete(context, client),
@@ -178,7 +178,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+              loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
               error: (err, stack) => Center(child: Text('Erreur: $err', style: const TextStyle(color: AppTheme.error))),
             ),
           ),

@@ -99,7 +99,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.palette_rounded, color: Theme.of(context).primaryColor),
+                          Icon(Icons.palette_rounded, color: Theme.of(context).primaryColor),
                           const SizedBox(width: 12),
                           Text('Préférences d\'Affichage', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                         ],
@@ -146,7 +146,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                 TextField(
                   controller: _nameController,
                   style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Nom du Fastfood',
                     prefixIcon: Icon(Icons.storefront, color: Theme.of(context).primaryColor),
                   ),
@@ -155,7 +155,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                 TextField(
                   controller: _descController,
                   style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Description (ex: Le meilleur burger)',
                     prefixIcon: Icon(Icons.description, color: Theme.of(context).primaryColor),
                   ),
@@ -168,7 +168,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                 TextField(
                   controller: _bannerController,
                   style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Annonce (Laisser vide pour cacher)',
                     prefixIcon: Icon(Icons.campaign, color: Theme.of(context).primaryColor),
                   ),
@@ -238,7 +238,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                       child: TextField(
                         controller: _newMessageController,
                         style: Theme.of(context).textTheme.bodyLarge,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Nouveau message (ex: Vous êtes si proche !)',
                           prefixIcon: Icon(Icons.message, color: Theme.of(context).primaryColor),
                         ),
@@ -246,7 +246,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                     ),
                     const SizedBox(width: 8),
                     IconButton(
-                      icon: const Icon(Icons.add_circle, color: Theme.of(context).primaryColor, size: 40),
+                      icon: Icon(Icons.add_circle, color: Theme.of(context).primaryColor, size: 40),
                       onPressed: () {
                         final val = _newMessageController.text.trim();
                         if (val.isNotEmpty && !_geofenceMessages.contains(val)) {
@@ -291,7 +291,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                               child: TextField(
                                 controller: _newCategoryController,
                                 style: Theme.of(context).textTheme.bodyLarge,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   labelText: 'Nouvelle catégorie',
                                   prefixIcon: Icon(Icons.category, color: Theme.of(context).primaryColor),
                                 ),
@@ -299,7 +299,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                             ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: const Icon(Icons.add_circle, color: Theme.of(context).primaryColor, size: 40),
+                              icon: Icon(Icons.add_circle, color: Theme.of(context).primaryColor, size: 40),
                               onPressed: () {
                                 final val = _newCategoryController.text.trim();
                                 if (val.isNotEmpty && !categories.contains(val)) {
@@ -314,7 +314,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                       ],
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+                  loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
                   error: (err, stack) => const Text('Erreur chargement catégories', style: TextStyle(color: AppTheme.error)),
                 ),
                 const SizedBox(height: 32),
@@ -327,7 +327,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (err, stack) => Center(child: Text('Erreur: $err', style: const TextStyle(color: AppTheme.error))),
       ),
     );

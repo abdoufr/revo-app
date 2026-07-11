@@ -58,7 +58,7 @@ class _ReferralSectionState extends ConsumerState<_ReferralSection> {
         children: [
           Row(
             children: [
-              const Icon(Icons.handshake_rounded, color: Theme.of(context).primaryColor),
+              Icon(Icons.handshake_rounded, color: Theme.of(context).primaryColor),
               const SizedBox(width: 12),
               Text('Parrainage', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
             ],
@@ -73,7 +73,7 @@ class _ReferralSectionState extends ConsumerState<_ReferralSection> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Mon Code :', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(widget.userId.substring(0, 6).toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor, letterSpacing: 2)),
+                Text(widget.userId.substring(0, 6).toUpperCase(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor, letterSpacing: 2)),
               ],
             ),
           ),
@@ -220,13 +220,13 @@ class ClientSettingsScreen extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.person_rounded, color: Theme.of(context).primaryColor),
+                            Icon(Icons.person_rounded, color: Theme.of(context).primaryColor),
                             const SizedBox(width: 12),
                             Text('my_profile'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         IconButton(
-                          icon: const Icon(Icons.edit_rounded, color: Theme.of(context).primaryColor),
+                          icon: Icon(Icons.edit_rounded, color: Theme.of(context).primaryColor),
                           onPressed: () => _showEditProfileDialog(context, user),
                         ),
                       ],
@@ -255,7 +255,7 @@ class ClientSettingsScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.leaderboard_rounded, color: Theme.of(context).primaryColor),
+                        Icon(Icons.leaderboard_rounded, color: Theme.of(context).primaryColor),
                         const SizedBox(width: 12),
                         Text('public_ranking'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                       ],
@@ -288,7 +288,7 @@ class ClientSettingsScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.palette_rounded, color: Theme.of(context).primaryColor),
+                        Icon(Icons.palette_rounded, color: Theme.of(context).primaryColor),
                         const SizedBox(width: 12),
                         Text('display_prefs'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                       ],
@@ -355,7 +355,7 @@ class ClientSettingsScreen extends ConsumerWidget {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (e, s) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );

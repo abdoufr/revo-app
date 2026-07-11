@@ -61,7 +61,7 @@ class AdminStoriesScreen extends ConsumerWidget {
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.add_photo_alternate_rounded, color: Theme.of(context).primaryColor, size: 40),
+                                  Icon(Icons.add_photo_alternate_rounded, color: Theme.of(context).primaryColor, size: 40),
                                   const SizedBox(height: 8),
                                   Text(
                                     'Ajouter une image',
@@ -224,7 +224,7 @@ class AdminStoriesScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (err, stack) => Center(child: Text('Erreur: $err', style: const TextStyle(color: AppTheme.error))),
       ),
     );

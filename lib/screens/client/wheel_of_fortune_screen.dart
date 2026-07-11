@@ -60,7 +60,7 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
           content: Text(
             'Vous avez gagné :\n\n${config.wheelPrizes[randomIndex]}',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
           ),
           actions: [
             ElevatedButton(
@@ -98,7 +98,7 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
                   const SizedBox(height: 24),
                   Text(
                     'Vos Points: ${user.loyaltyPoints}',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
                   ),
                   const SizedBox(height: 8),
                   Text('Tourner la roue coûte ${config.wheelCost} points', style: Theme.of(context).textTheme.bodyMedium),
@@ -143,11 +143,11 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
                 ],
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+            loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
             error: (e, s) => Center(child: Text('Erreur: $e')),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (e, s) => Center(child: Text('Erreur: $e')),
       ),
     );

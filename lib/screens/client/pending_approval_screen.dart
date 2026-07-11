@@ -22,7 +22,7 @@ class PendingApprovalScreen extends ConsumerWidget {
                     color: Theme.of(context).primaryColor.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.hourglass_empty_rounded,
                     size: 80,
                     color: Theme.of(context).primaryColor,
@@ -45,11 +45,11 @@ class PendingApprovalScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 48),
-                const CircularProgressIndicator(
+                CircularProgressIndicator(
                   color: Theme.of(context).primaryColor,
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'Cette page s\'actualisera automatiquement dès que votre compte sera validé.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
