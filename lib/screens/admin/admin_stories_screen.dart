@@ -183,9 +183,8 @@ class AdminStoriesScreen extends ConsumerWidget {
                   Positioned(
                     top: 8,
                     right: 8,
-                    child: IconButton(
-                      icon: const Icon(Icons.delete, color: AppTheme.error),
-                      onPressed: () {
+                    child: GestureDetector(
+                      onTap: () {
                         showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
@@ -198,6 +197,9 @@ class AdminStoriesScreen extends ConsumerWidget {
                                 onPressed: () {
                                   ref.read(storyActionsProvider).deleteStory(story.id);
                                   Navigator.pop(ctx);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Story supprimée !'), backgroundColor: AppTheme.success),
+                                  );
                                 },
                                 style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
                                 child: const Text('Supprimer', style: TextStyle(color: Colors.white)),
@@ -206,6 +208,15 @@ class AdminStoriesScreen extends ConsumerWidget {
                           ),
                         );
                       },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppTheme.error,
+                          shape: BoxShape.circle,
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 6)],
+                        ),
+                        child: const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 20),
+                      ),
                     ),
                   ),
                 ],
