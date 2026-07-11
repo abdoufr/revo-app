@@ -5,7 +5,7 @@ import '../../models/product.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/reviews_provider.dart';
 import '../../providers/auth_providers.dart';
-import '../../providers/gamification_provider.dart';
+import '../../providers/client_providers.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
@@ -296,31 +296,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(review.comment, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4)),
-                        if (review.restaurantReply != null && review.restaurantReply!.isNotEmpty) ...[
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primaryRed.withOpacity(0.05),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppTheme.primaryRed.withOpacity(0.2)),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Row(
-                                  children: [
-                                    Icon(Icons.storefront_rounded, size: 16, color: AppTheme.primaryRed),
-                                    SizedBox(width: 8),
-                                    Text('Réponse du restaurant', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryRed, fontSize: 12)),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(review.restaurantReply!, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic)),
-                              ],
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                   );
@@ -392,16 +367,13 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                               }
 
                               try {
-                                await ref.read(reviewActionsProvider).submitReview(
-                                  productId: widget.product.id,
-                                  userId: authUser.uid,
-                                  userName: clientUser.name,
-                                  rating: _rating,
-                                  comment: _commentController.text.trim(),
+                                await ref.read(reviewsActionsProvider).addReview(
+                                  widget.product.id,
+                                  authUser.uid,
+                                  clientUser.name,
+                                  _rating.toDouble(),
+                                  _commentController.text.trim(),
                                 );
-                                
-                                // Gain points
-                                await ref.read(gamificationProvider.notifier).awardPointsForAction('leave_review', context: context);
                                 
                                 if (context.mounted) {
                                   Navigator.pop(context);
