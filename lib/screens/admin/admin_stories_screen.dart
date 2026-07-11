@@ -46,9 +46,9 @@ class AdminStoriesScreen extends ConsumerWidget {
                         height: 200,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryOrange.withOpacity(0.1),
+                          color: AppTheme.primaryRed.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppTheme.primaryOrange),
+                          border: Border.all(color: AppTheme.primaryRed),
                         ),
                         child: base64Image != null && base64Image!.startsWith('data:image')
                             ? ClipRRect(
@@ -61,7 +61,7 @@ class AdminStoriesScreen extends ConsumerWidget {
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.add_photo_alternate_rounded, color: AppTheme.primaryOrange, size: 40),
+                                  const Icon(Icons.add_photo_alternate_rounded, color: AppTheme.primaryRed, size: 40),
                                   const SizedBox(height: 8),
                                   Text(
                                     'Ajouter une image',
@@ -96,7 +96,7 @@ class AdminStoriesScreen extends ConsumerWidget {
                       );
                     }
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryOrange),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
                   child: const Text('Publier', style: TextStyle(color: Colors.white)),
                 ),
               ],
@@ -117,7 +117,7 @@ class AdminStoriesScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddStoryDialog(context, ref),
-        backgroundColor: AppTheme.primaryOrange,
+        backgroundColor: AppTheme.primaryRed,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text('Nouvelle Story', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
@@ -224,7 +224,7 @@ class AdminStoriesScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
         error: (err, stack) => Center(child: Text('Erreur: $err', style: const TextStyle(color: AppTheme.error))),
       ),
     );

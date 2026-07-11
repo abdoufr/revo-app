@@ -50,7 +50,7 @@ class RewardsCatalogScreen extends ConsumerWidget {
                 );
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryOrange),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
             child: const Text('Échanger', style: TextStyle(color: Colors.white)),
           ),
         ],
@@ -77,8 +77,8 @@ class RewardsCatalogScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(24),
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryOrange.withOpacity(0.1),
-                  border: const Border(bottom: BorderSide(color: AppTheme.primaryOrange, width: 2)),
+                  color: AppTheme.primaryRed.withOpacity(0.1),
+                  border: const Border(bottom: BorderSide(color: AppTheme.primaryRed, width: 2)),
                 ),
                 child: Column(
                   children: [
@@ -86,7 +86,7 @@ class RewardsCatalogScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(
                       '${user.loyaltyPoints}',
-                      style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: AppTheme.primaryOrange),
+                      style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: AppTheme.primaryRed),
                     ),
                   ],
                 ),
@@ -139,7 +139,7 @@ class RewardsCatalogScreen extends ConsumerWidget {
                               ElevatedButton(
                                 onPressed: () => _claimReward(context, ref, item, user.loyaltyPoints),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: canAfford ? AppTheme.primaryOrange : Colors.grey,
+                                  backgroundColor: canAfford ? AppTheme.primaryRed : Colors.grey,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                 ),
                                 child: Text(
@@ -153,14 +153,14 @@ class RewardsCatalogScreen extends ConsumerWidget {
                       },
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+                  loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
                   error: (e, s) => Center(child: Text('Erreur: $e')),
                 ),
               ),
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
         error: (e, s) => Center(child: Text('Erreur: $e')),
       ),
     );

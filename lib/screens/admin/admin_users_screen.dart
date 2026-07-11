@@ -56,7 +56,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
               ref.read(adminActionsProvider).resetClientPoints(user.id);
               Navigator.pop(ctx);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryOrange),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
             child: const Text('Réinitialiser', style: TextStyle(color: Colors.white)),
           ),
         ],
@@ -84,7 +84,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
               },
               decoration: InputDecoration(
                 hintText: 'Rechercher un client (nom, tél...)',
-                prefixIcon: const Icon(Icons.search, color: AppTheme.primaryOrange),
+                prefixIcon: const Icon(Icons.search, color: AppTheme.primaryRed),
                 filled: true,
                 fillColor: Theme.of(context).cardColor,
                 border: OutlineInputBorder(
@@ -121,7 +121,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                       child: SoftCard(
                         padding: EdgeInsets.zero,
                         child: ExpansionTile(
-                          iconColor: AppTheme.primaryOrange,
+                          iconColor: AppTheme.primaryRed,
                           collapsedIconColor: Theme.of(context).iconTheme.color,
                           title: Text(
                             client.name,
@@ -132,8 +132,8 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           leading: CircleAvatar(
-                            backgroundColor: AppTheme.primaryOrange.withOpacity(0.2),
-                            child: const Icon(Icons.person, color: AppTheme.primaryOrange),
+                            backgroundColor: AppTheme.primaryRed.withOpacity(0.2),
+                            child: const Icon(Icons.person, color: AppTheme.primaryRed),
                           ),
                           children: [
                             Padding(
@@ -143,7 +143,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                                 children: [
                                   Column(
                                     children: [
-                                      Text('${client.loyaltyPoints}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.primaryOrange)),
+                                      Text('${client.loyaltyPoints}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.primaryRed)),
                                       const Text('Points Actuels', style: TextStyle(fontSize: 12)),
                                     ],
                                   ),
@@ -161,8 +161,8 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                               children: [
                                 TextButton.icon(
                                   onPressed: () => _confirmReset(context, client),
-                                  icon: const Icon(Icons.refresh, color: AppTheme.primaryOrange),
-                                  label: const Text('Zéro points', style: TextStyle(color: AppTheme.primaryOrange)),
+                                  icon: const Icon(Icons.refresh, color: AppTheme.primaryRed),
+                                  label: const Text('Zéro points', style: TextStyle(color: AppTheme.primaryRed)),
                                 ),
                                 TextButton.icon(
                                   onPressed: () => _confirmDelete(context, client),
@@ -178,7 +178,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
               error: (err, stack) => Center(child: Text('Erreur: $err', style: const TextStyle(color: AppTheme.error))),
             ),
           ),

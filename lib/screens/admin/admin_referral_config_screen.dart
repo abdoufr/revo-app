@@ -46,7 +46,7 @@ class _AdminReferralConfigScreenState extends ConsumerState<AdminReferralConfigS
         title: Text('Parrainage', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save_rounded, color: AppTheme.primaryOrange),
+            icon: const Icon(Icons.save_rounded, color: AppTheme.primaryRed),
             onPressed: _saveConfig,
           ),
         ],
@@ -71,7 +71,7 @@ class _AdminReferralConfigScreenState extends ConsumerState<AdminReferralConfigS
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.handshake_rounded, color: AppTheme.primaryOrange, size: 32),
+                          const Icon(Icons.handshake_rounded, color: AppTheme.primaryRed, size: 32),
                           const SizedBox(width: 16),
                           Expanded(
                             child: Text(
@@ -96,7 +96,7 @@ class _AdminReferralConfigScreenState extends ConsumerState<AdminReferralConfigS
                   controller: _referrerController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.person_add_alt_1_rounded, color: AppTheme.primaryOrange),
+                    prefixIcon: Icon(Icons.person_add_alt_1_rounded, color: AppTheme.primaryRed),
                     hintText: 'ex: 50',
                     suffixText: 'points',
                   ),
@@ -108,7 +108,7 @@ class _AdminReferralConfigScreenState extends ConsumerState<AdminReferralConfigS
                   controller: _referredController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.person_outline_rounded, color: AppTheme.primaryOrange),
+                    prefixIcon: Icon(Icons.person_outline_rounded, color: AppTheme.primaryRed),
                     hintText: 'ex: 50',
                     suffixText: 'points',
                   ),
@@ -120,7 +120,7 @@ class _AdminReferralConfigScreenState extends ConsumerState<AdminReferralConfigS
                   child: ElevatedButton(
                     onPressed: _saveConfig,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryOrange,
+                      backgroundColor: AppTheme.primaryRed,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                     child: const Text('Enregistrer les modifications', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
@@ -130,7 +130,7 @@ class _AdminReferralConfigScreenState extends ConsumerState<AdminReferralConfigS
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
         error: (e, s) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );

@@ -62,14 +62,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const Icon(
                       Icons.fastfood_rounded, // Icône plus dans le thème food
                       size: 70,
-                      color: AppTheme.primaryOrange,
+                      color: AppTheme.primaryRed,
                     ),
                     const SizedBox(height: 16),
                     Text(
                       _isSignUp ? 'Créer un compte' : 'Bienvenue sur REVO',
                       style: Theme.of(context).textTheme.displayLarge?.copyWith(
                         fontSize: 28,
-                        color: AppTheme.primaryOrange,
+                        color: AppTheme.primaryRed,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -90,7 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           style: Theme.of(context).textTheme.bodyLarge,
                           decoration: const InputDecoration(
                             hintText: 'Numéro de téléphone (ex: +213...)',
-                            prefixIcon: Icon(Icons.phone, color: AppTheme.primaryOrange),
+                            prefixIcon: Icon(Icons.phone, color: AppTheme.primaryRed),
                           ),
                         )
                       else
@@ -100,7 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           style: Theme.of(context).textTheme.bodyLarge,
                           decoration: const InputDecoration(
                             hintText: 'Code SMS à 6 chiffres',
-                            prefixIcon: Icon(Icons.message, color: AppTheme.primaryOrange),
+                            prefixIcon: Icon(Icons.message, color: AppTheme.primaryRed),
                           ),
                         ),
                     ] else ...[
@@ -110,7 +110,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: Theme.of(context).textTheme.bodyLarge,
                         decoration: const InputDecoration(
                           hintText: 'Email',
-                          prefixIcon: Icon(Icons.email, color: AppTheme.primaryOrange),
+                          prefixIcon: Icon(Icons.email, color: AppTheme.primaryRed),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -120,7 +120,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: Theme.of(context).textTheme.bodyLarge,
                         decoration: const InputDecoration(
                           hintText: 'Mot de passe',
-                          prefixIcon: Icon(Icons.lock, color: AppTheme.primaryOrange),
+                          prefixIcon: Icon(Icons.lock, color: AppTheme.primaryRed),
                         ),
                       ),
                     ],

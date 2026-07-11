@@ -1,204 +1,267 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/product.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/app_translations.dart';
-import 'product_reviews_sheet.dart';
+import '../../providers/admin_providers.dart';
+import 'product_details_screen.dart'; // We'll create this next
 
-class ClientMenuSection extends StatefulWidget {
-  final List<Product> products;
-
-  const ClientMenuSection({super.key, required this.products});
+class ClientMenuSection extends ConsumerStatefulWidget {
+  const ClientMenuSection({super.key});
 
   @override
-  State<ClientMenuSection> createState() => _ClientMenuSectionState();
+  ConsumerState<ClientMenuSection> createState() => _ClientMenuSectionState();
 }
 
-class _ClientMenuSectionState extends State<ClientMenuSection> {
+class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
   String _searchQuery = '';
   String _selectedCategory = 'All';
 
   @override
   Widget build(BuildContext context) {
-    // 1. Extract unique categories
-    final categories = ['All'];
-    for (var p in widget.products) {
-      if (p.category.isNotEmpty && !categories.contains(p.category)) {
-        categories.add(p.category);
-      }
-    }
+    final productsAsync = ref.watch(productsStreamProvider);
 
-    // 2. Filter products
-    final filteredProducts = widget.products.where((p) {
-      final matchesSearch = p.name.toLowerCase().contains(_searchQuery.toLowerCase()) || 
-                            p.description.toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesCategory = _selectedCategory == 'All' || p.category == _selectedCategory;
-      return matchesSearch && matchesCategory;
-    }).toList();
+    return productsAsync.when(
+      data: (products) {
+        // 1. Extract unique categories
+        final categories = ['All'];
+        for (var p in products) {
+          if (p.category.isNotEmpty && !categories.contains(p.category)) {
+            categories.add(p.category);
+          }
+        }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Search Bar
-        TextField(
-          onChanged: (val) {
-            setState(() {
-              _searchQuery = val;
-            });
-          },
-          decoration: InputDecoration(
-            hintText: 'search_menu'.tr(context),
-            prefixIcon: const Icon(Icons.search, color: AppTheme.primaryOrange),
-            filled: true,
-            fillColor: Theme.of(context).cardColor,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 16),
-          ),
-        ),
-        const SizedBox(height: 16),
+        // 2. Filter products
+        final filteredProducts = products.where((p) {
+          final matchesSearch = p.name.toLowerCase().contains(_searchQuery.toLowerCase()) || 
+                                p.description.toLowerCase().contains(_searchQuery.toLowerCase());
+          final matchesCategory = _selectedCategory == 'All' || p.category == _selectedCategory;
+          return matchesSearch && matchesCategory;
+        }).toList();
 
-        // Categories Chips
-        if (categories.length > 1)
-          SizedBox(
-            height: 40,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                final isSelected = category == _selectedCategory;
-                final displayCategory = category == 'All' ? 'all_categories'.tr(context) : category;
+        final popularProducts = filteredProducts.take(4).toList(); // Just a sample for "Popular"
+        final nearestProducts = filteredProducts.skip(4).take(4).toList(); // Just a sample for "Nearest"
 
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(
-                      displayCategory,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Search Bar
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    onChanged: (val) => setState(() => _searchQuery = val),
+                    decoration: InputDecoration(
+                      hintText: 'Search',
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                      filled: true,
+                      fillColor: Theme.of(context).cardColor,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
                       ),
-                    ),
-                    selected: isSelected,
-                    selectedColor: AppTheme.primaryOrange,
-                    backgroundColor: Theme.of(context).cardColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() {
-                          _selectedCategory = category;
-                        });
-                      }
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        const SizedBox(height: 24),
-
-        // Products List
-        if (filteredProducts.isEmpty)
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Text(
-                'empty_menu'.tr(context),
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          )
-        else
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: filteredProducts.length,
-            itemBuilder: (context, index) {
-              final product = filteredProducts[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Opacity(
-                  opacity: product.isAvailable ? 1.0 : 0.6,
-                  child: SoftCard(
-                    padding: EdgeInsets.zero,
-                    child: ListTile(
-                      onTap: () => showProductReviews(context, product),
-                      contentPadding: const EdgeInsets.all(16),
-                      leading: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryOrange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: product.imageUrl != null && product.imageUrl!.startsWith('data:image')
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Image.memory(
-                                  base64Decode(product.imageUrl!.split(',').last),
-                                  fit: BoxFit.cover,
-                                  color: product.isAvailable ? null : Colors.black.withOpacity(0.5),
-                                  colorBlendMode: product.isAvailable ? null : BlendMode.darken,
-                                ),
-                              )
-                            : Icon(Icons.fastfood, color: product.isAvailable ? AppTheme.primaryOrange : Colors.grey),
-                      ),
-                      title: Text(
-                        product.name,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: product.isAvailable ? null : Colors.grey,
-                        ),
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          product.description,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: product.isAvailable ? null : Colors.grey.withOpacity(0.5),
-                          ),
-                        ),
-                      ),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          if (!product.isAvailable)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Text(
-                                'Indisponible',
-                                style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold),
-                              ),
-                            )
-                          else
-                            Text(
-                              '${product.price} DA',
-                              style: const TextStyle(
-                                color: AppTheme.primaryOrange,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                        ],
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
                 ),
-              );
-            },
-          ),
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryRed,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.tune_rounded, color: Colors.white),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Categories
+            SizedBox(
+              height: 40,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  final isSelected = category == _selectedCategory;
+                  
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedCategory = category),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.only(right: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppTheme.primaryRed : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Center(
+                        child: Text(
+                          category,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // Popular Food Section
+            _buildSectionHeader('Popular Food'),
+            const SizedBox(height: 16),
+            _buildHorizontalList(popularProducts.isNotEmpty ? popularProducts : filteredProducts),
+
+            const SizedBox(height: 32),
+
+            // Nearest Section (or second row)
+            if (nearestProducts.isNotEmpty) ...[
+              _buildSectionHeader('Nearest'),
+              const SizedBox(height: 16),
+              _buildHorizontalList(nearestProducts),
+            ],
+          ],
+        );
+      },
+      loading: () => const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator(color: AppTheme.primaryRed))),
+      error: (e, s) => Center(child: Text('Erreur: $e')),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
+        Text('See All', style: TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.bold, fontSize: 14)),
       ],
+    );
+  }
+
+  Widget _buildHorizontalList(List<Product> products) {
+    if (products.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Text('Aucun produit trouvé.', style: Theme.of(context).textTheme.bodyMedium),
+        ),
+      );
+    }
+    
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          return _buildProductCard(product);
+        },
+      ),
+    );
+  }
+
+  Widget _buildProductCard(Product product) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: () {
+        if (product.isAvailable) {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailsScreen(product: product)));
+        }
+      },
+      child: Opacity(
+        opacity: product.isAvailable ? 1.0 : 0.5,
+        child: Container(
+          width: 160,
+          margin: const EdgeInsets.only(right: 16, bottom: 8, top: 4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: isDark ? [] : [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Image
+                    Center(
+                      child: Container(
+                        height: 90,
+                        width: 90,
+                        decoration: const BoxDecoration(shape: BoxShape.circle),
+                        child: product.imageUrl != null && product.imageUrl!.startsWith('data:image')
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(45),
+                                child: Image.memory(base64Decode(product.imageUrl!.split(',').last), fit: BoxFit.cover),
+                              )
+                            : const Icon(Icons.fastfood, size: 50, color: Colors.grey),
+                      ),
+                    ),
+                    const Spacer(),
+                    
+                    // Title
+                    Text(
+                      product.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                    const SizedBox(height: 2),
+                    
+                    // Subtitle / Category
+                    Text(
+                      product.category.isEmpty ? 'General' : product.category,
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Price & Add button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${product.price.toStringAsFixed(1)} DA',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        if (product.isAvailable)
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryRed,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Icon(Icons.add, color: Colors.white, size: 16),
+                          )
+                        else
+                          const Text('Rupture', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Favorite Icon
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Icon(Icons.favorite_border_rounded, color: isDark ? Colors.white54 : Colors.grey, size: 20),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

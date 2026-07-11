@@ -63,7 +63,7 @@ class _AdminWheelConfigScreenState extends ConsumerState<AdminWheelConfigScreen>
                 Navigator.pop(ctx);
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryOrange),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
             child: const Text('Ajouter', style: TextStyle(color: Colors.white)),
           ),
         ],
@@ -80,7 +80,7 @@ class _AdminWheelConfigScreenState extends ConsumerState<AdminWheelConfigScreen>
         title: Text('Configuration Roue', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save_rounded, color: AppTheme.primaryOrange),
+            icon: const Icon(Icons.save_rounded, color: AppTheme.primaryRed),
             onPressed: _saveConfig,
           ),
         ],
@@ -116,7 +116,7 @@ class _AdminWheelConfigScreenState extends ConsumerState<AdminWheelConfigScreen>
                       ),
                       Switch(
                         value: _isEnabled,
-                        activeColor: AppTheme.primaryOrange,
+                        activeColor: AppTheme.primaryRed,
                         onChanged: (val) => setState(() => _isEnabled = val),
                       ),
                     ],
@@ -129,7 +129,7 @@ class _AdminWheelConfigScreenState extends ConsumerState<AdminWheelConfigScreen>
                   controller: _costController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.stars_rounded, color: AppTheme.primaryOrange),
+                    prefixIcon: Icon(Icons.stars_rounded, color: AppTheme.primaryRed),
                     hintText: 'ex: 50',
                   ),
                 ),
@@ -139,7 +139,7 @@ class _AdminWheelConfigScreenState extends ConsumerState<AdminWheelConfigScreen>
                   children: [
                     Text('Lots sur la roue (${_prizes.length})', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                     IconButton(
-                      icon: const Icon(Icons.add_circle_outline, color: AppTheme.primaryOrange),
+                      icon: const Icon(Icons.add_circle_outline, color: AppTheme.primaryRed),
                       onPressed: _addPrize,
                     ),
                   ],
@@ -165,7 +165,7 @@ class _AdminWheelConfigScreenState extends ConsumerState<AdminWheelConfigScreen>
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
         error: (e, s) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );

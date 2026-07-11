@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Purxx Style Colors (Light Theme)
-  static const Color primaryOrange = Color(0xFFFF5722);
-  static const Color primaryOrangeLight = Color(0xFFFF8A65);
+  static const Color primaryRed = Color(0xFF990000); // Deep red from the design
+  static const Color primaryRedLight = Color(0xFFC62828);
   static const Color bgWhite = Color(0xFFFFFFFF);
   static const Color bgLightGray = Color(0xFFF9F9F9);
   static const Color textDark = Color(0xFF1E1E1E);
@@ -27,10 +27,10 @@ class AppTheme {
     return ThemeData(
       brightness: Brightness.light,
       scaffoldBackgroundColor: bgLightGray,
-      primaryColor: primaryOrange,
+      primaryColor: primaryRed,
       colorScheme: const ColorScheme.light(
-        primary: primaryOrange,
-        secondary: primaryOrangeLight,
+        primary: primaryRed,
+        secondary: primaryRedLight,
         surface: bgWhite,
         error: error,
       ),
@@ -61,7 +61,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: primaryOrange, width: 2),
+          borderSide: const BorderSide(color: primaryRed, width: 2),
         ),
       ),
     );
@@ -71,10 +71,10 @@ class AppTheme {
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: bgDark,
-      primaryColor: primaryOrange,
+      primaryColor: primaryRed,
       colorScheme: const ColorScheme.dark(
-        primary: primaryOrange,
-        secondary: primaryOrangeLight,
+        primary: primaryRed,
+        secondary: primaryRedLight,
         surface: bgDarkCard,
         error: error,
       ),
@@ -105,7 +105,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: primaryOrange, width: 2),
+          borderSide: const BorderSide(color: primaryRed, width: 2),
         ),
       ),
     );
@@ -172,11 +172,11 @@ class PrimaryButton extends StatelessWidget {
       width: double.infinity,
       height: 60,
       decoration: BoxDecoration(
-        color: AppTheme.primaryOrange,
+        color: AppTheme.primaryRed,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryOrange.withOpacity(0.3),
+            color: AppTheme.primaryRed.withOpacity(0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),

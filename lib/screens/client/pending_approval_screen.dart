@@ -19,13 +19,13 @@ class PendingApprovalScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryOrange.withOpacity(0.1),
+                    color: AppTheme.primaryRed.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.hourglass_empty_rounded,
                     size: 80,
-                    color: AppTheme.primaryOrange,
+                    color: AppTheme.primaryRed,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -46,14 +46,14 @@ class PendingApprovalScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 48),
                 const CircularProgressIndicator(
-                  color: AppTheme.primaryOrange,
+                  color: AppTheme.primaryRed,
                 ),
                 const SizedBox(height: 24),
                 const Text(
                   'Cette page s\'actualisera automatiquement dès que votre compte sera validé.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppTheme.primaryOrange,
+                    color: AppTheme.primaryRed,
                     fontSize: 12,
                   ),
                 ),

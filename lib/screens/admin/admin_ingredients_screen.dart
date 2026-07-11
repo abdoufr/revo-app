@@ -52,15 +52,15 @@ class AdminIngredientsScreen extends ConsumerWidget {
                       width: 80,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppTheme.primaryOrange.withOpacity(0.1),
-                        border: Border.all(color: AppTheme.primaryOrange),
+                        color: AppTheme.primaryRed.withOpacity(0.1),
+                        border: Border.all(color: AppTheme.primaryRed),
                       ),
                       child: base64Image != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(40),
                               child: Image.memory(base64Decode(base64Image!.split(',').last), fit: BoxFit.cover),
                             )
-                          : const Icon(Icons.add_photo_alternate_rounded, color: AppTheme.primaryOrange, size: 30),
+                          : const Icon(Icons.add_photo_alternate_rounded, color: AppTheme.primaryRed, size: 30),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -84,7 +84,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
                       return FilterChip(
                         label: Text('${cat['icon']} ${cat['label']}'),
                         selected: isSelected,
-                        selectedColor: AppTheme.primaryOrange,
+                        selectedColor: AppTheme.primaryRed,
                         checkmarkColor: Colors.white,
                         labelStyle: TextStyle(
                           color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color,
@@ -131,7 +131,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
                     );
                   }
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryOrange),
+                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
                 child: const Text('Ajouter', style: TextStyle(color: Colors.white)),
               ),
             ],
@@ -151,7 +151,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddIngredientDialog(context, ref),
-        backgroundColor: AppTheme.primaryOrange,
+        backgroundColor: AppTheme.primaryRed,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text('Ajouter', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
@@ -185,21 +185,21 @@ class AdminIngredientsScreen extends ConsumerWidget {
                       height: 52,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppTheme.primaryOrange.withOpacity(0.1),
+                        color: AppTheme.primaryRed.withOpacity(0.1),
                       ),
                       child: item.imageUrl != null && item.imageUrl!.startsWith('data:image')
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(26),
                               child: Image.memory(base64Decode(item.imageUrl!.split(',').last), fit: BoxFit.cover),
                             )
-                          : const Icon(Icons.egg_alt_rounded, color: AppTheme.primaryOrange),
+                          : const Icon(Icons.egg_alt_rounded, color: AppTheme.primaryRed),
                     ),
                     title: Text(item.name, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 4),
-                        Text('${item.price.toStringAsFixed(0)} DA', style: const TextStyle(color: AppTheme.primaryOrange, fontWeight: FontWeight.bold)),
+                        Text('${item.price.toStringAsFixed(0)} DA', style: const TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
                         Wrap(
                           spacing: 4,
@@ -209,7 +209,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
                               label: Text('${catData['icon']} ${catData['label']}', style: const TextStyle(fontSize: 11)),
                               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               padding: EdgeInsets.zero,
-                              backgroundColor: AppTheme.primaryOrange.withOpacity(0.1),
+                              backgroundColor: AppTheme.primaryRed.withOpacity(0.1),
                             );
                           }).toList(),
                         ),
@@ -220,7 +220,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
                       children: [
                         Switch(
                           value: item.isAvailable,
-                          activeColor: AppTheme.primaryOrange,
+                          activeColor: AppTheme.primaryRed,
                           onChanged: (val) => ref.read(ingredientActionsProvider).toggleAvailability(item.id, val),
                         ),
                         IconButton(
@@ -235,7 +235,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
         error: (e, s) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );

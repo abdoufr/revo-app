@@ -24,7 +24,7 @@ class ClientLeaderboardScreen extends ConsumerWidget {
   Color _getVipColor(int points) {
     if (points >= 500) return Colors.amber; // Gold
     if (points >= 200) return Colors.grey.shade400; // Silver
-    return AppTheme.primaryOrange; // Basic / Default
+    return AppTheme.primaryRed; // Basic / Default
   }
 
   String _getVipTier(int points) {
@@ -92,7 +92,7 @@ class ClientLeaderboardScreen extends ConsumerWidget {
                           children: [
                             Text(
                               isMe ? 'Moi (${user.name})' : user.name,
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18, color: isMe ? AppTheme.primaryOrange : null),
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18, color: isMe ? AppTheme.primaryRed : null),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -124,7 +124,7 @@ class ClientLeaderboardScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
         error: (error, stack) => Center(child: Text('Erreur: $error', style: const TextStyle(color: AppTheme.error))),
       ),
     );

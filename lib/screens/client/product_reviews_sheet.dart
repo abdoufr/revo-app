@@ -64,7 +64,7 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppTheme.primaryOrange.withOpacity(0.1),
+              color: AppTheme.primaryRed.withOpacity(0.1),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             ),
             child: Row(
@@ -81,7 +81,7 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                           borderRadius: BorderRadius.circular(16),
                           child: Image.memory(base64Decode(widget.product.imageUrl!.split(',').last), fit: BoxFit.cover),
                         )
-                      : const Icon(Icons.fastfood, color: AppTheme.primaryOrange, size: 40),
+                      : const Icon(Icons.fastfood, color: AppTheme.primaryRed, size: 40),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -90,7 +90,7 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                     children: [
                       Text(widget.product.name, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
-                      Text('${widget.product.price} DA', style: const TextStyle(color: AppTheme.primaryOrange, fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text('${widget.product.price} DA', style: const TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.bold, fontSize: 18)),
                       const SizedBox(height: 8),
                       // Mock average rating (to do real: fetch from product if we add it, or calculate)
                       Row(
@@ -141,7 +141,7 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                         ),
                         const SizedBox(width: 12),
                         IconButton(
-                          icon: const Icon(Icons.send_rounded, color: AppTheme.primaryOrange),
+                          icon: const Icon(Icons.send_rounded, color: AppTheme.primaryRed),
                           onPressed: () => _submitReview(user.id, user.name),
                         ),
                       ],
@@ -196,7 +196,7 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
               error: (e, s) => Center(child: Text('Erreur: $e')),
             ),
           ),

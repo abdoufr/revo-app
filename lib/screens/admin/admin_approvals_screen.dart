@@ -127,7 +127,7 @@ class AdminApprovalsScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
         error: (e, stack) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );

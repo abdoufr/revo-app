@@ -25,7 +25,7 @@ class AdminMenuScreen extends ConsumerWidget {
         onPressed: () {
           _showAddProductDialog(context, ref, availableCategories);
         },
-        backgroundColor: AppTheme.primaryOrange,
+        backgroundColor: AppTheme.primaryRed,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text('Nouveau Produit', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
@@ -46,13 +46,13 @@ class AdminMenuScreen extends ConsumerWidget {
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16),
                     title: Text(product.name, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
-                    subtitle: Text('${product.price} DA', style: const TextStyle(color: AppTheme.primaryOrange)),
+                    subtitle: Text('${product.price} DA', style: const TextStyle(color: AppTheme.primaryRed)),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Switch(
                           value: product.isAvailable,
-                          activeColor: AppTheme.primaryOrange,
+                          activeColor: AppTheme.primaryRed,
                           onChanged: (val) {
                             ref.read(adminActionsProvider).toggleProductAvailability(product.id, val);
                           },
@@ -77,7 +77,7 @@ class AdminMenuScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
         error: (error, stack) => Center(child: Text('Erreur: $error', style: const TextStyle(color: AppTheme.error))),
       ),
     );
@@ -135,9 +135,9 @@ class AdminMenuScreen extends ConsumerWidget {
                         height: 120,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryOrange.withOpacity(0.1),
+                          color: AppTheme.primaryRed.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppTheme.primaryOrange, width: 1, style: BorderStyle.solid),
+                          border: Border.all(color: AppTheme.primaryRed, width: 1, style: BorderStyle.solid),
                         ),
                         child: base64Image != null && base64Image!.startsWith('data:image')
                             ? ClipRRect(
@@ -150,7 +150,7 @@ class AdminMenuScreen extends ConsumerWidget {
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.add_photo_alternate_rounded, color: AppTheme.primaryOrange, size: 40),
+                                  const Icon(Icons.add_photo_alternate_rounded, color: AppTheme.primaryRed, size: 40),
                                   const SizedBox(height: 8),
                                   Text(
                                     'Ajouter une image',
@@ -226,7 +226,7 @@ class AdminMenuScreen extends ConsumerWidget {
                     }
                     Navigator.pop(context);
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryOrange),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
                   child: const Text('Enregistrer', style: TextStyle(color: Colors.white)),
                 ),
               ],

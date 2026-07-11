@@ -75,7 +75,7 @@ class AuthWrapper extends ConsumerWidget {
       },
       loading: () => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        body: const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
       ),
       error: (e, trace) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -99,7 +99,7 @@ class RoleWrapper extends ConsumerWidget {
           // Si le document n'existe pas encore (en cours de création)
           return Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            body: const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+            body: const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
           );
         }
 
@@ -118,7 +118,7 @@ class RoleWrapper extends ConsumerWidget {
       },
       loading: () => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+        body: const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
       ),
       error: (e, trace) => Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
