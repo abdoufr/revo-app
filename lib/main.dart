@@ -9,6 +9,8 @@ import 'screens/client/client_home.dart';
 import 'screens/admin/admin_home.dart';
 import 'providers/auth_providers.dart';
 import 'providers/theme_provider.dart';
+import 'providers/client_providers.dart';
+import 'services/vip_tier_service.dart';
 import 'screens/client/pending_approval_screen.dart';
 
 void main() async {
@@ -35,12 +37,18 @@ class RevoApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeProvider);
+    final userAsync = ref.watch(clientUserProvider);
+
+    Color currentPrimary = AppTheme.primaryRed;
+    if (userAsync.hasValue && userAsync.value != null) {
+      currentPrimary = VipTierService.getTierColor(userAsync.value!.lifetimePoints);
+    }
 
     return MaterialApp(
       title: 'Revo App',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: AppTheme.getLightTheme(currentPrimary),
+      darkTheme: AppTheme.getDarkTheme(currentPrimary),
       themeMode: themeState.themeMode,
       locale: themeState.locale,
       supportedLocales: const [

@@ -70,7 +70,7 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(catData['label'] as String,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryRed)),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
             const Divider(height: 24),
             ...selectedIngredients.map((i) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
@@ -79,7 +79,7 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
                     children: [
                       Text('• ${i.name}', style: Theme.of(context).textTheme.bodyLarge),
                       Text('${i.price.toStringAsFixed(0)} DA',
-                          style: const TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.bold)),
+                          style: const TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 )),
@@ -90,7 +90,7 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
                 Text('TOTAL', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
                 Text(
                   '${_totalPrice.toStringAsFixed(0)} DA',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.primaryRed),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
                 ),
               ],
             ),
@@ -108,7 +108,7 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
             },
             icon: const Icon(Icons.refresh_rounded, color: Colors.white),
             label: const Text('Nouvelle composition', style: TextStyle(color: Colors.white)),
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
           ),
         ],
       ),
@@ -125,7 +125,7 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
           if (_selectedCategory != null)
             TextButton(
               onPressed: _reset,
-              child: const Text('Recommencer', style: TextStyle(color: AppTheme.primaryRed)),
+              child: const Text('Recommencer', style: TextStyle(color: Theme.of(context).primaryColor)),
             ),
         ],
       ),
@@ -291,7 +291,7 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+      loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
       error: (e, s) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
     );
   }

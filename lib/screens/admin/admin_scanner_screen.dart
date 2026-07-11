@@ -187,7 +187,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
           IconButton(
             icon: Icon(
               _torchEnabled ? Icons.flash_on_rounded : Icons.flash_off_rounded,
-              color: _torchEnabled ? AppTheme.primaryRed : null,
+              color: _torchEnabled ? Theme.of(context).primaryColor : null,
             ),
             onPressed: () {
               _scannerController.toggleTorch();
@@ -208,12 +208,12 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: AppTheme.primaryRed.withOpacity(0.6),
+                  color: Theme.of(context).primaryColor.withOpacity(0.6),
                   width: 2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primaryRed.withOpacity(0.15),
+                    color: Theme.of(context).primaryColor.withOpacity(0.15),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -233,7 +233,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                       height: 180,
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: AppTheme.primaryRed,
+                          color: Theme.of(context).primaryColor,
                           width: 2.5,
                         ),
                         borderRadius: BorderRadius.circular(16),
@@ -274,7 +274,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                     style: Theme.of(context).textTheme.bodyLarge,
                     decoration: InputDecoration(
                       hintText: 'ID Client (scan auto ou saisie manuelle)',
-                      prefixIcon: const Icon(Icons.person, color: AppTheme.primaryRed),
+                      prefixIcon: const Icon(Icons.person, color: Theme.of(context).primaryColor),
                       suffixIcon: _clientIdController.text.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.close_rounded),
@@ -299,7 +299,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                   icon: const Icon(Icons.search_rounded),
                   label: const Text('Chercher'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryRed,
+                    backgroundColor: Theme.of(context).primaryColor,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -316,7 +316,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(
                 hintText: 'Montant de l\'achat (DA)',
-                prefixIcon: Icon(Icons.attach_money, color: AppTheme.primaryRed),
+                prefixIcon: Icon(Icons.attach_money, color: Theme.of(context).primaryColor),
               ),
             ),
 
@@ -327,7 +327,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
               const Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
-                  child: CircularProgressIndicator(color: AppTheme.primaryRed),
+                  child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
                 ),
               )
             else if (_scannedUser != null) ...[
@@ -340,10 +340,10 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppTheme.primaryRed.withOpacity(0.1),
+                            color: Theme.of(context).primaryColor.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.person_rounded, color: AppTheme.primaryRed, size: 28),
+                          child: const Icon(Icons.person_rounded, color: Theme.of(context).primaryColor, size: 28),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -360,7 +360,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                               Text(
                                 '${_scannedUser!['loyalty_points'] ?? 0} points',
                                 style: const TextStyle(
-                                  color: AppTheme.primaryRed,
+                                  color: Theme.of(context).primaryColor,
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                 ),

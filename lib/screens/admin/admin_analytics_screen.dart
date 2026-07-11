@@ -15,7 +15,7 @@ class AdminAnalyticsScreen extends ConsumerWidget {
         title: Text('Tableau de Bord', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: AppTheme.primaryRed),
+            icon: const Icon(Icons.refresh_rounded, color: Theme.of(context).primaryColor),
             onPressed: () => ref.refresh(advancedAnalyticsProvider),
           ),
         ],
@@ -24,7 +24,7 @@ class AdminAnalyticsScreen extends ConsumerWidget {
         data: (data) {
           return RefreshIndicator(
             onRefresh: () async => ref.refresh(advancedAnalyticsProvider),
-            color: AppTheme.primaryRed,
+            color: Theme.of(context).primaryColor,
             child: ListView(
               padding: const EdgeInsets.all(24),
               children: [
@@ -41,7 +41,7 @@ class AdminAnalyticsScreen extends ConsumerWidget {
                   title: 'Points Distribués (Total)',
                   value: '${data.totalPointsDistributed}',
                   icon: Icons.stars_rounded,
-                  color: AppTheme.primaryRed,
+                  color: Theme.of(context).primaryColor,
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -81,7 +81,7 @@ class AdminAnalyticsScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (e, s) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );

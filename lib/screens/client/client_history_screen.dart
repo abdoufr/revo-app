@@ -106,7 +106,7 @@ class ClientHistoryScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (error, stack) => Center(child: Text('Erreur: $error', style: const TextStyle(color: AppTheme.error))),
       ),
     );

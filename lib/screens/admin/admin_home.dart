@@ -60,7 +60,7 @@ class AdminHome extends ConsumerWidget {
                   );
                 }
               },
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
               child: const Text('Envoyer', style: TextStyle(color: Colors.white)),
             ),
           ],
@@ -135,7 +135,7 @@ class AdminHome extends ConsumerWidget {
                             ],
                           );
                         },
-                        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+                        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
                         error: (err, stack) => Text('Erreur: $err', style: const TextStyle(color: AppTheme.error)),
                       ),
                     ),
@@ -278,12 +278,12 @@ class AdminHome extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isPrimary ? AppTheme.primaryRed : Theme.of(context).colorScheme.surface,
+        color: isPrimary ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
         border: isPrimary ? null : Border.all(color: Theme.of(context).dividerColor),
         boxShadow: isPrimary ? [
           BoxShadow(
-            color: AppTheme.primaryRed.withOpacity(0.3),
+            color: Theme.of(context).primaryColor.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           )
@@ -295,10 +295,10 @@ class AdminHome extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isPrimary ? Colors.white.withOpacity(0.2) : AppTheme.primaryRed.withOpacity(0.1),
+              color: isPrimary ? Colors.white.withOpacity(0.2) : Theme.of(context).primaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: isPrimary ? Colors.white : AppTheme.primaryRed, size: 24),
+            child: Icon(icon, color: isPrimary ? Colors.white : Theme.of(context).primaryColor, size: 24),
           ),
           const SizedBox(height: 20),
           Text(
@@ -327,10 +327,10 @@ class AdminHome extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppTheme.primaryRed.withOpacity(0.1),
+              color: Theme.of(context).primaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: AppTheme.primaryRed, size: 28),
+            child: Icon(icon, color: Theme.of(context).primaryColor, size: 28),
           ),
           const SizedBox(width: 20),
           Expanded(

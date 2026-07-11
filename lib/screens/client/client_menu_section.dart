@@ -92,7 +92,7 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
                       margin: const EdgeInsets.only(right: 12),
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppTheme.primaryRed : Colors.transparent,
+                        color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
@@ -127,7 +127,7 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
           ],
         );
       },
-      loading: () => const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator(color: AppTheme.primaryRed))),
+      loading: () => const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator(color: Theme.of(context).primaryColor))),
       error: (e, s) => Center(child: Text('Erreur: $e')),
     );
   }
@@ -137,7 +137,7 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
-        Text('See All', style: TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.bold, fontSize: 14)),
+        Text('See All', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 14)),
       ],
     );
   }
@@ -244,7 +244,7 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
                   },
                   child: Icon(
                     favoriteIds.contains(product.id) ? Icons.favorite_rounded : Icons.favorite_border_rounded, 
-                    color: favoriteIds.contains(product.id) ? AppTheme.primaryRed : (isDark ? Colors.white54 : Colors.grey), 
+                    color: favoriteIds.contains(product.id) ? Theme.of(context).primaryColor : (isDark ? Colors.white54 : Colors.grey), 
                     size: 20
                   ),
                 ),

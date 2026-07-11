@@ -45,9 +45,9 @@ class AdminRewardsCatalogScreen extends ConsumerWidget {
                         height: 120,
                         width: 120,
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryRed.withOpacity(0.1),
+                          color: Theme.of(context).primaryColor.withOpacity(0.1),
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppTheme.primaryRed),
+                          border: Border.all(color: Theme.of(context).primaryColor),
                         ),
                         child: base64Image != null && base64Image!.startsWith('data:image')
                             ? ClipRRect(
@@ -60,9 +60,9 @@ class AdminRewardsCatalogScreen extends ConsumerWidget {
                             : const Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.add_photo_alternate_rounded, color: AppTheme.primaryRed, size: 30),
+                                  Icon(Icons.add_photo_alternate_rounded, color: Theme.of(context).primaryColor, size: 30),
                                   SizedBox(height: 4),
-                                  Text('Image', style: TextStyle(color: AppTheme.primaryRed, fontSize: 12)),
+                                  Text('Image', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 12)),
                                 ],
                               ),
                       ),
@@ -98,7 +98,7 @@ class AdminRewardsCatalogScreen extends ConsumerWidget {
                       );
                     }
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
                   child: const Text('Ajouter', style: TextStyle(color: Colors.white)),
                 ),
               ],
@@ -119,7 +119,7 @@ class AdminRewardsCatalogScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddRewardDialog(context, ref),
-        backgroundColor: AppTheme.primaryRed,
+        backgroundColor: Theme.of(context).primaryColor,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text('Ajouter Cadeau', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
@@ -151,7 +151,7 @@ class AdminRewardsCatalogScreen extends ConsumerWidget {
                       ),
                     ),
                     title: Text(item.name, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
-                    subtitle: Text('${item.pointsCost} points', style: const TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.bold)),
+                    subtitle: Text('${item.pointsCost} points', style: const TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline, color: AppTheme.error),
                       onPressed: () {
@@ -164,7 +164,7 @@ class AdminRewardsCatalogScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (err, stack) => Center(child: Text('Erreur: $err', style: const TextStyle(color: AppTheme.error))),
       ),
     );

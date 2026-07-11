@@ -85,7 +85,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Choisir la localisation'),
-        backgroundColor: AppTheme.primaryRed,
+        backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
       ),
       body: _isLoading
@@ -117,7 +117,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                             height: 80,
                             child: const Icon(
                               Icons.location_on,
-                              color: AppTheme.primaryRed,
+                              color: Theme.of(context).primaryColor,
                               size: 50,
                             ),
                           ),
@@ -136,7 +136,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryRed,
+                      backgroundColor: Theme.of(context).primaryColor,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(

@@ -44,7 +44,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             height: MediaQuery.of(context).size.height * 0.45,
             child: Container(
               decoration: BoxDecoration(
-                color: AppTheme.primaryRed,
+                color: Theme.of(context).primaryColor,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(50),
                   bottomRight: Radius.circular(50),
@@ -127,7 +127,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryRed,
+                                color: Theme.of(context).primaryColor,
                               ),
                             ),
                           ],
@@ -179,7 +179,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryRed : Colors.transparent,
+          color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: isSelected ? null : Border.all(color: Colors.grey.withOpacity(0.3)),
         ),
@@ -207,7 +207,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () {},
-          child: const Text('See more.', style: TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.bold)),
+          child: const Text('See more.', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
         ),
       ],
     );
@@ -226,7 +226,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             icon: const Icon(Icons.rate_review_rounded, color: Colors.white),
             label: const Text('Laisser un avis', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryRed,
+              backgroundColor: Theme.of(context).primaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
@@ -276,10 +276,10 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                               children: [
                                 CircleAvatar(
                                   radius: 16,
-                                  backgroundColor: AppTheme.primaryRed.withOpacity(0.1),
+                                  backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
                                   child: Text(
                                     review.userName.isNotEmpty ? review.userName[0].toUpperCase() : 'U',
-                                    style: const TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -302,7 +302,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                 },
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+            loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
             error: (e, s) => const Center(child: Text('Erreur de chargement des avis.')),
           ),
         ),
@@ -385,7 +385,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryRed,
+                              backgroundColor: Theme.of(context).primaryColor,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             ),
                             child: const Text('Envoyer', style: TextStyle(color: Colors.white)),

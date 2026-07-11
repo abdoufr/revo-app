@@ -23,13 +23,13 @@ class AppTheme {
   static const Color success = Color(0xFF10B981);
   static const Color error = Color(0xFFEF4444);
   
-  static ThemeData get lightTheme {
+  static ThemeData getLightTheme([Color color = primaryRed]) {
     return ThemeData(
       brightness: Brightness.light,
       scaffoldBackgroundColor: bgLightGray,
-      primaryColor: primaryRed,
-      colorScheme: const ColorScheme.light(
-        primary: primaryRed,
+      primaryColor: color,
+      colorScheme: ColorScheme.light(
+        primary: color,
         secondary: primaryRedLight,
         surface: bgWhite,
         error: error,
@@ -67,13 +67,13 @@ class AppTheme {
     );
   }
 
-  static ThemeData get darkTheme {
+  static ThemeData getDarkTheme([Color color = primaryRed]) {
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: bgDark,
-      primaryColor: primaryRed,
-      colorScheme: const ColorScheme.dark(
-        primary: primaryRed,
+      primaryColor: color,
+      colorScheme: ColorScheme.dark(
+        primary: color,
         secondary: primaryRedLight,
         surface: bgDarkCard,
         error: error,

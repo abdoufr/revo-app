@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_providers.dart';
 import '../../providers/client_providers.dart';
+import '../../services/vip_tier_service.dart';
 
 final leaderboardProvider = StreamProvider<List<ClientUser>>((ref) {
   return FirebaseFirestore.instance
@@ -21,17 +22,7 @@ final leaderboardProvider = StreamProvider<List<ClientUser>>((ref) {
 class ClientLeaderboardScreen extends ConsumerWidget {
   const ClientLeaderboardScreen({super.key});
 
-  Color _getVipColor(int points) {
-    if (points >= 500) return Colors.amber; // Gold
-    if (points >= 200) return Colors.grey.shade400; // Silver
-    return AppTheme.primaryRed; // Basic / Default
-  }
 
-  String _getVipTier(int points) {
-    if (points >= 500) return 'GOLD';
-    if (points >= 200) return 'SILVER';
-    return 'BASIC';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,9 +49,9 @@ class ClientLeaderboardScreen extends ConsumerWidget {
             itemCount: users.length,
             itemBuilder: (context, index) {
               final user = users[index];
-              final isMe = currentUser?.uid == user.id;
+              final isMe = currentUser != null && user.id == currentUser.uid;
               final rank = index + 1;
-              final vipColor = _getVipColor(user.lifetimePoints);
+              final vipColor = VipTierService.getTierColor(user.lifetimePoints);
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
@@ -92,11 +83,11 @@ class ClientLeaderboardScreen extends ConsumerWidget {
                           children: [
                             Text(
                               isMe ? 'Moi (${user.name})' : user.name,
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18, color: isMe ? AppTheme.primaryRed : null),
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18, color: isMe ? Theme.of(context).primaryColor : null),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Membre ${_getVipTier(user.lifetimePoints)}',
+                              VipTierService.getTierName(user.lifetimePoints),
                               style: TextStyle(color: vipColor, fontSize: 12, fontWeight: FontWeight.w600),
                             ),
                           ],
@@ -124,7 +115,7 @@ class ClientLeaderboardScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (error, stack) => Center(child: Text('Erreur: $error', style: const TextStyle(color: AppTheme.error))),
       ),
     );

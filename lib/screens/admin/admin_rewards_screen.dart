@@ -89,7 +89,7 @@ class _AdminRewardsScreenState extends ConsumerState<AdminRewardsScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Dépense pour 1 Point (DA)',
-                    prefixIcon: Icon(Icons.monetization_on, color: AppTheme.primaryRed),
+                    prefixIcon: Icon(Icons.monetization_on, color: Theme.of(context).primaryColor),
                   ),
                 ),
                 
@@ -111,7 +111,7 @@ class _AdminRewardsScreenState extends ConsumerState<AdminRewardsScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Points requis pour le Cadeau',
-                    prefixIcon: Icon(Icons.star, color: AppTheme.primaryRed),
+                    prefixIcon: Icon(Icons.star, color: Theme.of(context).primaryColor),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -120,7 +120,7 @@ class _AdminRewardsScreenState extends ConsumerState<AdminRewardsScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Description du Cadeau (ex: Un café offert)',
-                    prefixIcon: Icon(Icons.card_giftcard, color: AppTheme.primaryRed),
+                    prefixIcon: Icon(Icons.card_giftcard, color: Theme.of(context).primaryColor),
                   ),
                 ),
 
@@ -134,7 +134,7 @@ class _AdminRewardsScreenState extends ConsumerState<AdminRewardsScreen> {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (error, stack) => Center(child: Text('Erreur: $error', style: const TextStyle(color: AppTheme.error))),
       ),
     );

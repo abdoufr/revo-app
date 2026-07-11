@@ -99,7 +99,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.palette_rounded, color: AppTheme.primaryRed),
+                          const Icon(Icons.palette_rounded, color: Theme.of(context).primaryColor),
                           const SizedBox(width: 12),
                           Text('Préférences d\'Affichage', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                         ],
@@ -111,7 +111,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                           Text('Mode Sombre (Dark Mode)', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
                           Switch(
                             value: themeState.themeMode == ThemeMode.dark,
-                            activeColor: AppTheme.primaryRed,
+                            activeColor: Theme.of(context).primaryColor,
                             onChanged: (val) => ref.read(themeProvider.notifier).toggleTheme(),
                           ),
                         ],
@@ -148,7 +148,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Nom du Fastfood',
-                    prefixIcon: Icon(Icons.storefront, color: AppTheme.primaryRed),
+                    prefixIcon: Icon(Icons.storefront, color: Theme.of(context).primaryColor),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -157,7 +157,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Description (ex: Le meilleur burger)',
-                    prefixIcon: Icon(Icons.description, color: AppTheme.primaryRed),
+                    prefixIcon: Icon(Icons.description, color: Theme.of(context).primaryColor),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -170,7 +170,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                   decoration: const InputDecoration(
                     labelText: 'Annonce (Laisser vide pour cacher)',
-                    prefixIcon: Icon(Icons.campaign, color: AppTheme.primaryRed),
+                    prefixIcon: Icon(Icons.campaign, color: Theme.of(context).primaryColor),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -206,7 +206,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                       icon: const Icon(Icons.map),
                       label: const Text('Ouvrir la carte'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryRed,
+                        backgroundColor: Theme.of(context).primaryColor,
                         foregroundColor: Colors.white,
                       ),
                     ),
@@ -221,7 +221,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   children: _geofenceMessages.map((msg) {
                     return Chip(
                       label: Text(msg, style: const TextStyle(color: Colors.white)),
-                      backgroundColor: AppTheme.primaryRed,
+                      backgroundColor: Theme.of(context).primaryColor,
                       deleteIcon: const Icon(Icons.close, color: Colors.white, size: 18),
                       onDeleted: () {
                         setState(() {
@@ -240,13 +240,13 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                         style: Theme.of(context).textTheme.bodyLarge,
                         decoration: const InputDecoration(
                           labelText: 'Nouveau message (ex: Vous êtes si proche !)',
-                          prefixIcon: Icon(Icons.message, color: AppTheme.primaryRed),
+                          prefixIcon: Icon(Icons.message, color: Theme.of(context).primaryColor),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     IconButton(
-                      icon: const Icon(Icons.add_circle, color: AppTheme.primaryRed, size: 40),
+                      icon: const Icon(Icons.add_circle, color: Theme.of(context).primaryColor, size: 40),
                       onPressed: () {
                         final val = _newMessageController.text.trim();
                         if (val.isNotEmpty && !_geofenceMessages.contains(val)) {
@@ -275,7 +275,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                           children: categories.map((cat) {
                             return Chip(
                               label: Text(cat, style: const TextStyle(color: Colors.white)),
-                              backgroundColor: AppTheme.primaryRed,
+                              backgroundColor: Theme.of(context).primaryColor,
                               deleteIcon: const Icon(Icons.close, color: Colors.white, size: 18),
                               onDeleted: () {
                                 final newList = List<String>.from(categories)..remove(cat);
@@ -293,13 +293,13 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                                 style: Theme.of(context).textTheme.bodyLarge,
                                 decoration: const InputDecoration(
                                   labelText: 'Nouvelle catégorie',
-                                  prefixIcon: Icon(Icons.category, color: AppTheme.primaryRed),
+                                  prefixIcon: Icon(Icons.category, color: Theme.of(context).primaryColor),
                                 ),
                               ),
                             ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: const Icon(Icons.add_circle, color: AppTheme.primaryRed, size: 40),
+                              icon: const Icon(Icons.add_circle, color: Theme.of(context).primaryColor, size: 40),
                               onPressed: () {
                                 final val = _newCategoryController.text.trim();
                                 if (val.isNotEmpty && !categories.contains(val)) {
@@ -314,7 +314,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                       ],
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+                  loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
                   error: (err, stack) => const Text('Erreur chargement catégories', style: TextStyle(color: AppTheme.error)),
                 ),
                 const SizedBox(height: 32),
@@ -327,7 +327,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (err, stack) => Center(child: Text('Erreur: $err', style: const TextStyle(color: AppTheme.error))),
       ),
     );

@@ -71,14 +71,14 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientSettingsScreen())),
                           child: CircleAvatar(
                             radius: 24,
-                            backgroundColor: AppTheme.primaryRed.withOpacity(0.1),
+                            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
                             child: userAsync.when(
                               data: (user) => Text(
                                 user?.name.isNotEmpty == true ? user!.name[0].toUpperCase() : 'U',
-                                style: const TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.bold, fontSize: 20),
+                                style: const TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 20),
                               ),
                               loading: () => const CircularProgressIndicator(strokeWidth: 2),
-                              error: (_, __) => const Icon(Icons.person, color: AppTheme.primaryRed),
+                              error: (_, __) => const Icon(Icons.person, color: Theme.of(context).primaryColor),
                             ),
                           ),
                         ),
@@ -128,7 +128,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                                             width: 70,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
-                                              border: Border.all(color: AppTheme.primaryRed, width: 3),
+                                              border: Border.all(color: Theme.of(context).primaryColor, width: 3),
                                             ),
                                             child: ClipRRect(
                                               borderRadius: BorderRadius.circular(35),
@@ -169,13 +169,13 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [AppTheme.primaryRed, Color(0xFFC00000)],
+                            colors: [Theme.of(context).primaryColor, Color(0xFFC00000)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
-                            BoxShadow(color: AppTheme.primaryRed.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8)),
+                            BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8)),
                           ],
                         ),
                         child: Row(
@@ -258,15 +258,15 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppTheme.primaryRed.withOpacity(0.3)),
+                            border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: AppTheme.primaryRed.withOpacity(0.1), shape: BoxShape.circle),
-                                child: const Icon(Icons.campaign, color: AppTheme.primaryRed),
+                                decoration: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.1), shape: BoxShape.circle),
+                                child: const Icon(Icons.campaign, color: Theme.of(context).primaryColor),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -290,7 +290,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                       },
                     );
                   },
-                      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+                      loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
                       error: (err, stack) => Center(child: Text('Erreur de chargement: $err')),
                     );
                   }
@@ -312,10 +312,10 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
       margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: AppTheme.primaryRed,
+        color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
-          BoxShadow(color: AppTheme.primaryRed.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
+          BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
         ],
       ),
       child: Row(

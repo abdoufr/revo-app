@@ -5,6 +5,7 @@ import '../../models/reward.dart';
 import '../../providers/client_providers.dart'; // for ClientUser
 import '../../providers/admin_providers.dart'; // for rewardConfigProvider
 import '../../l10n/app_translations.dart';
+import '../../services/vip_tier_service.dart';
 import 'rewards_catalog_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -42,21 +43,8 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
         double progress = pointsForReward > 0 ? userPoints / pointsForReward : 0;
         if (progress > 1.0) progress = 1.0;
 
-        String vipTierName = 'Nouveau';
-        Color vipColor = Colors.grey;
-        if (lifetimePoints >= 2000) {
-          vipTierName = 'Gold';
-          vipColor = const Color(0xFFFFD700);
-        } else if (lifetimePoints >= 500) {
-          vipTierName = 'Silver';
-          vipColor = const Color(0xFFC0C0C0);
-        } else if (lifetimePoints >= 100) {
-          vipTierName = 'Bronze';
-          vipColor = const Color(0xFFCD7F32);
-        } else {
-          vipTierName = 'Membre';
-          vipColor = AppTheme.primaryRed;
-        }
+        String vipTierName = VipTierService.getTierName(lifetimePoints);
+        Color vipColor = VipTierService.getTierColor(lifetimePoints);
 
     return Column(
       children: [

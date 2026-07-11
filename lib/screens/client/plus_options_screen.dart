@@ -91,10 +91,10 @@ class PlusOptionsScreen extends ConsumerWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppTheme.primaryRed.withOpacity(0.1),
+          color: Theme.of(context).primaryColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: AppTheme.primaryRed, size: 22),
+        child: Icon(icon, color: Theme.of(context).primaryColor, size: 22),
       ),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),

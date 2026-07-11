@@ -58,7 +58,7 @@ class _ReferralSectionState extends ConsumerState<_ReferralSection> {
         children: [
           Row(
             children: [
-              const Icon(Icons.handshake_rounded, color: AppTheme.primaryRed),
+              const Icon(Icons.handshake_rounded, color: Theme.of(context).primaryColor),
               const SizedBox(width: 12),
               Text('Parrainage', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
             ],
@@ -68,12 +68,12 @@ class _ReferralSectionState extends ConsumerState<_ReferralSection> {
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            decoration: BoxDecoration(color: AppTheme.primaryRed.withOpacity(0.1), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.primaryRed)),
+            decoration: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12), border: Border.all(color: Theme.of(context).primaryColor)),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Mon Code :', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(widget.userId.substring(0, 6).toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryRed, letterSpacing: 2)),
+                Text(widget.userId.substring(0, 6).toUpperCase(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor, letterSpacing: 2)),
               ],
             ),
           ),
@@ -92,7 +92,7 @@ class _ReferralSectionState extends ConsumerState<_ReferralSection> {
               const SizedBox(width: 12),
               ElevatedButton(
                 onPressed: _isLoading ? null : _applyCode,
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
                 child: _isLoading 
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Text('Valider', style: TextStyle(color: Colors.white)),
@@ -145,7 +145,7 @@ class ClientSettingsScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Modifier mon profil', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryRed)),
+                Text('Modifier mon profil', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: nameController,
@@ -220,13 +220,13 @@ class ClientSettingsScreen extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.person_rounded, color: AppTheme.primaryRed),
+                            const Icon(Icons.person_rounded, color: Theme.of(context).primaryColor),
                             const SizedBox(width: 12),
                             Text('my_profile'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         IconButton(
-                          icon: const Icon(Icons.edit_rounded, color: AppTheme.primaryRed),
+                          icon: const Icon(Icons.edit_rounded, color: Theme.of(context).primaryColor),
                           onPressed: () => _showEditProfileDialog(context, user),
                         ),
                       ],
@@ -255,7 +255,7 @@ class ClientSettingsScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.leaderboard_rounded, color: AppTheme.primaryRed),
+                        const Icon(Icons.leaderboard_rounded, color: Theme.of(context).primaryColor),
                         const SizedBox(width: 12),
                         Text('public_ranking'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                       ],
@@ -272,7 +272,7 @@ class ClientSettingsScreen extends ConsumerWidget {
                         Expanded(child: Text('participate_ranking'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600))),
                         Switch(
                           value: user.isPublic,
-                          activeColor: AppTheme.primaryRed,
+                          activeColor: Theme.of(context).primaryColor,
                           onChanged: (val) => _togglePublicProfile(val, user.id, context),
                         ),
                       ],
@@ -288,7 +288,7 @@ class ClientSettingsScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.palette_rounded, color: AppTheme.primaryRed),
+                        const Icon(Icons.palette_rounded, color: Theme.of(context).primaryColor),
                         const SizedBox(width: 12),
                         Text('display_prefs'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                       ],
@@ -300,7 +300,7 @@ class ClientSettingsScreen extends ConsumerWidget {
                         Text('dark_mode'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
                         Switch(
                           value: themeState.themeMode == ThemeMode.dark,
-                          activeColor: AppTheme.primaryRed,
+                          activeColor: Theme.of(context).primaryColor,
                           onChanged: (val) => ref.read(themeProvider.notifier).toggleTheme(),
                         ),
                       ],
@@ -355,7 +355,7 @@ class ClientSettingsScreen extends ConsumerWidget {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (e, s) => Center(child: Text('Erreur: $e', style: const TextStyle(color: AppTheme.error))),
       ),
     );

@@ -60,12 +60,12 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
           content: Text(
             'Vous avez gagné :\n\n${config.wheelPrizes[randomIndex]}',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.primaryRed),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
           ),
           actions: [
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx),
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
               child: const Text('Génial !', style: TextStyle(color: Colors.white)),
             ),
           ],
@@ -98,7 +98,7 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
                   const SizedBox(height: 24),
                   Text(
                     'Vos Points: ${user.loyaltyPoints}',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryRed),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
                   ),
                   const SizedBox(height: 8),
                   Text('Tourner la roue coûte ${config.wheelCost} points', style: Theme.of(context).textTheme.bodyMedium),
@@ -113,7 +113,7 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
                             FortuneItem(
                               child: Text(prize, style: const TextStyle(fontWeight: FontWeight.bold)),
                               style: FortuneItemStyle(
-                                color: AppTheme.primaryRed.withOpacity(config.wheelPrizes.indexOf(prize) % 2 == 0 ? 1 : 0.8),
+                                color: Theme.of(context).primaryColor.withOpacity(config.wheelPrizes.indexOf(prize) % 2 == 0 ? 1 : 0.8),
                                 borderColor: Colors.white,
                                 borderWidth: 2,
                               ),
@@ -131,7 +131,7 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
                       child: ElevatedButton(
                         onPressed: _isSpinning ? null : () => _spinWheel(config, user.loyaltyPoints, user.id),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryRed,
+                          backgroundColor: Theme.of(context).primaryColor,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         ),
                         child: _isSpinning
@@ -143,11 +143,11 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
                 ],
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+            loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
             error: (e, s) => Center(child: Text('Erreur: $e')),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+        loading: () => const Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
         error: (e, s) => Center(child: Text('Erreur: $e')),
       ),
     );
