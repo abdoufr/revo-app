@@ -14,6 +14,8 @@ class AdminMenuScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsyncValue = ref.watch(productsStreamProvider);
+    final categoriesAsyncValue = ref.watch(categoriesProvider);
+    final List<String> availableCategories = categoriesAsyncValue.value ?? ['General'];
 
     return Scaffold(
       appBar: AppBar(
@@ -21,7 +23,7 @@ class AdminMenuScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          _showAddProductDialog(context, ref);
+          _showAddProductDialog(context, ref, availableCategories);
         },
         backgroundColor: AppTheme.primaryOrange,
         icon: const Icon(Icons.add, color: Colors.white),
@@ -51,7 +53,7 @@ class AdminMenuScreen extends ConsumerWidget {
                         IconButton(
                           icon: Icon(Icons.edit, color: Theme.of(context).iconTheme.color),
                           onPressed: () {
-                            _showAddProductDialog(context, ref, product: product);
+                            _showAddProductDialog(context, ref, availableCategories, product: product);
                           },
                         ),
                         IconButton(
@@ -74,11 +76,22 @@ class AdminMenuScreen extends ConsumerWidget {
     );
   }
 
-  void _showAddProductDialog(BuildContext context, WidgetRef ref, {Product? product}) {
+  void _showAddProductDialog(BuildContext context, WidgetRef ref, List<String> categories, {Product? product}) {
     final nameController = TextEditingController(text: product?.name ?? '');
     final descController = TextEditingController(text: product?.description ?? '');
     final priceController = TextEditingController(text: product?.price.toString() ?? '');
-    final categoryController = TextEditingController(text: product?.category ?? '');
+    
+    String selectedCategory = product?.category ?? '';
+    if (selectedCategory.isNotEmpty && !categories.contains(selectedCategory)) {
+      categories = [...categories, selectedCategory];
+    }
+    if (selectedCategory.isEmpty || !categories.contains(selectedCategory)) {
+      selectedCategory = categories.isNotEmpty ? categories.first : 'General';
+    }
+    if (!categories.contains('General') && categories.isEmpty) {
+        categories = ['General'];
+        selectedCategory = 'General';
+    }
     String? base64Image = product?.imageUrl;
 
     showDialog(
@@ -160,10 +173,24 @@ class AdminMenuScreen extends ConsumerWidget {
                       decoration: const InputDecoration(hintText: 'Prix (DA)'),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      controller: categoryController,
+                    DropdownButtonFormField<String>(
+                      value: selectedCategory,
+                      decoration: InputDecoration(
+                        hintText: 'category'.tr(context),
+                      ),
                       style: Theme.of(context).textTheme.bodyLarge,
-                      decoration: InputDecoration(hintText: 'category_hint'.tr(context)),
+                      dropdownColor: Theme.of(context).colorScheme.surface,
+                      items: categories.map((cat) {
+                        return DropdownMenuItem(
+                          value: cat,
+                          child: Text(cat),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() => selectedCategory = val);
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -180,7 +207,7 @@ class AdminMenuScreen extends ConsumerWidget {
                       name: nameController.text,
                       description: descController.text,
                       price: double.tryParse(priceController.text) ?? 0.0,
-                      category: categoryController.text.isEmpty ? 'General' : categoryController.text.trim(),
+                      category: selectedCategory,
                       imageUrl: base64Image,
                     );
                     

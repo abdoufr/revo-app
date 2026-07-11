@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product.dart';
 import '../models/reward.dart';
+import 'client_providers.dart';
 
 final productsStreamProvider = StreamProvider<List<Product>>((ref) {
   return FirebaseFirestore.instance.collection('products').snapshots().map((snapshot) {
@@ -16,6 +17,28 @@ final rewardConfigProvider = StreamProvider<RewardConfig>((ref) {
     }
     // Default config if not found
     return RewardConfig(spendingPerPoint: 100, pointsRequiredForReward: 50, rewardDescription: 'Cadeau Gratuit');
+  });
+});
+
+final categoriesProvider = StreamProvider<List<String>>((ref) {
+  return FirebaseFirestore.instance.collection('config').doc('categories').snapshots().map((doc) {
+    if (doc.exists && doc.data() != null) {
+      final list = doc.data()!['list'];
+      if (list is List) {
+        return List<String>.from(list);
+      }
+    }
+    return ['General'];
+  });
+});
+
+final allClientsStreamProvider = StreamProvider<List<ClientUser>>((ref) {
+  return FirebaseFirestore.instance
+      .collection('users')
+      .where('role', isEqualTo: 'client')
+      .snapshots()
+      .map((snapshot) {
+    return snapshot.docs.map((doc) => ClientUser.fromMap(doc.data(), doc.id)).toList();
   });
 });
 
@@ -109,6 +132,23 @@ class AdminActions {
       'fastfoodDescription': description,
       'announcementBanner': banner,
     }, SetOptions(merge: true));
+  }
+
+  Future<void> updateCategories(List<String> categories) async {
+    await _firestore.collection('config').doc('categories').set({
+      'list': categories,
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> deleteClient(String userId) async {
+    await _firestore.collection('users').doc(userId).delete();
+  }
+
+  Future<void> resetClientPoints(String userId) async {
+    await _firestore.collection('users').doc(userId).update({
+      'loyalty_points': 0,
+      'lifetime_points': 0,
+    });
   }
 }
 

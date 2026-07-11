@@ -8,6 +8,7 @@ import 'admin_menu_screen.dart';
 import 'admin_rewards_screen.dart';
 import 'admin_settings_screen.dart';
 import 'admin_approvals_screen.dart';
+import 'admin_users_screen.dart';
 
 class AdminHome extends ConsumerWidget {
   const AdminHome({super.key});
@@ -104,6 +105,16 @@ class AdminHome extends ConsumerWidget {
                       icon: Icons.person_add_alt_1_rounded,
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminApprovalsScreen()));
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Clients & Utilisateurs',
+                      subtitle: 'Gérer tous les comptes',
+                      icon: Icons.people_alt_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminUsersScreen()));
                       },
                     ),
                     const SizedBox(height: 16),

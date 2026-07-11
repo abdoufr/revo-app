@@ -16,6 +16,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
   final _bannerController = TextEditingController();
+  final _newCategoryController = TextEditingController();
   bool _isLoading = false;
   bool _isInit = false;
 
@@ -24,6 +25,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     _nameController.dispose();
     _descController.dispose();
     _bannerController.dispose();
+    _newCategoryController.dispose();
     super.dispose();
   }
 
@@ -52,10 +54,10 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     }
   }
 
-  @override
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(appSettingsProvider);
     final themeState = ref.watch(themeProvider);
+    final categoriesAsync = ref.watch(categoriesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -155,6 +157,64 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                     labelText: 'Annonce (Laisser vide pour cacher)',
                     prefixIcon: Icon(Icons.campaign, color: AppTheme.primaryOrange),
                   ),
+                ),
+                const SizedBox(height: 32),
+                Text('Gestion des Catégories', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text('Gérez les catégories disponibles pour vos produits.', style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 16),
+                categoriesAsync.when(
+                  data: (categories) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: categories.map((cat) {
+                            return Chip(
+                              label: Text(cat, style: const TextStyle(color: Colors.white)),
+                              backgroundColor: AppTheme.primaryOrange,
+                              deleteIcon: const Icon(Icons.close, color: Colors.white, size: 18),
+                              onDeleted: () {
+                                final newList = List<String>.from(categories)..remove(cat);
+                                ref.read(adminActionsProvider).updateCategories(newList);
+                              },
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _newCategoryController,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                                decoration: const InputDecoration(
+                                  labelText: 'Nouvelle catégorie',
+                                  prefixIcon: Icon(Icons.category, color: AppTheme.primaryOrange),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.add_circle, color: AppTheme.primaryOrange, size: 40),
+                              onPressed: () {
+                                final val = _newCategoryController.text.trim();
+                                if (val.isNotEmpty && !categories.contains(val)) {
+                                  final newList = List<String>.from(categories)..add(val);
+                                  ref.read(adminActionsProvider).updateCategories(newList);
+                                  _newCategoryController.clear();
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryOrange)),
+                  error: (err, stack) => const Text('Erreur chargement catégories', style: TextStyle(color: AppTheme.error)),
                 ),
                 const SizedBox(height: 32),
                 PrimaryButton(
