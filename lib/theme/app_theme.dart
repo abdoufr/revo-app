@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Purxx Style Colors (Light Theme)
-  static const Color primaryRed = Color(0xFF990000); // Deep red from the design
-  static const Color primaryRedLight = Color(0xFFC62828);
+  static const Color primaryRed = Color(0xFFFF5722); // Reverted to Orange as requested
+  static const Color primaryRedLight = Color(0xFFFF8A65);
   static const Color bgWhite = Color(0xFFFFFFFF);
   static const Color bgLightGray = Color(0xFFF9F9F9);
   static const Color textDark = Color(0xFF1E1E1E);

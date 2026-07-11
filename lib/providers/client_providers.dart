@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_providers.dart';
 
 class ClientUser {
@@ -64,11 +66,21 @@ class ClientActions {
 }
 
 final clientActionsProvider = Provider((ref) => ClientActions());
+
 class FavoriteProductsNotifier extends Notifier<Set<String>> {
   @override
-  Set<String> build() => <String>{};
+  Set<String> build() {
+    _loadFavorites();
+    return <String>{};
+  }
 
-  void toggle(String productId) {
+  Future<void> _loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    final favList = prefs.getStringList('favorites') ?? [];
+    state = favList.toSet();
+  }
+
+  void toggle(String productId) async {
     final newState = Set<String>.from(state);
     if (newState.contains(productId)) {
       newState.remove(productId);
@@ -76,6 +88,9 @@ class FavoriteProductsNotifier extends Notifier<Set<String>> {
       newState.add(productId);
     }
     state = newState;
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favorites', newState.toList());
   }
 }
 

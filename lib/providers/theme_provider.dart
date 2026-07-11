@@ -38,22 +38,21 @@ class ThemeNotifier extends Notifier<ThemeState> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    final isDark = prefs.getBool('isDark') ?? false;
+    // Force light mode
+    await prefs.setBool('isDark', false);
     final langCode = prefs.getString('lang') ?? 'fr';
 
     state = state.copyWith(
-      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+      themeMode: ThemeMode.light,
       locale: Locale(langCode),
     );
   }
 
   Future<void> toggleTheme() async {
-    final isDark = state.themeMode == ThemeMode.dark;
-    final newMode = isDark ? ThemeMode.light : ThemeMode.dark;
-    state = state.copyWith(themeMode: newMode);
-
+    // Disabled dark mode per user request
+    state = state.copyWith(themeMode: ThemeMode.light);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isDark', !isDark);
+    await prefs.setBool('isDark', false);
   }
 
   Future<void> setLanguage(String langCode) async {
