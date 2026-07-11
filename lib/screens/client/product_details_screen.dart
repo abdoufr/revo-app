@@ -26,6 +26,10 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
     _commentController.dispose();
     super.dispose();
   }
+  bool _showDetails = true; // true = Details tab, false = Reviews tab
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
