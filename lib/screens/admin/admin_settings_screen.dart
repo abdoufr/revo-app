@@ -4,6 +4,8 @@ import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/theme_provider.dart';
+import 'package:latlong2/latlong.dart';
+import 'map_picker_screen.dart';
 
 class AdminSettingsScreen extends ConsumerStatefulWidget {
   const AdminSettingsScreen({super.key});
@@ -179,26 +181,33 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: TextField(
-                        controller: _latController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        decoration: const InputDecoration(
-                          labelText: 'Latitude',
-                          prefixIcon: Icon(Icons.location_on, color: AppTheme.primaryRed),
-                        ),
+                      child: Text(
+                        'Lat: ${_latController.text.isNotEmpty ? _latController.text : "0.0"}\nLng: ${_lngController.text.isNotEmpty ? _lngController.text : "0.0"}',
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextField(
-                        controller: _lngController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        decoration: const InputDecoration(
-                          labelText: 'Longitude',
-                          prefixIcon: Icon(Icons.location_on, color: AppTheme.primaryRed),
-                        ),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final lat = double.tryParse(_latController.text) ?? 0.0;
+                        final lng = double.tryParse(_lngController.text) ?? 0.0;
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MapPickerScreen(initialLat: lat, initialLng: lng),
+                          ),
+                        );
+                        if (result != null && result is LatLng) {
+                          setState(() {
+                            _latController.text = result.latitude.toString();
+                            _lngController.text = result.longitude.toString();
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.map),
+                      label: const Text('Ouvrir la carte'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryRed,
+                        foregroundColor: Colors.white,
                       ),
                     ),
                   ],

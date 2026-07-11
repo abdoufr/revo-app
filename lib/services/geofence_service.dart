@@ -26,15 +26,42 @@ class GeofenceService {
     LocationPermission permission;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
+    if (!serviceEnabled) {
+      if (context.mounted) {
+        _showPermissionDialog(
+          context, 
+          'Localisation désactivée', 
+          'Veuillez activer le GPS pour recevoir nos offres lorsque vous passez près du magasin !'
+        );
+      }
+      return;
+    }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return;
+      if (permission == LocationPermission.denied) {
+        if (context.mounted) {
+          _showPermissionDialog(
+            context,
+            'Permission refusée',
+            'L\'application a besoin de la localisation pour savoir si vous êtes à proximité de notre fastfood. Vous ratez des cadeaux !'
+          );
+        }
+        return;
+      }
     }
     
-    if (permission == LocationPermission.deniedForever) return;
+    if (permission == LocationPermission.deniedForever) {
+      if (context.mounted) {
+        _showPermissionDialog(
+          context,
+          'Permission bloquée',
+          'Vous avez bloqué la localisation de manière permanente. Allez dans les paramètres de votre appareil pour l\'activer et profiter de nos cadeaux de proximité.'
+        );
+      }
+      return;
+    }
 
     try {
       Position position = await Geolocator.getCurrentPosition(
@@ -80,6 +107,29 @@ class GeofenceService {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('OK', style: TextStyle(color: Color(0xFFFF5722), fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static void _showPermissionDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.location_disabled_rounded, color: Colors.orange, size: 28),
+            const SizedBox(width: 8),
+            Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold))),
+          ],
+        ),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('COMPRIS', style: TextStyle(color: Color(0xFFFF5722), fontWeight: FontWeight.bold)),
           ),
         ],
       ),
