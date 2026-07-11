@@ -17,6 +17,10 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
   final _descController = TextEditingController();
   final _bannerController = TextEditingController();
   final _newCategoryController = TextEditingController();
+  final _latController = TextEditingController();
+  final _lngController = TextEditingController();
+  final _newMessageController = TextEditingController();
+  List<String> _geofenceMessages = [];
   bool _isLoading = false;
   bool _isInit = false;
 
@@ -26,6 +30,9 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     _descController.dispose();
     _bannerController.dispose();
     _newCategoryController.dispose();
+    _latController.dispose();
+    _lngController.dispose();
+    _newMessageController.dispose();
     super.dispose();
   }
 
@@ -36,6 +43,9 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
         _nameController.text.trim(),
         _descController.text.trim(),
         _bannerController.text.trim(),
+        double.tryParse(_latController.text.trim()) ?? 0.0,
+        double.tryParse(_lngController.text.trim()) ?? 0.0,
+        _geofenceMessages,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -69,6 +79,9 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             _nameController.text = settings.fastfoodName;
             _descController.text = settings.fastfoodDescription;
             _bannerController.text = settings.announcementBanner;
+            _latController.text = settings.storeLat.toString();
+            _lngController.text = settings.storeLng.toString();
+            _geofenceMessages = List.from(settings.geofenceMessages);
             _isInit = true;
           }
 
@@ -157,6 +170,85 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                     labelText: 'Annonce (Laisser vide pour cacher)',
                     prefixIcon: Icon(Icons.campaign, color: AppTheme.primaryRed),
                   ),
+                ),
+                const SizedBox(height: 32),
+                Text('Localisation et Notifications', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text('Gérez la position GPS du magasin et les messages de bienvenue lorsque le client s\'approche à moins de 100m.', style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _latController,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        decoration: const InputDecoration(
+                          labelText: 'Latitude',
+                          prefixIcon: Icon(Icons.location_on, color: AppTheme.primaryRed),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextField(
+                        controller: _lngController,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        decoration: const InputDecoration(
+                          labelText: 'Longitude',
+                          prefixIcon: Icon(Icons.location_on, color: AppTheme.primaryRed),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text('Messages d\'approche (100m)', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _geofenceMessages.map((msg) {
+                    return Chip(
+                      label: Text(msg, style: const TextStyle(color: Colors.white)),
+                      backgroundColor: AppTheme.primaryRed,
+                      deleteIcon: const Icon(Icons.close, color: Colors.white, size: 18),
+                      onDeleted: () {
+                        setState(() {
+                          _geofenceMessages.remove(msg);
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _newMessageController,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        decoration: const InputDecoration(
+                          labelText: 'Nouveau message (ex: Vous êtes si proche !)',
+                          prefixIcon: Icon(Icons.message, color: AppTheme.primaryRed),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle, color: AppTheme.primaryRed, size: 40),
+                      onPressed: () {
+                        final val = _newMessageController.text.trim();
+                        if (val.isNotEmpty && !_geofenceMessages.contains(val)) {
+                          setState(() {
+                            _geofenceMessages.add(val);
+                            _newMessageController.clear();
+                          });
+                        }
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 32),
                 Text('Gestion des Catégories', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),

@@ -294,6 +294,18 @@ class ClientSettingsScreen extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('dark_mode'.tr(context), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                        Switch(
+                          value: themeState.themeMode == ThemeMode.dark,
+                          activeColor: AppTheme.primaryRed,
+                          onChanged: (val) => ref.read(themeProvider.notifier).toggleTheme(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

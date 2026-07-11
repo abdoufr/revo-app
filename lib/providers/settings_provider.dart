@@ -12,6 +12,9 @@ final appSettingsProvider = StreamProvider<AppSettings>((ref) {
       fastfoodName: 'REVO APP',
       fastfoodDescription: 'Le meilleur fastfood!',
       announcementBanner: '',
+      storeLat: 0.0,
+      storeLng: 0.0,
+      geofenceMessages: ['Vous êtes à côté ! Venez nous voir !'],
     );
   });
 });

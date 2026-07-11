@@ -130,11 +130,14 @@ class AdminActions {
     });
   }
 
-  Future<void> updateAppSettings(String name, String description, String banner) async {
+  Future<void> updateAppSettings(String name, String description, String banner, double lat, double lng, List<String> messages) async {
     await _firestore.collection('config').doc('fastfood').set({
       'fastfoodName': name,
       'fastfoodDescription': description,
       'announcementBanner': banner,
+      'storeLat': lat,
+      'storeLng': lng,
+      'geofenceMessages': messages,
     }, SetOptions(merge: true));
   }
 

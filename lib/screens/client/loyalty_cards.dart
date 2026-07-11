@@ -246,14 +246,14 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.account_balance_wallet_rounded, color: Colors.white),
+              const Icon(Icons.card_giftcard_rounded, color: Colors.white),
               const SizedBox(width: 12),
               Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('total_spent'.tr(context), style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                  Text('${(lifetimePoints * config.spendingPerPoint).toStringAsFixed(0)} DA', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                  const Text('Avant prochain cadeau', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  Text('${pointsForReward - userPoints} points', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
                 ],
               ),
             ],

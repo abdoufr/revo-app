@@ -17,6 +17,7 @@ import 'client_history_screen.dart';
 import 'client_leaderboard_screen.dart';
 import 'wheel_of_fortune_screen.dart';
 import 'composer_screen.dart';
+import '../../services/geofence_service.dart';
 
 class ClientHome extends ConsumerStatefulWidget {
   const ClientHome({super.key});
@@ -27,11 +28,28 @@ class ClientHome extends ConsumerStatefulWidget {
 
 class _ClientHomeState extends ConsumerState<ClientHome> {
   int _selectedIndex = 0;
+  bool _geofenceChecked = false;
 
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(clientUserProvider);
     final storiesAsync = ref.watch(storiesProvider);
+    final settingsAsync = ref.watch(appSettingsProvider);
+
+    // Trigger geofence check once per session when settings are loaded
+    if (!_geofenceChecked) {
+      settingsAsync.whenData((settings) {
+        _geofenceChecked = true;
+        Future.microtask(() {
+          GeofenceService.checkLocationAndNotify(
+            context,
+            settings.storeLat,
+            settings.storeLng,
+            settings.geofenceMessages,
+          );
+        });
+      });
+    }
 
     return Scaffold(
       extendBody: true, // For floating bottom nav bar
