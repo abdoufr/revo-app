@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import '../../theme/app_theme.dart';
 
@@ -23,50 +24,77 @@ class MapPickerScreen extends StatefulWidget {
 class _MapPickerScreenState extends State<MapPickerScreen> {
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
   LatLng? _selectedLocation;
   bool _isLoading = true;
   bool _isSearching = false;
+  List<dynamic> _searchResults = [];
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
-  Future<void> _searchLocation(String query) async {
-    if (query.trim().isEmpty) return;
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    if (query.trim().isEmpty) {
+      setState(() {
+        _searchResults = [];
+        _isSearching = false;
+      });
+      return;
+    }
 
     setState(() => _isSearching = true);
-    try {
-      final url = Uri.parse(
-        'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=1',
-      );
-      final response = await http.get(
-        url,
-        headers: {'User-Agent': 'com.revo.app'},
-      );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data is List && data.isNotEmpty) {
-          final lat = double.parse(data[0]['lat']);
-          final lon = double.parse(data[0]['lon']);
-          _mapController.move(LatLng(lat, lon), 15.0);
-        } else {
-          if (mounted)
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Aucun résultat trouvé')),
-            );
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        // Using Photon API which is much better for autocomplete/typo tolerance
+        final url = Uri.parse(
+          'https://photon.komoot.io/api/?q=${Uri.encodeComponent(query)}&limit=5',
+        );
+        final response = await http.get(url);
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (mounted) {
+            setState(() {
+              _searchResults = data['features'] ?? [];
+            });
+          }
         }
+      } catch (e) {
+        debugPrint('Erreur recherche: $e');
+      } finally {
+        if (mounted) setState(() => _isSearching = false);
       }
-    } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erreur de recherche: $e')));
-    } finally {
-      if (mounted) setState(() => _isSearching = false);
+    });
+  }
+
+  void _selectSearchResult(dynamic feature) {
+    final coords = feature['geometry']['coordinates'];
+    final lat = (coords[1] as num).toDouble();
+    final lon = (coords[0] as num).toDouble();
+    final props = feature['properties'];
+
+    String name = props['name'] ?? '';
+    if (props['city'] != null && props['city'] != name) {
+      name += ', ${props['city']}';
+    } else if (props['state'] != null) {
+      name += ', ${props['state']}';
     }
+
+    _searchController.text = name;
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      _searchResults = [];
+    });
+
+    _mapController.move(LatLng(lat, lon), 15.0);
   }
 
   @override
@@ -189,7 +217,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                         child: TextField(
                           controller: _searchController,
                           textInputAction: TextInputAction.search,
-                          onSubmitted: _searchLocation,
+                          onChanged: _onSearchChanged,
                           decoration: InputDecoration(
                             hintText: 'Rechercher une ville, quartier...',
                             border: InputBorder.none,
@@ -209,28 +237,73 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                                       Icons.search,
                                       color: Theme.of(context).primaryColor,
                                     ),
-                                    onPressed: () =>
-                                        _searchLocation(_searchController.text),
+                                    onPressed: () {},
                                   ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(230),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black12, blurRadius: 4),
-                          ],
+                      if (_searchResults.isNotEmpty)
+                        Container(
+                          margin: const EdgeInsets.top(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: const [
+                              BoxShadow(color: Colors.black12, blurRadius: 8),
+                            ],
+                          ),
+                          constraints: const BoxConstraints(maxHeight: 250),
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: _searchResults.length,
+                            separatorBuilder: (ctx, i) =>
+                                const Divider(height: 1),
+                            itemBuilder: (ctx, index) {
+                              final feature = _searchResults[index];
+                              final props = feature['properties'];
+                              final name = props['name'] ?? 'Inconnu';
+                              final city =
+                                  props['city'] ??
+                                  props['state'] ??
+                                  props['country'] ??
+                                  '';
+
+                              return ListTile(
+                                leading: const Icon(
+                                  Icons.location_on_outlined,
+                                  color: Colors.grey,
+                                ),
+                                title: Text(
+                                  name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: city.isNotEmpty ? Text(city) : null,
+                                onTap: () => _selectSearchResult(feature),
+                              );
+                            },
+                          ),
                         ),
-                        child: const Text(
-                          'Déplacez la carte pour positionner le marqueur exactement sur votre emplacement.',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                          textAlign: TextAlign.center,
+                      if (_searchResults.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(230),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: const [
+                                BoxShadow(color: Colors.black12, blurRadius: 4),
+                              ],
+                            ),
+                            child: const Text(
+                              'Déplacez la carte pour positionner le marqueur exactement sur votre emplacement.',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
