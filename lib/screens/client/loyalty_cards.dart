@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../theme/app_theme.dart';
 import '../../models/reward.dart';
-import '../../models/reward_config.dart';
 import '../../providers/client_providers.dart'; // for ClientUser
 import '../../providers/admin_providers.dart'; // for rewardConfigProvider
 import '../../l10n/app_translations.dart';
