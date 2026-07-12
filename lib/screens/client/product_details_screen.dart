@@ -14,7 +14,8 @@ class ProductDetailsScreen extends ConsumerStatefulWidget {
   const ProductDetailsScreen({super.key, required this.product});
 
   @override
-  ConsumerState<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
+  ConsumerState<ProductDetailsScreen> createState() =>
+      _ProductDetailsScreenState();
 }
 
 class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
@@ -26,6 +27,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
     _commentController.dispose();
     super.dispose();
   }
+
   bool _showDetails = true; // true = Details tab, false = Reviews tab
 
   @override
@@ -34,137 +36,173 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
+      body: Column(
         children: [
-          // Background Curved Red Header
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: MediaQuery.of(context).size.height * 0.45,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(50),
-                  bottomRight: Radius.circular(50),
-                ),
-              ),
-            ),
-          ),
-          
-          SafeArea(
-            child: Column(
-              children: [
-                // Custom AppBar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 20),
-                        ),
-                      ),
-                      const Icon(Icons.more_vert, color: Colors.white),
-                    ],
+          // Top section: Background and Image
+          Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.bottomCenter,
+            children: [
+              // Orange Background
+              Container(
+                height:
+                    MediaQuery.of(context).size.height *
+                    0.3, // Fixed relative height, not too big
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(50),
+                    bottomRight: Radius.circular(50),
                   ),
                 ),
-                
-                const SizedBox(height: 16),
-                
-                // Huge Image
-                Hero(
+                child: SafeArea(
+                  bottom: false,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_back_ios_new_rounded,
+                                color: Colors.black,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.more_vert, color: Colors.white),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Image crossing the border
+              Positioned(
+                bottom: -70,
+                child: Hero(
                   tag: 'product_image_${widget.product.id}',
                   child: Container(
                     height: 180,
                     width: 180,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
+                      color: Colors.white,
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 10)),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
                       ],
                     ),
-                    child: widget.product.imageUrl != null && widget.product.imageUrl!.startsWith('data:image')
+                    child:
+                        widget.product.imageUrl != null &&
+                            widget.product.imageUrl!.startsWith('data:image')
                         ? ClipRRect(
-                            borderRadius: BorderRadius.circular(125),
-                            child: Image.memory(base64Decode(widget.product.imageUrl!.split(',').last), fit: BoxFit.cover),
+                            borderRadius: BorderRadius.circular(90),
+                            child: Image.memory(
+                              base64Decode(
+                                widget.product.imageUrl!.split(',').last,
+                              ),
+                              fit: BoxFit.cover,
+                            ),
                           )
-                        : const CircleAvatar(backgroundColor: Colors.white, child: Icon(Icons.fastfood, size: 80, color: Colors.grey)),
+                        : const CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              Icons.fastfood,
+                              size: 80,
+                              color: Colors.grey,
+                            ),
+                          ),
                   ),
                 ),
-                
-                const SizedBox(height: 16),
-                
-                // Content Section
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Title & Price Row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                widget.product.name,
-                                style: Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 28),
-                              ),
-                            ),
-                            Text(
-                              '${widget.product.price.toStringAsFixed(1)} DA',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                          ],
+              ),
+            ],
+          ),
+
+          // Gap for the image overflow
+          const SizedBox(height: 86),
+
+          // Content Section
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title & Price Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.product.name,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.displayMedium?.copyWith(fontSize: 28),
                         ),
-                        
-                        const SizedBox(height: 8),
-                        
-                        // Category Subtitle
-                        Text(
-                          widget.product.category.isEmpty ? 'General' : widget.product.category,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '${widget.product.price.toStringAsFixed(1)} DA',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
                         ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        // Tabs (Details / Reviews)
-                        Row(
-                          children: [
-                            _buildTabButton('Details', _showDetails),
-                            const SizedBox(width: 16),
-                            _buildTabButton('Reviews', !_showDetails),
-                          ],
-                        ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        // Tab Content
-                        Expanded(
-                          child: _showDetails 
-                              ? SingleChildScrollView(child: _buildDetailsContent()) 
-                              : _buildReviewsContent(),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Category Subtitle
+                  Text(
+                    widget.product.category.isEmpty
+                        ? 'General'
+                        : widget.product.category,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 16),
+
+                  // Tabs (Details / Reviews)
+                  Row(
+                    children: [
+                      _buildTabButton('Details', _showDetails),
+                      const SizedBox(width: 16),
+                      _buildTabButton('Reviews', !_showDetails),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Tab Content
+                  Expanded(
+                    child: _showDetails
+                        ? SingleChildScrollView(child: _buildDetailsContent())
+                        : _buildReviewsContent(),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -179,14 +217,20 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+          color: isSelected
+              ? Theme.of(context).primaryColor
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
-          border: isSelected ? null : Border.all(color: Colors.grey.withOpacity(0.3)),
+          border: isSelected
+              ? null
+              : Border.all(color: Colors.grey.withOpacity(0.3)),
         ),
         child: Text(
           title,
           style: TextStyle(
-            color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+            color: isSelected
+                ? Colors.white
+                : Theme.of(context).textTheme.bodyLarge?.color,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -199,15 +243,23 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.product.description.isEmpty 
-              ? 'Aucune description disponible pour ce produit. Il est cependant délicieux et préparé avec les meilleurs ingrédients !' 
+          widget.product.description.isEmpty
+              ? 'Aucune description disponible pour ce produit. Il est cependant délicieux et préparé avec les meilleurs ingrédients !'
               : widget.product.description,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5, fontSize: 15),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(height: 1.5, fontSize: 15),
         ),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () {},
-          child: Text('See more.', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+          child: Text(
+            'See more.',
+            style: TextStyle(
+              color: Theme.of(context).primaryColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ],
     );
@@ -216,7 +268,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   Widget _buildReviewsContent() {
     final reviewsAsync = ref.watch(productReviewsProvider(widget.product.id));
     final userAsync = ref.watch(clientUserProvider);
-    
+
     return Column(
       children: [
         // Add review button
@@ -225,16 +277,24 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           child: ElevatedButton.icon(
             onPressed: () => _showAddReviewDialog(context),
             icon: const Icon(Icons.rate_review_rounded, color: Colors.white),
-            label: const Text('Laisser un avis', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            label: const Text(
+              'Laisser un avis',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
           ),
         ),
         const SizedBox(height: 16),
-        
+
         // Reviews list
         Expanded(
           child: reviewsAsync.when(
@@ -244,9 +304,17 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.speaker_notes_off_rounded, size: 60, color: Colors.grey.withOpacity(0.5)),
+                      Icon(
+                        Icons.speaker_notes_off_rounded,
+                        size: 60,
+                        color: Colors.grey.withOpacity(0.5),
+                      ),
                       const SizedBox(height: 16),
-                      Text('Aucun avis pour le moment.\nSoyez le premier !', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.withOpacity(0.8))),
+                      Text(
+                        'Aucun avis pour le moment.\nSoyez le premier !',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey.withOpacity(0.8)),
+                      ),
                     ],
                   ),
                 );
@@ -264,7 +332,11 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: Colors.grey.withOpacity(0.2)),
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
                       ],
                     ),
                     child: Column(
@@ -278,24 +350,40 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                                 children: [
                                   CircleAvatar(
                                     radius: 16,
-                                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).primaryColor.withOpacity(0.1),
                                     child: Text(
-                                      review.userName.isNotEmpty ? review.userName[0].toUpperCase() : 'U',
-                                      style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                                      review.userName.isNotEmpty
+                                          ? review.userName[0].toUpperCase()
+                                          : 'U',
+                                      style: TextStyle(
+                                        color: Theme.of(context).primaryColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   Flexible(
                                     child: Text(
-                                      review.userName, 
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      review.userName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   if (review.isModified ?? false) ...[
                                     const SizedBox(width: 8),
-                                    const Text('(Modifié)', style: TextStyle(color: Colors.grey, fontSize: 10, fontStyle: FontStyle.italic)),
-                                  ]
+                                    const Text(
+                                      '(Modifié)',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 10,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -304,7 +392,10 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                               children: [
                                 RatingBarIndicator(
                                   rating: review.rating.toDouble(),
-                                  itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+                                  itemBuilder: (context, _) => const Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
+                                  ),
                                   itemCount: 5,
                                   itemSize: 16.0,
                                 ),
@@ -316,13 +407,24 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                                         children: [
                                           const SizedBox(width: 8),
                                           GestureDetector(
-                                            onTap: () => _showAddReviewDialog(context, existingReview: review),
-                                            child: const Icon(Icons.edit_rounded, size: 16, color: Colors.blueGrey),
+                                            onTap: () => _showAddReviewDialog(
+                                              context,
+                                              existingReview: review,
+                                            ),
+                                            child: const Icon(
+                                              Icons.edit_rounded,
+                                              size: 16,
+                                              color: Colors.blueGrey,
+                                            ),
                                           ),
                                           const SizedBox(width: 8),
                                           GestureDetector(
                                             onTap: () => _deleteReview(review),
-                                            child: const Icon(Icons.delete_rounded, size: 16, color: Colors.redAccent),
+                                            child: const Icon(
+                                              Icons.delete_rounded,
+                                              size: 16,
+                                              color: Colors.redAccent,
+                                            ),
                                           ),
                                         ],
                                       );
@@ -337,15 +439,25 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Text(review.comment, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4)),
+                        Text(
+                          review.comment,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(height: 1.4),
+                        ),
                       ],
                     ),
                   );
                 },
               );
             },
-            loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
-            error: (e, s) => const Center(child: Text('Erreur de chargement des avis.')),
+            loading: () => Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            error: (e, s) =>
+                const Center(child: Text('Erreur de chargement des avis.')),
           ),
         ),
       ],
@@ -359,16 +471,26 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
         title: const Text('Supprimer l\'avis'),
         content: const Text('Êtes-vous sûr de vouloir supprimer cet avis ?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Supprimer', style: TextStyle(color: Colors.red))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+          ),
         ],
       ),
     );
 
     if (confirm == true && mounted) {
-      await ref.read(reviewsActionsProvider).deleteReview(review.id, widget.product.id);
+      await ref
+          .read(reviewsActionsProvider)
+          .deleteReview(review.id, widget.product.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Avis supprimé')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Avis supprimé')));
       }
     }
   }
@@ -387,13 +509,22 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(existingReview != null ? 'Modifier votre avis' : 'Donnez votre avis', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      existingReview != null
+                          ? 'Modifier votre avis'
+                          : 'Donnez votre avis',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 24),
                     RatingBar.builder(
                       initialRating: _rating.toDouble(),
@@ -402,8 +533,10 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                       allowHalfRating: false,
                       itemCount: 5,
                       itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
-                      onRatingUpdate: (rating) => setStateDialog(() => _rating = rating.toInt()),
+                      itemBuilder: (context, _) =>
+                          const Icon(Icons.star, color: Colors.amber),
+                      onRatingUpdate: (rating) =>
+                          setStateDialog(() => _rating = rating.toInt()),
                     ),
                     const SizedBox(height: 24),
                     TextField(
@@ -411,7 +544,9 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                       maxLines: 4,
                       decoration: InputDecoration(
                         hintText: 'Qu\'avez-vous pensé de ce plat ?',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -420,45 +555,78 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                         Expanded(
                           child: TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text('Annuler', style: TextStyle(color: Colors.grey)),
+                            child: const Text(
+                              'Annuler',
+                              style: TextStyle(color: Colors.grey),
+                            ),
                           ),
                         ),
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () async {
-                              if (_commentController.text.trim().isEmpty) return;
-                              
-                              final authUser = ref.read(authStateProvider).value;
-                              final clientUser = ref.read(clientUserProvider).value;
-                              
+                              if (_commentController.text.trim().isEmpty)
+                                return;
+
+                              final authUser = ref
+                                  .read(authStateProvider)
+                                  .value;
+                              final clientUser = ref
+                                  .read(clientUserProvider)
+                                  .value;
+
                               if (authUser == null || clientUser == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez vous connecter.')));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Veuillez vous connecter.'),
+                                  ),
+                                );
                                 return;
                               }
 
                               try {
-                                await ref.read(reviewsActionsProvider).addReview(
-                                  widget.product.id,
-                                  authUser.uid,
-                                  clientUser.name,
-                                  _rating.toDouble(),
-                                  _commentController.text.trim(),
-                                );
-                                
+                                await ref
+                                    .read(reviewsActionsProvider)
+                                    .addReview(
+                                      widget.product.id,
+                                      authUser.uid,
+                                      clientUser.name,
+                                      _rating.toDouble(),
+                                      _commentController.text.trim(),
+                                    );
+
                                 if (context.mounted) {
                                   Navigator.pop(context);
                                   _commentController.clear();
-                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Merci pour votre avis !', style: TextStyle(color: Colors.white)), backgroundColor: AppTheme.success));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Merci pour votre avis !',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      backgroundColor: AppTheme.success,
+                                    ),
+                                  );
                                 }
                               } catch (e) {
-                                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error));
+                                if (context.mounted)
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Erreur: $e'),
+                                      backgroundColor: AppTheme.error,
+                                    ),
+                                  );
                               }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).primaryColor,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
-                            child: const Text('Envoyer', style: TextStyle(color: Colors.white)),
+                            child: const Text(
+                              'Envoyer',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
                       ],
@@ -467,7 +635,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                 ),
               ),
             );
-          }
+          },
         );
       },
     );
