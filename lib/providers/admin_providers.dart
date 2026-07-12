@@ -5,31 +5,47 @@ import '../models/reward.dart';
 import 'client_providers.dart';
 
 final productsStreamProvider = StreamProvider<List<Product>>((ref) {
-  return FirebaseFirestore.instance.collection('products').snapshots().map((snapshot) {
-    return snapshot.docs.map((doc) => Product.fromMap(doc.data(), doc.id)).toList();
+  return FirebaseFirestore.instance.collection('products').snapshots().map((
+    snapshot,
+  ) {
+    return snapshot.docs
+        .map((doc) => Product.fromMap(doc.data(), doc.id))
+        .toList();
   });
 });
 
 final rewardConfigProvider = StreamProvider<RewardConfig>((ref) {
-  return FirebaseFirestore.instance.collection('config').doc('rewards').snapshots().map((doc) {
-    if (doc.exists && doc.data() != null) {
-      return RewardConfig.fromMap(doc.data()!);
-    }
-    // Default config if not found
-    return RewardConfig(spendingPerPoint: 100, pointsRequiredForReward: 50, rewardDescription: 'Cadeau Gratuit');
-  });
+  return FirebaseFirestore.instance
+      .collection('config')
+      .doc('rewards')
+      .snapshots()
+      .map((doc) {
+        if (doc.exists && doc.data() != null) {
+          return RewardConfig.fromMap(doc.data()!);
+        }
+        // Default config if not found
+        return RewardConfig(
+          spendingPerPoint: 100,
+          pointsRequiredForReward: 50,
+          rewardDescription: 'Cadeau Gratuit',
+        );
+      });
 });
 
 final categoriesProvider = StreamProvider<List<String>>((ref) {
-  return FirebaseFirestore.instance.collection('config').doc('categories').snapshots().map((doc) {
-    if (doc.exists && doc.data() != null) {
-      final list = doc.data()!['list'];
-      if (list is List) {
-        return List<String>.from(list);
-      }
-    }
-    return ['General'];
-  });
+  return FirebaseFirestore.instance
+      .collection('config')
+      .doc('categories')
+      .snapshots()
+      .map((doc) {
+        if (doc.exists && doc.data() != null) {
+          final list = doc.data()!['list'];
+          if (list is List) {
+            return List<String>.from(list);
+          }
+        }
+        return ['General'];
+      });
 });
 
 final allClientsStreamProvider = StreamProvider<List<ClientUser>>((ref) {
@@ -38,8 +54,10 @@ final allClientsStreamProvider = StreamProvider<List<ClientUser>>((ref) {
       .where('role', isEqualTo: 'client')
       .snapshots()
       .map((snapshot) {
-    return snapshot.docs.map((doc) => ClientUser.fromMap(doc.data(), doc.id)).toList();
-  });
+        return snapshot.docs
+            .map((doc) => ClientUser.fromMap(doc.data(), doc.id))
+            .toList();
+      });
 });
 
 // Admin Actions Provider
@@ -53,7 +71,10 @@ class AdminActions {
   }
 
   Future<void> updateProduct(Product product) async {
-    await _firestore.collection('products').doc(product.id).update(product.toMap());
+    await _firestore
+        .collection('products')
+        .doc(product.id)
+        .update(product.toMap());
   }
 
   Future<void> deleteProduct(String id) async {
@@ -61,7 +82,9 @@ class AdminActions {
   }
 
   Future<void> toggleProductAvailability(String id, bool isAvailable) async {
-    await _firestore.collection('products').doc(id).update({'is_available': isAvailable});
+    await _firestore.collection('products').doc(id).update({
+      'is_available': isAvailable,
+    });
   }
 
   Future<void> updateRewardConfig(RewardConfig config) async {
@@ -69,12 +92,20 @@ class AdminActions {
   }
 
   // Scan Logic: Add points based on spending
-  Future<void> addPointsToUser(String userId, double amountSpent, {String? adminName}) async {
+  Future<void> addPointsToUser(
+    String userId,
+    double amountSpent, {
+    String? adminName,
+  }) async {
     // 1. Get current reward config
-    final configDoc = await _firestore.collection('config').doc('rewards').get();
+    final configDoc = await _firestore
+        .collection('config')
+        .doc('rewards')
+        .get();
     double spendingPerPoint = 100.0; // default
     if (configDoc.exists && configDoc.data() != null) {
-      spendingPerPoint = (configDoc.data()!['spendingPerPoint'] ?? 100.0).toDouble();
+      spendingPerPoint = (configDoc.data()!['spendingPerPoint'] ?? 100.0)
+          .toDouble();
     }
 
     // Calculate points earned
@@ -91,8 +122,10 @@ class AdminActions {
       }
       String clientName = snapshot.data()?['name'] ?? 'Client Inconnu';
       int currentPoints = snapshot.data()?['loyalty_points'] ?? 0;
-      int lifetimePoints = snapshot.data()?['lifetime_points'] ?? currentPoints; // Fallback for old users
-      
+      int lifetimePoints =
+          snapshot.data()?['lifetime_points'] ??
+          currentPoints; // Fallback for old users
+
       transaction.update(userRef, {
         'loyalty_points': currentPoints + pointsEarned,
         'lifetime_points': lifetimePoints + pointsEarned,
@@ -125,7 +158,9 @@ class AdminActions {
       if (currentPoints < pointsRequired) {
         throw Exception("Points insuffisants!");
       }
-      transaction.update(userRef, {'loyalty_points': currentPoints - pointsRequired});
+      transaction.update(userRef, {
+        'loyalty_points': currentPoints - pointsRequired,
+      });
     });
 
     await _firestore.collection('transactions').add({
@@ -136,7 +171,14 @@ class AdminActions {
     });
   }
 
-  Future<void> updateAppSettings(String name, String description, String banner, double lat, double lng, List<String> messages) async {
+  Future<void> updateAppSettings(
+    String name,
+    String description,
+    String banner,
+    double lat,
+    double lng,
+    List<String> messages,
+  ) async {
     await _firestore.collection('config').doc('fastfood').set({
       'fastfoodName': name,
       'fastfoodDescription': description,
@@ -167,28 +209,30 @@ class AdminActions {
 
 // Analytics Provider
 final analyticsProvider = StreamProvider<Map<String, dynamic>>((ref) {
-  // We use multiple streams combined or just a unified approach.
-  // For simplicity, we can fetch all transactions and users, but using aggregate queries is better.
-  // Since StreamProvider doesn't support aggregate queries directly in a live way easily across multiple collections,
-  // we'll return a FutureProvider or a manual Stream.
-  // Actually, we'll just query the transactions to calculate total points given and fetch user count.
-  return FirebaseFirestore.instance.collection('transactions').snapshots().asyncMap((transSnapshot) async {
-    double totalPoints = 0;
-    int rewardsClaimed = 0;
-    for (var doc in transSnapshot.docs) {
-      if (doc.data()['type'] == 'earn') {
-        totalPoints += (doc.data()['points_earned'] ?? 0);
-      } else if (doc.data()['type'] == 'claim') {
-        rewardsClaimed++;
-      }
-    }
+  // Écouter les utilisateurs pour avoir un total instantané des points (lifetime_points)
+  return FirebaseFirestore.instance
+      .collection('users')
+      .where('role', isEqualTo: 'client')
+      .snapshots()
+      .asyncMap((usersSnapshot) async {
+        double totalPoints = 0;
 
-    final usersSnapshot = await FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'client').count().get();
-    
-    return {
-      'totalClients': usersSnapshot.count ?? 0,
-      'totalPoints': totalPoints.toInt(),
-      'rewardsClaimed': rewardsClaimed,
-    };
-  });
+        for (var doc in usersSnapshot.docs) {
+          totalPoints += ((doc.data()['lifetime_points'] ?? 0) as num)
+              .toDouble();
+        }
+
+        // Récupérer le nombre de récompenses réclamées
+        final claimSnapshot = await FirebaseFirestore.instance
+            .collection('transactions')
+            .where('type', isEqualTo: 'claim')
+            .count()
+            .get();
+
+        return {
+          'totalClients': usersSnapshot.docs.length,
+          'totalPoints': totalPoints.toInt(),
+          'rewardsClaimed': claimSnapshot.count ?? 0,
+        };
+      });
 });
