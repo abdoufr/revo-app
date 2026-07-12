@@ -244,7 +244,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                       ),
                       if (_searchResults.isNotEmpty)
                         Container(
-                          margin: const EdgeInsets.top(8),
+                          margin: const EdgeInsets.only(top: 8),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
