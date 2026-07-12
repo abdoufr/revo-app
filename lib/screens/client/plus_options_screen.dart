@@ -30,13 +30,10 @@ class PlusOptionsScreen extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            height: 420,
-            child: userAsync.when(
-              data: (user) => user == null ? const SizedBox() : LoyaltyCardsCarousel(user: user),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => const SizedBox(),
-            ),
+          userAsync.when(
+            data: (user) => user == null ? const SizedBox() : LoyaltyCardsCarousel(user: user),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, __) => const SizedBox(),
           ),
           const SizedBox(height: 32),
           

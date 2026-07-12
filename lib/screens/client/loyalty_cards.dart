@@ -265,38 +265,44 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
   }
 
   void _showQrScannerSheet(BuildContext context) {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Votre Code Personnel', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              const Text('Présentez ce code à la caisse pour gagner des points.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 32),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 15, spreadRadius: 2),
-                  ],
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Votre Code Personnel', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                const Text('Présentez ce code à la caisse pour gagner des points.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+                const SizedBox(height: 32),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 15, spreadRadius: 2),
+                    ],
+                  ),
+                  child: QrImageView(
+                    data: widget.user.id,
+                    version: QrVersions.auto,
+                    size: 200.0,
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                  ),
                 ),
-                child: QrImageView(
-                  data: widget.user.id,
-                  version: QrVersions.auto,
-                  size: 200.0,
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
+                const SizedBox(height: 24),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Fermer', style: TextStyle(fontSize: 16)),
                 ),
-              ),
-              const SizedBox(height: 32),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -314,7 +320,8 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
             children: [
               Text('Paliers VIP', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
-              Expanded(
+              SizedBox(
+                height: 300,
                 child: ListView.separated(
                   shrinkWrap: true,
                   itemCount: VipTierService.allTiers.length,

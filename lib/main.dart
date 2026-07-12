@@ -41,7 +41,11 @@ class RevoApp extends ConsumerWidget {
 
     Color currentPrimary = AppTheme.primaryRed;
     if (userAsync.hasValue && userAsync.value != null) {
-      currentPrimary = VipTierService.getTierColor(userAsync.value!.lifetimePoints);
+      if (userAsync.value!.role == 'admin') {
+        currentPrimary = AppTheme.primaryRed;
+      } else {
+        currentPrimary = VipTierService.getTierColor(userAsync.value!.lifetimePoints);
+      }
     }
 
     return MaterialApp(
