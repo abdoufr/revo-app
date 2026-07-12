@@ -75,6 +75,12 @@ class ClientActions {
       'wheel_spins_used': FieldValue.increment(1),
     });
   }
+
+  Future<void> incrementAppVisits() async {
+    await _firestore.collection('config').doc('analytics').set({
+      'total_visits': FieldValue.increment(1),
+    }, SetOptions(merge: true));
+  }
 }
 
 final clientActionsProvider = Provider((ref) => ClientActions());

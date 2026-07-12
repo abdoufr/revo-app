@@ -49,6 +49,32 @@ class AdminAnalyticsScreen extends ConsumerWidget {
                     Expanded(
                       child: _buildStatCard(
                         context,
+                        title: 'Visites de l\'App',
+                        value: '${data.totalVisits}',
+                        icon: Icons.remove_red_eye_rounded,
+                        color: Colors.orange,
+                        small: true,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildStatCard(
+                        context,
+                        title: 'Avis Clients',
+                        value: '${data.totalReviews}',
+                        icon: Icons.reviews_rounded,
+                        color: Colors.amber,
+                        small: true,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatCard(
+                        context,
                         title: 'Points en circulation',
                         value: '${data.totalPointsAvailable}',
                         icon: Icons.account_balance_wallet_rounded,
@@ -68,14 +94,6 @@ class AdminAnalyticsScreen extends ConsumerWidget {
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 16),
-                _buildStatCard(
-                  context,
-                  title: 'Avis Clients Laissés',
-                  value: '${data.totalReviews}',
-                  icon: Icons.reviews_rounded,
-                  color: Colors.amber,
                 ),
               ],
             ),

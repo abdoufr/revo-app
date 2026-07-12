@@ -138,7 +138,13 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(adminActionsProvider).addPointsToUser(clientId, amount);
+      final authUser = ref.read(authStateProvider).value;
+      String adminName = 'Admin';
+      if (authUser != null) {
+        final adminDoc = await FirebaseFirestore.instance.collection('users').doc(authUser.uid).get();
+        adminName = adminDoc.data()?['name'] ?? 'Admin';
+      }
+      await ref.read(adminActionsProvider).addPointsToUser(clientId, amount, adminName: adminName);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

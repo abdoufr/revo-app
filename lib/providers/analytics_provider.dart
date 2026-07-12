@@ -7,6 +7,7 @@ class AnalyticsData {
   final int totalPointsAvailable;
   final double averagePointsPerUser;
   final int totalReviews;
+  final int totalVisits;
 
   AnalyticsData({
     required this.totalUsers,
@@ -14,6 +15,7 @@ class AnalyticsData {
     required this.totalPointsAvailable,
     required this.averagePointsPerUser,
     required this.totalReviews,
+    required this.totalVisits,
   });
 }
 
@@ -35,11 +37,18 @@ final advancedAnalyticsProvider = FutureProvider<AnalyticsData>((ref) async {
   final reviewsSnapshot = await firestore.collection('reviews').get();
   int totalReviews = reviewsSnapshot.docs.length;
 
+  final analyticsConfig = await firestore.collection('config').doc('analytics').get();
+  int totalVisits = 0;
+  if (analyticsConfig.exists && analyticsConfig.data() != null) {
+    totalVisits = analyticsConfig.data()?['total_visits'] ?? 0;
+  }
+
   return AnalyticsData(
     totalUsers: totalUsers,
     totalPointsDistributed: totalPointsDistributed,
     totalPointsAvailable: totalPointsAvailable,
     averagePointsPerUser: averagePoints,
     totalReviews: totalReviews,
+    totalVisits: totalVisits,
   );
 });

@@ -29,6 +29,18 @@ class ClientHome extends ConsumerStatefulWidget {
 class _ClientHomeState extends ConsumerState<ClientHome> {
   int _selectedIndex = 0;
   bool _geofenceChecked = false;
+  bool _visitRecorded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_visitRecorded) {
+        _visitRecorded = true;
+        ref.read(clientActionsProvider).incrementAppVisits();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

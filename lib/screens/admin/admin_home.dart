@@ -15,6 +15,7 @@ import 'admin_rewards_catalog_screen.dart';
 import 'admin_referral_config_screen.dart';
 import 'admin_analytics_screen.dart';
 import 'admin_ingredients_screen.dart';
+import 'admin_history_screen.dart';
 import '../../providers/notification_provider.dart';
 
 class AdminHome extends ConsumerWidget {
@@ -217,12 +218,20 @@ class AdminHome extends ConsumerWidget {
                     const SizedBox(height: 16),
                     _buildTrendyActionCard(
                       context,
-                      title: 'Clients & Utilisateurs',
-                      subtitle: 'Gérer tous les comptes',
-                      icon: Icons.people_alt_rounded,
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminUsersScreen()));
-                      },
+                      title: 'Gérer les Utilisateurs',
+                      subtitle: 'Voir les clients inscrits',
+                      icon: Icons.people_rounded,
+                      color: Colors.blueAccent,
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminUsersScreen())),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Historique des Points',
+                      subtitle: 'Voir qui a ajouté des points et à qui',
+                      icon: Icons.history_rounded,
+                      color: Colors.indigo,
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminHistoryScreen())),
                     ),
                     const SizedBox(height: 16),
                     _buildTrendyActionCard(

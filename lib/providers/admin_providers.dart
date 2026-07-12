@@ -69,7 +69,7 @@ class AdminActions {
   }
 
   // Scan Logic: Add points based on spending
-  Future<void> addPointsToUser(String userId, double amountSpent) async {
+  Future<void> addPointsToUser(String userId, double amountSpent, {String? adminName}) async {
     // 1. Get current reward config
     final configDoc = await _firestore.collection('config').doc('rewards').get();
     double spendingPerPoint = 100.0; // default
@@ -89,6 +89,7 @@ class AdminActions {
       if (!snapshot.exists) {
         throw Exception("Client introuvable!");
       }
+      String clientName = snapshot.data()?['name'] ?? 'Client Inconnu';
       int currentPoints = snapshot.data()?['loyalty_points'] ?? 0;
       int lifetimePoints = snapshot.data()?['lifetime_points'] ?? currentPoints; // Fallback for old users
       
@@ -99,12 +100,17 @@ class AdminActions {
     });
 
     // 3. Log transaction
+    final userSnap = await _firestore.collection('users').doc(userId).get();
+    final clientName = userSnap.data()?['name'] ?? 'Client Inconnu';
+
     await _firestore.collection('transactions').add({
       'user_id': userId,
+      'client_name': clientName,
       'amount_spent': amountSpent,
       'points_earned': pointsEarned,
       'type': 'earn',
       'date': FieldValue.serverTimestamp(),
+      'admin_name': adminName ?? 'Admin',
     });
   }
 
