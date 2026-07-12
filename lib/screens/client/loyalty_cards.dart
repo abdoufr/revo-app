@@ -139,9 +139,11 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
   }
 
   Widget _buildStampCard(int userPoints, int pointsForReward, Color vipColor) {
-    const int totalStamps = 15;
+    const int totalStamps = 10;
+    final int completedRewards = pointsForReward > 0 ? (userPoints / pointsForReward).floor() : 0;
+    final int currentCyclePoints = pointsForReward > 0 ? userPoints % pointsForReward : userPoints;
     final int pointsPerStamp = pointsForReward > 0 ? (pointsForReward / totalStamps).ceil() : 1;
-    final int activeStamps = pointsPerStamp > 0 ? (userPoints / pointsPerStamp).floor() : 0;
+    final int activeStamps = pointsPerStamp > 0 ? (currentCyclePoints / pointsPerStamp).floor() : 0;
     final int displayStamps = activeStamps > totalStamps ? totalStamps : activeStamps;
 
     return Container(
@@ -167,15 +169,14 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
                       const Text('Ma Carte de Tampons', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       IconButton(
                         icon: Icon(_isStampView ? Icons.swap_horiz_rounded : Icons.grid_view_rounded, size: 20, color: Colors.grey),
-                        onPressed: () {
-                          setState(() {
-                            _isStampView = !_isStampView;
-                          });
-                        },
+                        onPressed: () => setState(() => _isStampView = !_isStampView),
                       ),
                     ],
                   ),
-                  Text('$displayStamps / $totalStamps tampons actifs', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  if (completedRewards > 0)
+                    Text('🎁 $completedRewards cadeau${completedRewards > 1 ? 'x' : ''} disponible${completedRewards > 1 ? 's' : ''} !', style: TextStyle(color: vipColor, fontSize: 13, fontWeight: FontWeight.bold))
+                  else
+                    Text('$displayStamps / $totalStamps tampons actifs', style: const TextStyle(color: Colors.grey, fontSize: 12)),
                 ],
               ),
               ElevatedButton.icon(
@@ -225,14 +226,14 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Points actuels', style: TextStyle(fontSize: 14)),
-                    Text('$userPoints / $pointsForReward', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: vipColor)),
+                    Text('$currentCyclePoints / $pointsForReward', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: vipColor)),
                   ],
                 ),
                 const SizedBox(height: 12),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
-                    value: pointsForReward > 0 ? (userPoints / pointsForReward).clamp(0.0, 1.0) : 0,
+                    value: pointsForReward > 0 ? (currentCyclePoints / pointsForReward).clamp(0.0, 1.0) : 0,
                     backgroundColor: Colors.grey.withValues(alpha: 0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(vipColor),
                     minHeight: 12,
