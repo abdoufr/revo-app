@@ -8,7 +8,10 @@ final storiesProvider = StreamProvider<List<StoryModel>>((ref) {
       .orderBy('created_at', descending: true)
       .snapshots()
       .map((snapshot) {
-    return snapshot.docs.map((doc) => StoryModel.fromMap(doc.data(), doc.id)).toList();
+    return snapshot.docs
+        .map((doc) => StoryModel.fromMap(doc.data(), doc.id))
+        .where((story) => story.createdAt.isAfter(DateTime.now().subtract(const Duration(hours: 24))))
+        .toList();
   });
 });
 

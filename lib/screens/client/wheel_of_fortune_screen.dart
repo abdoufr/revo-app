@@ -25,21 +25,25 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
     super.dispose();
   }
 
-  void _spinWheel(GamificationConfig config, int userPoints, String userId) async {
+  void _spinWheel(GamificationConfig config, ClientUser user) async {
     if (_isSpinning) return;
-    if (userPoints < config.wheelCost) {
+    
+    final int allowedSpins = config.wheelCost > 0 ? (user.lifetimePoints ~/ config.wheelCost) : 0;
+    final int availableSpins = allowedSpins - user.wheelSpinsUsed;
+    
+    if (availableSpins <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Vous n\'avez pas assez de points (${config.wheelCost} requis).'), backgroundColor: AppTheme.error),
+        SnackBar(content: Text('Vous n\'avez pas de tours disponibles. (1 tour tous les ${config.wheelCost} points).'), backgroundColor: AppTheme.error),
       );
       return;
     }
 
     setState(() => _isSpinning = true);
 
-    // Deduct points
+    // Consume a spin (doesn't deduct points)
     final authUser = ref.read(authStateProvider).value;
     if (authUser != null) {
-      await ref.read(clientActionsProvider).deductPoints(authUser.uid, config.wheelCost);
+      await ref.read(clientActionsProvider).incrementSpinsUsed(authUser.uid);
     }
 
     // Random prize
@@ -96,12 +100,20 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
               return Column(
                 children: [
                   const SizedBox(height: 24),
-                  Text(
-                    'Vos Points: ${user.loyaltyPoints}',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
-                  ),
-                  const SizedBox(height: 8),
-                  Text('Tourner la roue coûte ${config.wheelCost} points', style: Theme.of(context).textTheme.bodyMedium),
+                  Builder(builder: (context) {
+                    final int allowedSpins = config.wheelCost > 0 ? (user.lifetimePoints ~/ config.wheelCost) : 0;
+                    final int availableSpins = allowedSpins - user.wheelSpinsUsed;
+                    return Column(
+                      children: [
+                        Text(
+                          'Tours disponibles: $availableSpins',
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+                        ),
+                        const SizedBox(height: 8),
+                        Text('Gagnez 1 tour tous les ${config.wheelCost} points cumulés !', style: Theme.of(context).textTheme.bodyMedium),
+                      ],
+                    );
+                  }),
                   const SizedBox(height: 48),
                   Expanded(
                     child: Padding(
@@ -129,7 +141,7 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: _isSpinning ? null : () => _spinWheel(config, user.loyaltyPoints, user.id),
+                        onPressed: _isSpinning ? null : () => _spinWheel(config, user),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

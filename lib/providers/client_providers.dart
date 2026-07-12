@@ -14,6 +14,7 @@ class ClientUser {
   final int lifetimePoints;
   final bool isPublic;
   final String role;
+  final int wheelSpinsUsed;
 
   ClientUser({
     required this.id,
@@ -25,6 +26,7 @@ class ClientUser {
     required this.lifetimePoints,
     required this.isPublic,
     required this.role,
+    required this.wheelSpinsUsed,
   });
 
   factory ClientUser.fromMap(Map<String, dynamic> data, String id) {
@@ -38,6 +40,7 @@ class ClientUser {
       lifetimePoints: data['lifetime_points'] ?? (data['loyalty_points'] ?? 0),
       isPublic: data['is_public'] ?? false,
       role: data['role'] ?? 'client',
+      wheelSpinsUsed: data['wheel_spins_used'] ?? 0,
     );
   }
 }
@@ -64,6 +67,12 @@ class ClientActions {
       final data = snap.data() as Map<String, dynamic>?;
       final current = (data?['loyalty_points'] ?? 0) as int;
       tx.update(ref, {'loyalty_points': (current - points).clamp(0, 999999)});
+    });
+  }
+
+  Future<void> incrementSpinsUsed(String userId) async {
+    await _firestore.collection('users').doc(userId).update({
+      'wheel_spins_used': FieldValue.increment(1),
     });
   }
 }
