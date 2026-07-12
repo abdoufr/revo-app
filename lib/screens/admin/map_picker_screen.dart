@@ -101,7 +101,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   children: [
                     TileLayer(
                       urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
                       userAgentPackageName: 'com.revo.app',
                     ),
                   ],
