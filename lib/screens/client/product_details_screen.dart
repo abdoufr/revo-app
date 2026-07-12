@@ -215,6 +215,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
 
   Widget _buildReviewsContent() {
     final reviewsAsync = ref.watch(productReviewsProvider(widget.product.id));
+    final userAsync = ref.watch(clientUserProvider);
     
     return Column(
       children: [
@@ -272,25 +273,66 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 16,
-                                  backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                                  child: Text(
-                                    review.userName.isNotEmpty ? review.userName[0].toUpperCase() : 'U',
-                                    style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 16,
+                                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                                    child: Text(
+                                      review.userName.isNotEmpty ? review.userName[0].toUpperCase() : 'U',
+                                      style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(review.userName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                              ],
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      review.userName, 
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (review.isModified ?? false) ...[
+                                    const SizedBox(width: 8),
+                                    const Text('(Modifié)', style: TextStyle(color: Colors.grey, fontSize: 10, fontStyle: FontStyle.italic)),
+                                  ]
+                                ],
+                              ),
                             ),
-                            RatingBarIndicator(
-                              rating: review.rating.toDouble(),
-                              itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
-                              itemCount: 5,
-                              itemSize: 16.0,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                RatingBarIndicator(
+                                  rating: review.rating.toDouble(),
+                                  itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+                                  itemCount: 5,
+                                  itemSize: 16.0,
+                                ),
+                                userAsync.when(
+                                  data: (user) {
+                                    if (user?.id == review.userId) {
+                                      return Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const SizedBox(width: 8),
+                                          GestureDetector(
+                                            onTap: () => _showAddReviewDialog(context, existingReview: review),
+                                            child: const Icon(Icons.edit_rounded, size: 16, color: Colors.blueGrey),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          GestureDetector(
+                                            onTap: () => _deleteReview(review),
+                                            child: const Icon(Icons.delete_rounded, size: 16, color: Colors.redAccent),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                    return const SizedBox();
+                                  },
+                                  loading: () => const SizedBox(),
+                                  error: (_, __) => const SizedBox(),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -310,7 +352,35 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
     );
   }
 
-  void _showAddReviewDialog(BuildContext context) {
+  void _deleteReview(Review review) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer l\'avis'),
+        content: const Text('Êtes-vous sûr de vouloir supprimer cet avis ?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Supprimer', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      await ref.read(reviewsActionsProvider).deleteReview(review.id, widget.product.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Avis supprimé')));
+      }
+    }
+  }
+
+  void _showAddReviewDialog(BuildContext context, {Review? existingReview}) {
+    if (existingReview != null) {
+      _rating = existingReview.rating.toInt();
+      _commentController.text = existingReview.comment;
+    } else {
+      _rating = 5;
+      _commentController.clear();
+    }
     showDialog(
       context: context,
       builder: (context) {
@@ -323,7 +393,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Donnez votre avis', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(existingReview != null ? 'Modifier votre avis' : 'Donnez votre avis', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 24),
                     RatingBar.builder(
                       initialRating: _rating.toDouble(),

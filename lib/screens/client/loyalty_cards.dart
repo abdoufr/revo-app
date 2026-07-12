@@ -312,31 +312,74 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
   void _showVipTiersInfo(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Paliers VIP', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 300,
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: VipTierService.allTiers.length,
-                  separatorBuilder: (context, index) => const Divider(),
-                  itemBuilder: (context, index) {
-                    final tier = VipTierService.allTiers[index];
-                    return ListTile(
-                      leading: Icon(Icons.stars_rounded, color: tier['color'] as Color, size: 32),
-                      title: Text(tier['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      trailing: Text('${tier['minPoints']} pts', style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.grey)),
-                    );
-                  },
+              const SizedBox(height: 12),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 24),
+              Text('Paliers VIP', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+              const SizedBox(height: 8),
+              const Text('Découvrez les avantages de chaque niveau', style: TextStyle(color: Colors.grey)),
+              const SizedBox(height: 24),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  child: Column(
+                    children: List.generate(VipTierService.allTiers.length, (index) {
+                      final tier = VipTierService.allTiers[index];
+                      final color = tier['color'] as Color;
+                      final minPoints = tier['minPoints'] as int;
+                      
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [color.withOpacity(0.9), color.withOpacity(0.6)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(color: color.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: const BoxDecoration(color: Colors.white24, shape: BoxShape.circle),
+                              child: const Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 28),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(tier['name'] as String, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+                                  const SizedBox(height: 4),
+                                  Text(minPoints == 0 ? 'Niveau de départ' : 'À partir de $minPoints PTS', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
                 ),
               ),
+              const SizedBox(height: 24),
             ],
           ),
         );

@@ -123,11 +123,25 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
                         items: [
                           for (var prize in config.wheelPrizes)
                             FortuneItem(
-                              child: Text(prize, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Text(
+                                  prize, 
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w900, 
+                                    fontSize: 16, 
+                                    color: Colors.white,
+                                    shadows: [Shadow(color: Colors.black45, blurRadius: 4, offset: Offset(1, 1))]
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ),
                               style: FortuneItemStyle(
-                                color: Theme.of(context).primaryColor.withOpacity(config.wheelPrizes.indexOf(prize) % 2 == 0 ? 1 : 0.8),
+                                color: config.wheelPrizes.indexOf(prize) % 2 == 0 
+                                    ? Theme.of(context).primaryColor 
+                                    : const Color(0xFFFF9800),
                                 borderColor: Colors.white,
-                                borderWidth: 2,
+                                borderWidth: 3,
                               ),
                             ),
                         ],

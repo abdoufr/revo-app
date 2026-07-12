@@ -10,6 +10,7 @@ class Review {
   final double rating;
   final String comment;
   final DateTime createdAt;
+  final bool? isModified;
 
   Review({
     required this.id,
@@ -19,6 +20,7 @@ class Review {
     required this.rating,
     required this.comment,
     required this.createdAt,
+    this.isModified,
   });
 
   Map<String, dynamic> toMap() {
@@ -41,6 +43,7 @@ class Review {
       rating: (map['rating'] ?? 5.0).toDouble(),
       comment: map['comment'] ?? '',
       createdAt: (map['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      isModified: map['is_modified'] as bool?,
     );
   }
 }
@@ -75,7 +78,7 @@ class ReviewsActions {
       await existingReviews.docs.first.reference.update({
         'rating': rating,
         'comment': comment,
-        'created_at': FieldValue.serverTimestamp(),
+        'is_modified': true,
       });
     } else {
       // Créer un nouvel avis
@@ -90,6 +93,11 @@ class ReviewsActions {
     }
     
     // Mettre à jour la moyenne du produit (optionnel mais recommandé pour les perfs)
+    _updateProductAverageRating(productId);
+  }
+
+  Future<void> deleteReview(String reviewId, String productId) async {
+    await _firestore.collection('reviews').doc(reviewId).delete();
     _updateProductAverageRating(productId);
   }
   

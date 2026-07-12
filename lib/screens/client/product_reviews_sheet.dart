@@ -8,8 +8,9 @@ import '../../providers/client_providers.dart';
 
 class ProductReviewsSheet extends ConsumerStatefulWidget {
   final Product product;
+  final Review? existingReview;
 
-  const ProductReviewsSheet({super.key, required this.product});
+  const ProductReviewsSheet({super.key, required this.product, this.existingReview});
 
   @override
   ConsumerState<ProductReviewsSheet> createState() => _ProductReviewsSheetState();
@@ -18,6 +19,15 @@ class ProductReviewsSheet extends ConsumerStatefulWidget {
 class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
   final _commentController = TextEditingController();
   double _rating = 5.0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingReview != null) {
+      _commentController.text = widget.existingReview!.comment;
+      _rating = widget.existingReview!.rating;
+    }
+  }
 
   @override
   void dispose() {
@@ -116,7 +126,10 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Donner votre avis', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      widget.existingReview != null ? 'Modifier votre avis' : 'Donner votre avis', 
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
