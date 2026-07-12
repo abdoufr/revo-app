@@ -4,6 +4,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
+import '../../providers/auth_providers.dart';
 
 class AdminScannerScreen extends ConsumerStatefulWidget {
   const AdminScannerScreen({super.key});
