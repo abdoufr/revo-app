@@ -9,6 +9,7 @@ class AdminAnalyticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final analyticsAsync = ref.watch(advancedAnalyticsProvider);
+    final visitsAsync = ref.watch(visitsStreamProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -50,7 +51,11 @@ class AdminAnalyticsScreen extends ConsumerWidget {
                       child: _buildStatCard(
                         context,
                         title: 'Visites de l\'App',
-                        value: '${data.totalVisits}',
+                        value: visitsAsync.when(
+                          data: (v) => '$v',
+                          loading: () => '...',
+                          error: (_, __) => 'Err',
+                        ),
                         icon: Icons.remove_red_eye_rounded,
                         color: Colors.orange,
                         small: true,

@@ -7,12 +7,14 @@ import '../../theme/app_theme.dart';
 final adminHistoryProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
   return FirebaseFirestore.instance
       .collection('transactions')
-      .where('type', isEqualTo: 'earn')
       .orderBy('date', descending: true)
       .limit(100)
       .snapshots()
       .map((snapshot) {
-    return snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
+    return snapshot.docs
+        .where((doc) => doc.data()['type'] == 'earn')
+        .map((doc) => {'id': doc.id, ...doc.data()})
+        .toList();
   });
 });
 

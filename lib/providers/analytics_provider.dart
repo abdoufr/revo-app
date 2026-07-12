@@ -19,6 +19,15 @@ class AnalyticsData {
   });
 }
 
+final visitsStreamProvider = StreamProvider<int>((ref) {
+  return FirebaseFirestore.instance.collection('config').doc('analytics').snapshots().map((doc) {
+    if (doc.exists && doc.data() != null) {
+      return doc.data()!['total_visits'] ?? 0;
+    }
+    return 0;
+  });
+});
+
 final advancedAnalyticsProvider = FutureProvider<AnalyticsData>((ref) async {
   final firestore = FirebaseFirestore.instance;
 
