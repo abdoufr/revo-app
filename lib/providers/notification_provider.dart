@@ -23,7 +23,7 @@ final announcementsProvider = StreamProvider<List<Announcement>>((ref) {
   return FirebaseFirestore.instance
       .collection('announcements')
       .orderBy('created_at', descending: true)
-      .limit(10)
+      .limit(30)
       .snapshots()
       .map((snapshot) {
     return snapshot.docs.map((doc) => Announcement.fromMap(doc.data(), doc.id)).toList();
@@ -39,6 +39,10 @@ class NotificationActions {
       'message': message,
       'created_at': FieldValue.serverTimestamp(),
     });
+  }
+
+  Future<void> deleteNotification(String id) async {
+    await _firestore.collection('announcements').doc(id).delete();
   }
 }
 

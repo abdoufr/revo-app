@@ -16,59 +16,10 @@ import 'admin_referral_config_screen.dart';
 import 'admin_analytics_screen.dart';
 import 'admin_ingredients_screen.dart';
 import 'admin_history_screen.dart';
-import '../../providers/notification_provider.dart';
+import 'admin_notifications_screen.dart';
 
 class AdminHome extends ConsumerWidget {
   const AdminHome({super.key});
-
-  void _showSendNotificationDialog(BuildContext context, WidgetRef ref) {
-    final titleController = TextEditingController();
-    final messageController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          title: Text('Envoyer une Notification', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Titre de la notification', hintText: 'ex: Promo ce soir !'),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: messageController,
-                decoration: const InputDecoration(labelText: 'Message', hintText: 'Texte complet de la notification'),
-                maxLines: 3,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Annuler', style: TextStyle(color: Colors.grey)),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (titleController.text.isNotEmpty && messageController.text.isNotEmpty) {
-                  ref.read(notificationActionsProvider).sendNotification(titleController.text.trim(), messageController.text.trim());
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Notification envoyée avec succès !'), backgroundColor: AppTheme.success),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
-              child: const Text('Envoyer', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -161,9 +112,11 @@ class AdminHome extends ConsumerWidget {
                     _buildTrendyActionCard(
                       context,
                       title: 'Notifications Push',
-                      subtitle: 'Envoyer une alerte à tous les clients',
+                      subtitle: 'Gérer et envoyer des alertes',
                       icon: Icons.notifications_active_rounded,
-                      onTap: () => _showSendNotificationDialog(context, ref),
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminNotificationsScreen()));
+                      },
                     ),
                     const SizedBox(height: 16),
                     _buildTrendyActionCard(
