@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../theme/app_theme.dart';
 
 class MapPickerScreen extends StatefulWidget {
@@ -20,8 +22,52 @@ class MapPickerScreen extends StatefulWidget {
 
 class _MapPickerScreenState extends State<MapPickerScreen> {
   final MapController _mapController = MapController();
+  final TextEditingController _searchController = TextEditingController();
   LatLng? _selectedLocation;
   bool _isLoading = true;
+  bool _isSearching = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _searchLocation(String query) async {
+    if (query.trim().isEmpty) return;
+
+    setState(() => _isSearching = true);
+    try {
+      final url = Uri.parse(
+        'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=1',
+      );
+      final response = await http.get(
+        url,
+        headers: {'User-Agent': 'com.revo.app'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data is List && data.isNotEmpty) {
+          final lat = double.parse(data[0]['lat']);
+          final lon = double.parse(data[0]['lon']);
+          _mapController.move(LatLng(lat, lon), 15.0);
+        } else {
+          if (mounted)
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Aucun résultat trouvé')),
+            );
+        }
+      }
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erreur de recherche: $e')));
+    } finally {
+      if (mounted) setState(() => _isSearching = false);
+    }
+  }
 
   @override
   void initState() {
@@ -130,20 +176,62 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   top: 16,
                   left: 16,
                   right: 16,
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(230),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: const [
-                        BoxShadow(color: Colors.black12, blurRadius: 4),
-                      ],
-                    ),
-                    child: const Text(
-                      'Déplacez la carte pour positionner le marqueur exactement sur votre emplacement.',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                      textAlign: TextAlign.center,
-                    ),
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [
+                            BoxShadow(color: Colors.black12, blurRadius: 8),
+                          ],
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          textInputAction: TextInputAction.search,
+                          onSubmitted: _searchLocation,
+                          decoration: InputDecoration(
+                            hintText: 'Rechercher une ville, quartier...',
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            suffixIcon: _isSearching
+                                ? const Padding(
+                                    padding: EdgeInsets.all(12.0),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : IconButton(
+                                    icon: Icon(
+                                      Icons.search,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                    onPressed: () =>
+                                        _searchLocation(_searchController.text),
+                                  ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(230),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: const [
+                            BoxShadow(color: Colors.black12, blurRadius: 4),
+                          ],
+                        ),
+                        child: const Text(
+                          'Déplacez la carte pour positionner le marqueur exactement sur votre emplacement.',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Positioned(
