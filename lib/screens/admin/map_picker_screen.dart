@@ -96,34 +96,55 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   mapController: _mapController,
                   options: MapOptions(
                     initialCenter: _selectedLocation!,
-                    initialZoom: 15.0,
-                    onTap: (tapPosition, point) {
-                      setState(() {
-                        _selectedLocation = point;
-                      });
-                    },
+                    initialZoom: 16.0,
                   ),
                   children: [
                     TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'com.revo.app',
                     ),
-                    MarkerLayer(
-                      markers: [
-                        if (_selectedLocation != null)
-                          Marker(
-                            point: _selectedLocation!,
-                            width: 80,
-                            height: 80,
-                            child: Icon(
-                              Icons.location_on,
-                              color: Theme.of(context).primaryColor,
-                              size: 50,
-                            ),
-                          ),
+                  ],
+                ),
+                // The fixed center pin
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 40.0,
+                    ), // Aligns the tip of the pin to the center
+                    child: Icon(
+                      Icons.location_on,
+                      color: Theme.of(context).primaryColor,
+                      size: 50,
+                      shadows: const [
+                        Shadow(
+                          color: Colors.black45,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
                       ],
                     ),
-                  ],
+                  ),
+                ),
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withAlpha(230),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black12, blurRadius: 4),
+                      ],
+                    ),
+                    child: const Text(
+                      'Déplacez la carte pour positionner le marqueur exactement sur votre emplacement.',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ),
                 Positioned(
                   bottom: 32,
@@ -131,9 +152,8 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   right: 32,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (_selectedLocation != null) {
-                        Navigator.of(context).pop(_selectedLocation);
-                      }
+                      final center = _mapController.camera.center;
+                      Navigator.of(context).pop(center);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
@@ -145,7 +165,10 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                     ),
                     child: const Text(
                       'Valider cette position',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
