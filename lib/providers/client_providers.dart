@@ -15,6 +15,7 @@ class ClientUser {
   final bool isPublic;
   final String role;
   final int wheelSpinsUsed;
+  final String? referredBy;
 
   ClientUser({
     required this.id,
@@ -27,6 +28,7 @@ class ClientUser {
     required this.isPublic,
     required this.role,
     required this.wheelSpinsUsed,
+    this.referredBy,
   });
 
   factory ClientUser.fromMap(Map<String, dynamic> data, String id) {
@@ -41,6 +43,7 @@ class ClientUser {
       isPublic: data['is_public'] ?? false,
       role: data['role'] ?? 'client',
       wheelSpinsUsed: data['wheel_spins_used'] ?? 0,
+      referredBy: data['referred_by'],
     );
   }
 }
@@ -49,12 +52,16 @@ final clientUserProvider = StreamProvider<ClientUser?>((ref) {
   final user = ref.watch(authStateProvider).value;
   if (user == null) return const Stream.empty();
 
-  return FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots().map((doc) {
-    if (!doc.exists || doc.data() == null) {
-      return null;
-    }
-    return ClientUser.fromMap(doc.data()!, doc.id);
-  });
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .snapshots()
+      .map((doc) {
+        if (!doc.exists || doc.data() == null) {
+          return null;
+        }
+        return ClientUser.fromMap(doc.data()!, doc.id);
+      });
 });
 
 class ClientActions {
@@ -106,12 +113,13 @@ class FavoriteProductsNotifier extends Notifier<Set<String>> {
       newState.add(productId);
     }
     state = newState;
-    
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('favorites', newState.toList());
   }
 }
 
-final favoriteProductsProvider = NotifierProvider<FavoriteProductsNotifier, Set<String>>(() {
-  return FavoriteProductsNotifier();
-});
+final favoriteProductsProvider =
+    NotifierProvider<FavoriteProductsNotifier, Set<String>>(() {
+      return FavoriteProductsNotifier();
+    });
