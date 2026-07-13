@@ -32,12 +32,12 @@ final referralConfigProvider = StreamProvider<ReferralConfig>((ref) {
       .doc('referral')
       .snapshots()
       .map((snapshot) {
-    if (snapshot.exists && snapshot.data() != null) {
-      return ReferralConfig.fromMap(snapshot.data()!);
-    } else {
-      return ReferralConfig(pointsForReferrer: 50, pointsForReferred: 50);
-    }
-  });
+        if (snapshot.exists && snapshot.data() != null) {
+          return ReferralConfig.fromMap(snapshot.data()!);
+        } else {
+          return ReferralConfig(pointsForReferrer: 50, pointsForReferred: 50);
+        }
+      });
 });
 
 class ReferralActions {
@@ -85,7 +85,10 @@ class ReferralActions {
     }
 
     // Récupérer la config pour les points
-    final configDoc = await _firestore.collection('config').doc('referral').get();
+    final configDoc = await _firestore
+        .collection('config')
+        .doc('referral')
+        .get();
     int pointsReferrer = 50;
     int pointsReferred = 50;
     if (configDoc.exists && configDoc.data() != null) {
@@ -100,22 +103,59 @@ class ReferralActions {
       final freshReferrerDoc = await transaction.get(referrerDoc!.reference);
 
       final freshUserData = freshUserDoc.data() as Map<String, dynamic>?;
-      final freshReferrerData = freshReferrerDoc.data() as Map<String, dynamic>?;
+      final freshReferrerData =
+          freshReferrerDoc.data() as Map<String, dynamic>?;
 
       if (freshUserData?['referred_by'] != null) {
         throw Exception("Vous avez déjà été parrainé.");
       }
 
       final currentUserPoints = (freshUserData?['loyalty_points'] ?? 0) as int;
-      final currentReferrerPoints = (freshReferrerData?['loyalty_points'] ?? 0) as int;
+      final currentReferrerPoints =
+          (freshReferrerData?['loyalty_points'] ?? 0) as int;
+      final currentUserLifetime =
+          (freshUserData?['lifetime_points'] ?? currentUserPoints) as int;
+      final currentReferrerLifetime =
+          (freshReferrerData?['lifetime_points'] ?? currentReferrerPoints)
+              as int;
+
+      final currentUserName = freshUserData?['name'] ?? 'Client Inconnu';
+      final currentReferrerName =
+          freshReferrerData?['name'] ?? 'Client Inconnu';
 
       transaction.update(userDocRef, {
         'loyalty_points': currentUserPoints + pointsReferred,
+        'lifetime_points': currentUserLifetime + pointsReferred,
         'referred_by': referrerDoc.id,
       });
 
       transaction.update(referrerDoc.reference, {
         'loyalty_points': currentReferrerPoints + pointsReferrer,
+        'lifetime_points': currentReferrerLifetime + pointsReferrer,
+      });
+
+      // Log transaction for referred
+      final newTxReferredRef = _firestore.collection('transactions').doc();
+      transaction.set(newTxReferredRef, {
+        'user_id': user.uid,
+        'client_name': currentUserName,
+        'amount_spent': 0,
+        'points_earned': pointsReferred,
+        'type': 'earn',
+        'date': FieldValue.serverTimestamp(),
+        'admin_name': 'Système (Parrainage)',
+      });
+
+      // Log transaction for referrer
+      final newTxReferrerRef = _firestore.collection('transactions').doc();
+      transaction.set(newTxReferrerRef, {
+        'user_id': referrerDoc.id,
+        'client_name': currentReferrerName,
+        'amount_spent': 0,
+        'points_earned': pointsReferrer,
+        'type': 'earn',
+        'date': FieldValue.serverTimestamp(),
+        'admin_name': 'Système (Parrainage de $currentUserName)',
       });
     });
 
