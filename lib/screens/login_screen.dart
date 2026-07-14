@@ -19,8 +19,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
   final _otpController = TextEditingController();
-  
-  bool _isPhoneLogin = false; // Par défaut, on met Email pour coller à la maquette Purxx
+
+  bool _isPhoneLogin =
+      false; // Par défaut, on met Email pour coller à la maquette Purxx
   bool _isSignUp = false;
   bool _isLoading = false;
   bool _otpSent = false;
@@ -50,7 +51,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
+            ),
             child: SoftCard(
               child: Form(
                 key: _formKey,
@@ -90,7 +94,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           style: Theme.of(context).textTheme.bodyLarge,
                           decoration: InputDecoration(
                             hintText: 'Numéro de téléphone (ex: +213...)',
-                            prefixIcon: Icon(Icons.phone, color: Theme.of(context).primaryColor),
+                            prefixIcon: Icon(
+                              Icons.phone,
+                              color: Theme.of(context).primaryColor,
+                            ),
                           ),
                         )
                       else
@@ -100,7 +107,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           style: Theme.of(context).textTheme.bodyLarge,
                           decoration: InputDecoration(
                             hintText: 'Code SMS à 6 chiffres',
-                            prefixIcon: Icon(Icons.message, color: Theme.of(context).primaryColor),
+                            prefixIcon: Icon(
+                              Icons.message,
+                              color: Theme.of(context).primaryColor,
+                            ),
                           ),
                         ),
                     ] else ...[
@@ -110,7 +120,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: Theme.of(context).textTheme.bodyLarge,
                         decoration: InputDecoration(
                           hintText: 'Email',
-                          prefixIcon: Icon(Icons.email, color: Theme.of(context).primaryColor),
+                          prefixIcon: Icon(
+                            Icons.email,
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -120,54 +133,100 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: Theme.of(context).textTheme.bodyLarge,
                         decoration: InputDecoration(
                           hintText: 'Mot de passe',
-                          prefixIcon: Icon(Icons.lock, color: Theme.of(context).primaryColor),
+                          prefixIcon: Icon(
+                            Icons.lock,
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
                       ),
                     ],
 
                     const SizedBox(height: 32),
-                    
+
                     // Primary Button
                     PrimaryButton(
-                      text: _isPhoneLogin 
-                          ? (_otpSent ? 'Confirmer le Code' : 'Envoyer le Code SMS') 
+                      text: _isPhoneLogin
+                          ? (_otpSent
+                                ? 'Confirmer le Code'
+                                : 'Envoyer le Code SMS')
                           : (_isSignUp ? 'Créer mon compte' : 'Se Connecter'),
                       isLoading: _isLoading,
                       onPressed: () async {
                         if (_isPhoneLogin) {
                           if (!_otpSent) {
-                            if (_phoneController.text.isEmpty) return;
+                            String phone = _phoneController.text.trim();
+                            if (phone.isEmpty) return;
+
+                            // Auto-format for Algeria if starts with 0
+                            if (phone.startsWith('0')) {
+                              phone = '+213${phone.substring(1)}';
+                            } else if (!phone.startsWith('+')) {
+                              phone = '+$phone';
+                            }
+
                             setState(() => _isLoading = true);
                             try {
-                              _confirmationResult = await ref.read(authControllerProvider).verifyPhoneNumber(_phoneController.text.trim());
+                              _confirmationResult = await ref
+                                  .read(authControllerProvider)
+                                  .verifyPhoneNumber(phone);
                               setState(() => _otpSent = true);
                             } catch (e) {
-                              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+                              if (mounted)
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Erreur: $e')),
+                                );
                             } finally {
                               if (mounted) setState(() => _isLoading = false);
                             }
                           } else {
-                            if (_otpController.text.isEmpty || _confirmationResult == null) return;
+                            if (_otpController.text.isEmpty ||
+                                _confirmationResult == null)
+                              return;
                             setState(() => _isLoading = true);
                             try {
-                              await ref.read(authControllerProvider).verifyOTP(_confirmationResult!, _otpController.text.trim());
+                              await ref
+                                  .read(authControllerProvider)
+                                  .verifyOTP(
+                                    _confirmationResult!,
+                                    _otpController.text.trim(),
+                                  );
                             } catch (e) {
-                              if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Code invalide ou expiré')));
+                              if (mounted)
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Code invalide ou expiré'),
+                                  ),
+                                );
                             } finally {
                               if (mounted) setState(() => _isLoading = false);
                             }
                           }
                         } else {
-                          if (_emailController.text.isEmpty || _passwordController.text.isEmpty) return;
+                          if (_emailController.text.isEmpty ||
+                              _passwordController.text.isEmpty)
+                            return;
                           setState(() => _isLoading = true);
                           try {
                             if (_isSignUp) {
-                              await ref.read(authControllerProvider).signUpWithEmail(_emailController.text.trim(), _passwordController.text.trim());
+                              await ref
+                                  .read(authControllerProvider)
+                                  .signUpWithEmail(
+                                    _emailController.text.trim(),
+                                    _passwordController.text.trim(),
+                                  );
                             } else {
-                              await ref.read(authControllerProvider).signInWithEmail(_emailController.text.trim(), _passwordController.text.trim());
+                              await ref
+                                  .read(authControllerProvider)
+                                  .signInWithEmail(
+                                    _emailController.text.trim(),
+                                    _passwordController.text.trim(),
+                                  );
                             }
                           } catch (e) {
-                            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+                            if (mounted)
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Erreur: $e')),
+                              );
                           } finally {
                             if (mounted) setState(() => _isLoading = false);
                           }
@@ -181,8 +240,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       TextButton(
                         onPressed: () => setState(() => _isSignUp = !_isSignUp),
                         child: Text(
-                          _isSignUp ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? S\'inscrire',
-                          style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                          _isSignUp
+                              ? 'Déjà un compte ? Se connecter'
+                              : 'Pas de compte ? S\'inscrire',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
 
@@ -190,10 +254,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       TextButton(
                         onPressed: _toggleLoginType,
                         child: Text(
-                          _isPhoneLogin 
-                              ? 'Utiliser l\'Email au lieu' 
+                          _isPhoneLogin
+                              ? 'Utiliser l\'Email au lieu'
                               : 'Utiliser le Numéro au lieu',
-                          style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
 
@@ -201,12 +268,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Expanded(child: Divider(color: Theme.of(context).dividerColor, thickness: 0.5)),
+                          Expanded(
+                            child: Divider(
+                              color: Theme.of(context).dividerColor,
+                              thickness: 0.5,
+                            ),
+                          ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text('OU', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12)),
+                            child: Text(
+                              'OU',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                            ),
                           ),
-                          Expanded(child: Divider(color: Theme.of(context).dividerColor, thickness: 0.5)),
+                          Expanded(
+                            child: Divider(
+                              color: Theme.of(context).dividerColor,
+                              thickness: 0.5,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -217,25 +299,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onPressed: () async {
                         setState(() => _isLoading = true);
                         try {
-                          await ref.read(authControllerProvider).signInWithGoogle();
+                          await ref
+                              .read(authControllerProvider)
+                              .signInWithGoogle();
                         } catch (e) {
-                          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+                          if (mounted)
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Erreur: $e')),
+                            );
                         } finally {
                           if (mounted) setState(() => _isLoading = false);
                         }
                       },
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: Theme.of(context).dividerColor, width: 1),
+                        side: BorderSide(
+                          color: Theme.of(context).dividerColor,
+                          width: 1,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         backgroundColor: Theme.of(context).colorScheme.surface,
                       ),
-                      icon: Icon(Icons.account_circle, color: Theme.of(context).iconTheme.color),
+                      icon: Icon(
+                        Icons.account_circle,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
                       label: Text(
                         'Continuer avec Google',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
