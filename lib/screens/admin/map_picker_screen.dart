@@ -137,7 +137,11 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     }
 
     try {
-      Position position = await Geolocator.getCurrentPosition();
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
       setState(() {
         _selectedLocation = LatLng(position.latitude, position.longitude);
         _isLoading = false;
@@ -152,6 +156,47 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
       _selectedLocation = const LatLng(36.7525, 3.04197); // Default: Algiers
       _isLoading = false;
     });
+  }
+
+  Future<void> _moveToCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Le service de localisation est désactivé.'),
+          ),
+        );
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
+    if (permission == LocationPermission.deniedForever) return;
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Recherche de votre position...')),
+      );
+    }
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.best,
+        ),
+      );
+      final newLoc = LatLng(position.latitude, position.longitude);
+      _mapController.move(newLoc, 17.0);
+    } catch (e) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur: impossible d\'obtenir la position')),
+        );
+    }
   }
 
   @override
@@ -305,6 +350,19 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                           ),
                         ),
                     ],
+                  ),
+                ),
+                Positioned(
+                  bottom: 100,
+                  right: 16,
+                  child: FloatingActionButton(
+                    heroTag: 'my_location_btn',
+                    onPressed: _moveToCurrentLocation,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.my_location,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                 ),
                 Positioned(
