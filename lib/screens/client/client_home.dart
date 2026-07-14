@@ -53,11 +53,17 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
       settingsAsync.whenData((settings) {
         _geofenceChecked = true;
         Future.microtask(() {
+          // In-app banner (legacy)
           GeofenceService.checkLocationAndNotify(
             context,
             settings.storeLat,
             settings.storeLng,
             settings.geofenceMessages,
+          );
+          // True background geofencing
+          GeofencingServiceManager().startGeofencing(
+            settings.storeLat,
+            settings.storeLng,
           );
         });
       });
@@ -71,7 +77,10 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 16.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -80,22 +89,43 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         GestureDetector(
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientSettingsScreen())),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ClientSettingsScreen(),
+                            ),
+                          ),
                           child: CircleAvatar(
                             radius: 24,
-                            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).primaryColor.withOpacity(0.1),
                             child: userAsync.when(
                               data: (user) => Text(
-                                user?.name.isNotEmpty == true ? user!.name[0].toUpperCase() : 'U',
-                                style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 20),
+                                user?.name.isNotEmpty == true
+                                    ? user!.name[0].toUpperCase()
+                                    : 'U',
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
                               ),
-                              loading: () => const CircularProgressIndicator(strokeWidth: 2),
-                              error: (_, __) => Icon(Icons.person, color: Theme.of(context).primaryColor),
+                              loading: () => const CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                              error: (_, __) => Icon(
+                                Icons.person,
+                                color: Theme.of(context).primaryColor,
+                              ),
                             ),
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.notifications_none_rounded, size: 28),
+                          icon: const Icon(
+                            Icons.notifications_none_rounded,
+                            size: 28,
+                          ),
                           onPressed: () {
                             _showNotificationsSheet(context, ref);
                           },
@@ -103,14 +133,12 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Title
                     Text(
                       'Choose\nYour Favorite Food',
-                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        fontSize: 28,
-                        height: 1.2,
-                      ),
+                      style: Theme.of(context).textTheme.displayMedium
+                          ?.copyWith(fontSize: 28, height: 1.2),
                     ),
                     const SizedBox(height: 24),
 
@@ -129,7 +157,15 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                                 itemBuilder: (context, index) {
                                   final story = stories[index];
                                   return GestureDetector(
-                                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => StoryViewerScreen(stories: stories, initialIndex: index))),
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => StoryViewerScreen(
+                                          stories: stories,
+                                          initialIndex: index,
+                                        ),
+                                      ),
+                                    ),
                                     child: Container(
                                       margin: const EdgeInsets.only(right: 16),
                                       width: 80,
@@ -140,19 +176,39 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                                             width: 70,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
-                                              border: Border.all(color: Theme.of(context).primaryColor, width: 3),
+                                              border: Border.all(
+                                                color: Theme.of(
+                                                  context,
+                                                ).primaryColor,
+                                                width: 3,
+                                              ),
                                             ),
                                             child: ClipRRect(
-                                              borderRadius: BorderRadius.circular(35),
-                                              child: story.imageUrl.startsWith('data:image') 
-                                                  ? Image.memory(base64Decode(story.imageUrl.split(',').last), fit: BoxFit.cover)
-                                                  : Container(color: Colors.grey),
+                                              borderRadius:
+                                                  BorderRadius.circular(35),
+                                              child:
+                                                  story.imageUrl.startsWith(
+                                                    'data:image',
+                                                  )
+                                                  ? Image.memory(
+                                                      base64Decode(
+                                                        story.imageUrl
+                                                            .split(',')
+                                                            .last,
+                                                      ),
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Container(
+                                                      color: Colors.grey,
+                                                    ),
                                             ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
                                             story.title,
-                                            style: Theme.of(context).textTheme.bodySmall,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             textAlign: TextAlign.center,
@@ -174,20 +230,34 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
 
                     // Composer mon Plat Banner
                     GestureDetector(
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComposerScreen())),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ComposerScreen(),
+                        ),
+                      ),
                       child: Container(
                         width: double.infinity,
                         margin: const EdgeInsets.only(bottom: 24),
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Theme.of(context).primaryColor, Color(0xFFC00000)],
+                            colors: [
+                              Theme.of(context).primaryColor,
+                              Color(0xFFC00000),
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
-                            BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8)),
+                            BoxShadow(
+                              color: Theme.of(
+                                context,
+                              ).primaryColor.withOpacity(0.3),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            ),
                           ],
                         ),
                         child: Row(
@@ -196,9 +266,22 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Composer mon plat', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                                  const Text(
+                                    'Composer mon plat',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                   const SizedBox(height: 8),
-                                  const Text('Créez le plat de vos rêves avec vos ingrédients préférés.', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                                  const Text(
+                                    'Créez le plat de vos rêves avec vos ingrédients préférés.',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -209,7 +292,11 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                                 color: Colors.white.withOpacity(0.2),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.restaurant_rounded, color: Colors.white, size: 32),
+                              child: const Icon(
+                                Icons.restaurant_rounded,
+                                color: Colors.white,
+                                size: 32,
+                              ),
                             ),
                           ],
                         ),
@@ -218,7 +305,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
 
                     // Menu Section (Search, Categories, Grids)
                     ClientMenuSection(showFavoritesOnly: _selectedIndex == 1),
-                    
+
                     const SizedBox(height: 100), // Padding for bottom nav bar
                   ],
                 ),
@@ -246,9 +333,21 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
           child: Column(
             children: [
               const SizedBox(height: 16),
-              Container(width: 50, height: 5, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10))),
+              Container(
+                width: 50,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
               const SizedBox(height: 16),
-              Text('Notifications', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              Text(
+                'Notifications',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
               Expanded(
                 child: Consumer(
@@ -256,56 +355,95 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                     final announcementsAsync = ref.watch(announcementsProvider);
                     return announcementsAsync.when(
                       data: (announcements) {
-                    if (announcements.isEmpty) {
-                      return Center(child: Text('Aucune notification', style: Theme.of(context).textTheme.bodyMedium));
-                    }
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(24),
-                      itemCount: announcements.length,
-                      itemBuilder: (context, index) {
-                        final ann = announcements[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.1), shape: BoxShape.circle),
-                                child: Icon(Icons.campaign, color: Theme.of(context).primaryColor),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(ann.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                    const SizedBox(height: 4),
-                                    Text(ann.message, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color)),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      _formatDate(ann.createdAt),
-                                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                                    ),
-                                  ],
+                        if (announcements.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'Aucune notification',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          );
+                        }
+                        return ListView.builder(
+                          padding: const EdgeInsets.all(24),
+                          itemCount: announcements.length,
+                          itemBuilder: (context, index) {
+                            final ann = announcements[index];
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Theme.of(
+                                    context,
+                                  ).primaryColor.withOpacity(0.3),
                                 ),
                               ),
-                            ],
-                          ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(
+                                        context,
+                                      ).primaryColor.withOpacity(0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.campaign,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          ann.title,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          ann.message,
+                                          style: TextStyle(
+                                            color: Theme.of(
+                                              context,
+                                            ).textTheme.bodyMedium?.color,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          _formatDate(ann.createdAt),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         );
                       },
+                      loading: () => Center(
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      error: (err, stack) =>
+                          Center(child: Text('Erreur de chargement: $err')),
                     );
                   },
-                      loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
-                      error: (err, stack) => Center(child: Text('Erreur de chargement: $err')),
-                    );
-                  }
                 ),
               ),
             ],
@@ -327,7 +465,11 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
         color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
-          BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10)),
+          BoxShadow(
+            color: Theme.of(context).primaryColor.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
         ],
       ),
       child: Row(
@@ -346,23 +488,24 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
     return GestureDetector(
       onTap: () {
         if (index == 2) {
-           Navigator.push(context, MaterialPageRoute(builder: (_) => const PlusOptionsScreen()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PlusOptionsScreen()),
+          );
         } else {
-           setState(() => _selectedIndex = index);
+          setState(() => _selectedIndex = index);
         }
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent,
+          color: isSelected
+              ? Colors.white.withOpacity(0.2)
+              : Colors.transparent,
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: 28,
-        ),
+        child: Icon(icon, color: Colors.white, size: 28),
       ),
     );
   }
