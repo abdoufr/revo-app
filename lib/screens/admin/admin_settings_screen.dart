@@ -6,12 +6,14 @@ import '../../providers/settings_provider.dart';
 import '../../providers/theme_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'map_picker_screen.dart';
+import '../../utils/db_seeder.dart';
 
 class AdminSettingsScreen extends ConsumerStatefulWidget {
   const AdminSettingsScreen({super.key});
 
   @override
-  ConsumerState<AdminSettingsScreen> createState() => _AdminSettingsScreenState();
+  ConsumerState<AdminSettingsScreen> createState() =>
+      _AdminSettingsScreenState();
 }
 
 class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
@@ -41,24 +43,32 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
   Future<void> _saveSettings() async {
     setState(() => _isLoading = true);
     try {
-      await ref.read(adminActionsProvider).updateAppSettings(
-        _nameController.text.trim(),
-        _descController.text.trim(),
-        _bannerController.text.trim(),
-        double.tryParse(_latController.text.trim()) ?? 0.0,
-        double.tryParse(_lngController.text.trim()) ?? 0.0,
-        _geofenceMessages,
-      );
+      await ref
+          .read(adminActionsProvider)
+          .updateAppSettings(
+            _nameController.text.trim(),
+            _descController.text.trim(),
+            _bannerController.text.trim(),
+            double.tryParse(_latController.text.trim()) ?? 0.0,
+            double.tryParse(_lngController.text.trim()) ?? 0.0,
+            _geofenceMessages,
+          );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Paramètres mis à jour avec succès!'), backgroundColor: AppTheme.success),
+          const SnackBar(
+            content: Text('Paramètres mis à jour avec succès!'),
+            backgroundColor: AppTheme.success,
+          ),
         );
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error),
+          SnackBar(
+            content: Text('Erreur: $e'),
+            backgroundColor: AppTheme.error,
+          ),
         );
       }
     } finally {
@@ -73,7 +83,10 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Paramètres du Fastfood', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
+        title: Text(
+          'Paramètres du Fastfood',
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+        ),
       ),
       body: settingsAsync.when(
         data: (settings) {
@@ -99,20 +112,35 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.palette_rounded, color: Theme.of(context).primaryColor),
+                          Icon(
+                            Icons.palette_rounded,
+                            color: Theme.of(context).primaryColor,
+                          ),
                           const SizedBox(width: 12),
-                          Text('Préférences d\'Affichage', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text(
+                            'Préférences d\'Affichage',
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Mode Sombre (Dark Mode)', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                          Text(
+                            'Mode Sombre (Dark Mode)',
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
                           Switch(
                             value: themeState.themeMode == ThemeMode.dark,
                             activeColor: Theme.of(context).primaryColor,
-                            onChanged: (val) => ref.read(themeProvider.notifier).toggleTheme(),
+                            onChanged: (val) =>
+                                ref.read(themeProvider.notifier).toggleTheme(),
                           ),
                         ],
                       ),
@@ -120,19 +148,37 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Langue', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                          Text(
+                            'Langue',
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
                           DropdownButton<String>(
                             value: themeState.locale.languageCode,
-                            dropdownColor: Theme.of(context).colorScheme.surface,
+                            dropdownColor: Theme.of(
+                              context,
+                            ).colorScheme.surface,
                             style: Theme.of(context).textTheme.bodyLarge,
                             underline: const SizedBox(),
                             items: const [
-                              DropdownMenuItem(value: 'fr', child: Text('Français')),
-                              DropdownMenuItem(value: 'en', child: Text('English')),
-                              DropdownMenuItem(value: 'ar', child: Text('العربية')),
+                              DropdownMenuItem(
+                                value: 'fr',
+                                child: Text('Français'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'en',
+                                child: Text('English'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'ar',
+                                child: Text('العربية'),
+                              ),
                             ],
                             onChanged: (val) {
-                              if (val != null) ref.read(themeProvider.notifier).setLanguage(val);
+                              if (val != null)
+                                ref
+                                    .read(themeProvider.notifier)
+                                    .setLanguage(val);
                             },
                           ),
                         ],
@@ -141,14 +187,23 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                Text('Informations Générales', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  'Informations Générales',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _nameController,
                   style: Theme.of(context).textTheme.bodyLarge,
                   decoration: InputDecoration(
                     labelText: 'Nom du Fastfood',
-                    prefixIcon: Icon(Icons.storefront, color: Theme.of(context).primaryColor),
+                    prefixIcon: Icon(
+                      Icons.storefront,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -157,26 +212,50 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                   decoration: InputDecoration(
                     labelText: 'Description (ex: Le meilleur burger)',
-                    prefixIcon: Icon(Icons.description, color: Theme.of(context).primaryColor),
+                    prefixIcon: Icon(
+                      Icons.description,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
-                Text('Promotion Live (Bannière Client)', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  'Promotion Live (Bannière Client)',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text('Ce message s\'affichera chez tous les clients.', style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  'Ce message s\'affichera chez tous les clients.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _bannerController,
                   style: Theme.of(context).textTheme.bodyLarge,
                   decoration: InputDecoration(
                     labelText: 'Annonce (Laisser vide pour cacher)',
-                    prefixIcon: Icon(Icons.campaign, color: Theme.of(context).primaryColor),
+                    prefixIcon: Icon(
+                      Icons.campaign,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
-                Text('Localisation et Notifications', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  'Localisation et Notifications',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text('Gérez la position GPS du magasin et les messages de bienvenue lorsque le client s\'approche à moins de 100m.', style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  'Gérez la position GPS du magasin et les messages de bienvenue lorsque le client s\'approche à moins de 100m.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -193,7 +272,10 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MapPickerScreen(initialLat: lat, initialLng: lng),
+                            builder: (context) => MapPickerScreen(
+                              initialLat: lat,
+                              initialLng: lng,
+                            ),
                           ),
                         );
                         if (result != null && result is LatLng) {
@@ -213,16 +295,28 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text('Messages d\'approche (100m)', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  'Messages d\'approche (100m)',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: _geofenceMessages.map((msg) {
                     return Chip(
-                      label: Text(msg, style: const TextStyle(color: Colors.white)),
+                      label: Text(
+                        msg,
+                        style: const TextStyle(color: Colors.white),
+                      ),
                       backgroundColor: Theme.of(context).primaryColor,
-                      deleteIcon: const Icon(Icons.close, color: Colors.white, size: 18),
+                      deleteIcon: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                       onDeleted: () {
                         setState(() {
                           _geofenceMessages.remove(msg);
@@ -239,17 +333,26 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                         controller: _newMessageController,
                         style: Theme.of(context).textTheme.bodyLarge,
                         decoration: InputDecoration(
-                          labelText: 'Nouveau message (ex: Vous êtes si proche !)',
-                          prefixIcon: Icon(Icons.message, color: Theme.of(context).primaryColor),
+                          labelText:
+                              'Nouveau message (ex: Vous êtes si proche !)',
+                          prefixIcon: Icon(
+                            Icons.message,
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     IconButton(
-                      icon: Icon(Icons.add_circle, color: Theme.of(context).primaryColor, size: 40),
+                      icon: Icon(
+                        Icons.add_circle,
+                        color: Theme.of(context).primaryColor,
+                        size: 40,
+                      ),
                       onPressed: () {
                         final val = _newMessageController.text.trim();
-                        if (val.isNotEmpty && !_geofenceMessages.contains(val)) {
+                        if (val.isNotEmpty &&
+                            !_geofenceMessages.contains(val)) {
                           setState(() {
                             _geofenceMessages.add(val);
                             _newMessageController.clear();
@@ -260,9 +363,18 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   ],
                 ),
                 const SizedBox(height: 32),
-                Text('Gestion des Catégories', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  'Gestion des Catégories',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text('Gérez les catégories disponibles pour vos produits.', style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  'Gérez les catégories disponibles pour vos produits.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
                 const SizedBox(height: 16),
                 categoriesAsync.when(
                   data: (categories) {
@@ -274,12 +386,22 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                           runSpacing: 8,
                           children: categories.map((cat) {
                             return Chip(
-                              label: Text(cat, style: const TextStyle(color: Colors.white)),
+                              label: Text(
+                                cat,
+                                style: const TextStyle(color: Colors.white),
+                              ),
                               backgroundColor: Theme.of(context).primaryColor,
-                              deleteIcon: const Icon(Icons.close, color: Colors.white, size: 18),
+                              deleteIcon: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                               onDeleted: () {
-                                final newList = List<String>.from(categories)..remove(cat);
-                                ref.read(adminActionsProvider).updateCategories(newList);
+                                final newList = List<String>.from(categories)
+                                  ..remove(cat);
+                                ref
+                                    .read(adminActionsProvider)
+                                    .updateCategories(newList);
                               },
                             );
                           }).toList(),
@@ -293,18 +415,29 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                                 style: Theme.of(context).textTheme.bodyLarge,
                                 decoration: InputDecoration(
                                   labelText: 'Nouvelle catégorie',
-                                  prefixIcon: Icon(Icons.category, color: Theme.of(context).primaryColor),
+                                  prefixIcon: Icon(
+                                    Icons.category,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
                                 ),
                               ),
                             ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: Icon(Icons.add_circle, color: Theme.of(context).primaryColor, size: 40),
+                              icon: Icon(
+                                Icons.add_circle,
+                                color: Theme.of(context).primaryColor,
+                                size: 40,
+                              ),
                               onPressed: () {
                                 final val = _newCategoryController.text.trim();
-                                if (val.isNotEmpty && !categories.contains(val)) {
-                                  final newList = List<String>.from(categories)..add(val);
-                                  ref.read(adminActionsProvider).updateCategories(newList);
+                                if (val.isNotEmpty &&
+                                    !categories.contains(val)) {
+                                  final newList = List<String>.from(categories)
+                                    ..add(val);
+                                  ref
+                                      .read(adminActionsProvider)
+                                      .updateCategories(newList);
                                   _newCategoryController.clear();
                                 }
                               },
@@ -314,8 +447,15 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                       ],
                     );
                   },
-                  loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
-                  error: (err, stack) => const Text('Erreur chargement catégories', style: TextStyle(color: AppTheme.error)),
+                  loading: () => Center(
+                    child: CircularProgressIndicator(
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  error: (err, stack) => const Text(
+                    'Erreur chargement catégories',
+                    style: TextStyle(color: AppTheme.error),
+                  ),
                 ),
                 const SizedBox(height: 32),
                 PrimaryButton(
@@ -323,12 +463,83 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   isLoading: _isLoading,
                   onPressed: _saveSettings,
                 ),
+                const SizedBox(height: 32),
+                ElevatedButton.icon(
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Générer Menu Réel ?'),
+                              content: const Text(
+                                'Cela va insérer de vrais produits (Burgers, Tacos, Pizzas...) et de vraies catégories dans la base de données. Continuer ?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, false),
+                                  child: const Text('Annuler'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, true),
+                                  child: const Text('Oui, Générer'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm == true) {
+                            setState(() => _isLoading = true);
+                            try {
+                              await DbSeeder.seedDatabase();
+                              if (mounted)
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      '✅ Menu Réel et Config générés avec succès !',
+                                    ),
+                                  ),
+                                );
+                            } catch (e) {
+                              if (mounted)
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Erreur: $e')),
+                                );
+                            } finally {
+                              if (mounted) setState(() => _isLoading = false);
+                            }
+                          }
+                        },
+                  icon: const Icon(Icons.fastfood, color: Colors.white),
+                  label: const Text(
+                    'Générer le Menu Réel (Demo)',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
               ],
             ),
           );
         },
-        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
-        error: (err, stack) => Center(child: Text('Erreur: $err', style: const TextStyle(color: AppTheme.error))),
+        loading: () => Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
+        error: (err, stack) => Center(
+          child: Text(
+            'Erreur: $err',
+            style: const TextStyle(color: AppTheme.error),
+          ),
+        ),
       ),
     );
   }
