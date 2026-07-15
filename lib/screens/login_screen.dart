@@ -18,6 +18,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _signupPhoneController = TextEditingController();
   final _otpController = TextEditingController();
 
   bool _isPhoneLogin =
@@ -41,6 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _phoneController.dispose();
+    _signupPhoneController.dispose();
     _otpController.dispose();
     super.dispose();
   }
@@ -139,6 +141,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                       ),
+                      if (_isSignUp) ...[
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _signupPhoneController,
+                          keyboardType: TextInputType.phone,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          decoration: InputDecoration(
+                            hintText: 'Numéro de téléphone (optionnel)',
+                            prefixIcon: Icon(
+                              Icons.phone,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
 
                     const SizedBox(height: 32),
@@ -208,11 +225,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           setState(() => _isLoading = true);
                           try {
                             if (_isSignUp) {
+                              String? phoneStr = _signupPhoneController.text
+                                  .trim();
+                              if (phoneStr.isNotEmpty) {
+                                // Auto-format for Algeria if starts with 0
+                                if (phoneStr.startsWith('0')) {
+                                  phoneStr = '+213${phoneStr.substring(1)}';
+                                } else if (!phoneStr.startsWith('+')) {
+                                  phoneStr = '+$phoneStr';
+                                }
+                              } else {
+                                phoneStr = null;
+                              }
+
                               await ref
                                   .read(authControllerProvider)
                                   .signUpWithEmail(
                                     _emailController.text.trim(),
                                     _passwordController.text.trim(),
+                                    phone: phoneStr,
                                   );
                             } else {
                               await ref
