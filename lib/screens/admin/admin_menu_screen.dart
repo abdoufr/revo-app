@@ -280,7 +280,7 @@ class AdminMenuScreen extends ConsumerWidget {
                   child: Text('Annuler', style: Theme.of(context).textTheme.bodyMedium),
                 ),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     final newProduct = Product(
                       id: product?.id ?? '',
                       name: nameController.text,
@@ -297,12 +297,21 @@ class AdminMenuScreen extends ConsumerWidget {
                       gallery: galleryImages,
                     );
                     
-                    if (product == null) {
-                      ref.read(adminActionsProvider).addProduct(newProduct);
-                    } else {
-                      ref.read(adminActionsProvider).updateProduct(newProduct);
+                    try {
+                      if (product == null) {
+                        await ref.read(adminActionsProvider).addProduct(newProduct);
+                      } else {
+                        await ref.read(adminActionsProvider).updateProduct(newProduct);
+                      }
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Produit enregistré !'), backgroundColor: Colors.green));
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: L\'image est peut-être trop lourde. Essayez avec moins de photos.'), backgroundColor: Colors.red));
+                      }
                     }
-                    Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
                   child: const Text('Enregistrer', style: TextStyle(color: Colors.white)),
