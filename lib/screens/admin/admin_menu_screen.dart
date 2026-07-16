@@ -20,6 +20,27 @@ class AdminMenuScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Gérer le Menu', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bug_report),
+            onPressed: () async {
+              try {
+                final snapshot = await FirebaseFirestore.instance.collection('products').limit(1).get();
+                final doc = snapshot.docs.first;
+                final data = doc.data();
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Debug Info'),
+                    content: Text('ID: ${doc.id}\nKeys: ${data.keys.join(', ')}\nGallery isList: ${data['gallery'] is List}\nGallery length: ${data['gallery']?.length ?? 0}'),
+                  ),
+                );
+              } catch (e) {
+                print(e);
+              }
+            },
+          )
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
