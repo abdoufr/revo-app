@@ -7,6 +7,7 @@ class Product {
   final bool isAvailable;
   final String? imageUrl; // Base64 or URL
   final List<String> ingredients;
+  final List<String> gallery; // Additional images for description
 
   Product({
     required this.id,
@@ -17,6 +18,7 @@ class Product {
     this.isAvailable = true,
     this.imageUrl,
     this.ingredients = const [],
+    this.gallery = const [],
   });
 
   factory Product.fromMap(Map<String, dynamic> data, String documentId) {
@@ -29,6 +31,7 @@ class Product {
       isAvailable: data['is_available'] ?? true,
       imageUrl: data['imageUrl'],
       ingredients: data['ingredients'] != null ? List<String>.from(data['ingredients']) : [],
+      gallery: data['gallery'] != null ? List<String>.from(data['gallery']) : [],
     );
   }
 
@@ -40,6 +43,7 @@ class Product {
       'category': category,
       'is_available': isAvailable,
       'ingredients': ingredients,
+      'gallery': gallery,
       if (imageUrl != null) 'imageUrl': imageUrl,
     };
   }

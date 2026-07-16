@@ -262,6 +262,48 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             ),
           ),
         ),
+        _buildGallerySection(),
+      ],
+    );
+  }
+
+  Widget _buildGallerySection() {
+    if (widget.product.gallery.isEmpty) {
+      return const SizedBox();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Text(
+          'Galerie',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 120,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: widget.product.gallery.length,
+            itemBuilder: (context, index) {
+              final imgBase64 = widget.product.gallery[index];
+              return Container(
+                margin: const EdgeInsets.only(right: 12),
+                width: 120,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  image: DecorationImage(
+                    image: MemoryImage(base64Decode(imgBase64.split(',').last)),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }

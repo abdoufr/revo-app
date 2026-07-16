@@ -101,6 +101,7 @@ class AdminMenuScreen extends ConsumerWidget {
         selectedCategory = 'General';
     }
     String? base64Image = product?.imageUrl;
+    List<String> galleryImages = product?.gallery.toList() ?? [];
 
     showDialog(
       context: context,
@@ -208,6 +209,68 @@ class AdminMenuScreen extends ConsumerWidget {
                         hintText: 'Ingrédients (séparés par des virgules)',
                       ),
                     ),
+                    const SizedBox(height: 24),
+                    Text('Images de la description (Galerie)', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 100,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          ...galleryImages.asMap().entries.map((entry) {
+                            int idx = entry.key;
+                            String imgBase64 = entry.value;
+                            return Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              width: 100,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
+                                image: DecorationImage(
+                                  image: MemoryImage(_decodeBase64(imgBase64)),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              child: Align(
+                                alignment: Alignment.topRight,
+                                child: IconButton(
+                                  icon: const Icon(Icons.cancel, color: Colors.red),
+                                  onPressed: () {
+                                    setState(() {
+                                      galleryImages.removeAt(idx);
+                                    });
+                                  },
+                                ),
+                              ),
+                            );
+                          }),
+                          GestureDetector(
+                            onTap: () async {
+                              try {
+                                final picker = _getPicker();
+                                final pickedFile = await picker.pickImage(source: _getImageSource(), maxWidth: 800, imageQuality: 85);
+                                if (pickedFile != null) {
+                                  final bytes = await pickedFile.readAsBytes();
+                                  final base64String = 'data:image/jpeg;base64,' + _base64Encode(bytes);
+                                  setState(() {
+                                    galleryImages.add(base64String);
+                                  });
+                                }
+                              } catch (e) {}
+                            },
+                            child: Container(
+                              width: 100,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Theme.of(context).primaryColor, style: BorderStyle.solid),
+                              ),
+                              child: Icon(Icons.add_photo_alternate_rounded, color: Theme.of(context).primaryColor),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -231,6 +294,7 @@ class AdminMenuScreen extends ConsumerWidget {
                           .map((e) => e.trim())
                           .where((e) => e.isNotEmpty)
                           .toList(),
+                      gallery: galleryImages,
                     );
                     
                     if (product == null) {

@@ -11,6 +11,7 @@ class Review {
   final String comment;
   final DateTime createdAt;
   final bool? isModified;
+  final List<String> images;
 
   Review({
     required this.id,
@@ -21,6 +22,7 @@ class Review {
     required this.comment,
     required this.createdAt,
     this.isModified,
+    this.images = const [],
   });
 
   Map<String, dynamic> toMap() {
@@ -31,6 +33,7 @@ class Review {
       'rating': rating,
       'comment': comment,
       'created_at': FieldValue.serverTimestamp(),
+      'images': images,
     };
   }
 
@@ -44,6 +47,7 @@ class Review {
       comment: map['comment'] ?? '',
       createdAt: (map['created_at'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isModified: map['is_modified'] as bool?,
+      images: map['images'] != null ? List<String>.from(map['images']) : [],
     );
   }
 }
@@ -65,7 +69,7 @@ final productReviewsProvider = StreamProvider.family<List<Review>, String>((ref,
 class ReviewsActions {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> addReview(String productId, String userId, String userName, double rating, String comment) async {
+  Future<void> addReview(String productId, String userId, String userName, double rating, String comment, {List<String> images = const []}) async {
     // Vérifier si l'utilisateur a déjà laissé un avis pour ce produit
     final existingReviews = await _firestore
         .collection('reviews')
@@ -79,6 +83,7 @@ class ReviewsActions {
         'rating': rating,
         'comment': comment,
         'is_modified': true,
+        if (images.isNotEmpty) 'images': images,
       });
     } else {
       // Créer un nouvel avis
@@ -89,6 +94,7 @@ class ReviewsActions {
         'rating': rating,
         'comment': comment,
         'created_at': FieldValue.serverTimestamp(),
+        'images': images,
       });
     }
     

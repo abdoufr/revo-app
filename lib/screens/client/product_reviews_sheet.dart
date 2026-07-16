@@ -5,6 +5,7 @@ import '../../models/product.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/reviews_provider.dart';
 import '../../providers/client_providers.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProductReviewsSheet extends ConsumerStatefulWidget {
   final Product product;
@@ -19,6 +20,9 @@ class ProductReviewsSheet extends ConsumerStatefulWidget {
 class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
   final _commentController = TextEditingController();
   double _rating = 5.0;
+  List<String> _reviewImages = [];
+
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -44,11 +48,13 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
       userName,
       _rating,
       _commentController.text.trim(),
+      images: _reviewImages,
     );
 
     _commentController.clear();
     setState(() {
       _rating = 5.0;
+      _reviewImages = [];
     });
 
     if (mounted) {
@@ -144,8 +150,58 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                         );
                       }),
                     ),
+                    if (_reviewImages.isNotEmpty)
+                      Container(
+                        height: 60,
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _reviewImages.length,
+                          itemBuilder: (context, index) {
+                            return Stack(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    image: DecorationImage(
+                                      image: MemoryImage(base64Decode(_reviewImages[index].split(',').last)),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _reviewImages.removeAt(index)),
+                                    child: Container(
+                                      color: Colors.white.withOpacity(0.8),
+                                      child: const Icon(Icons.close, size: 16, color: Colors.red),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
                     Row(
                       children: [
+                        IconButton(
+                          icon: const Icon(Icons.add_a_photo, color: Colors.grey),
+                          onPressed: () async {
+                            final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70, maxWidth: 600);
+                            if (picked != null) {
+                              final bytes = await picked.readAsBytes();
+                              setState(() {
+                                _reviewImages.add('data:image/jpeg;base64,' + base64Encode(bytes));
+                              });
+                            }
+                          },
+                        ),
                         Expanded(
                           child: TextField(
                             controller: _commentController,
@@ -191,18 +247,65 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                             children: [
                               Text(review.userName, style: const TextStyle(fontWeight: FontWeight.bold)),
                               Row(
-                                children: List.generate(5, (starIndex) {
-                                  return Icon(
-                                    starIndex < review.rating ? Icons.star_rounded : Icons.star_border_rounded,
-                                    color: Colors.amber,
-                                    size: 16,
-                                  );
-                                }),
+                                children: [
+                                  Row(
+                                    children: List.generate(5, (starIndex) {
+                                      return Icon(
+                                        starIndex < review.rating ? Icons.star_rounded : Icons.star_border_rounded,
+                                        color: Colors.amber,
+                                        size: 16,
+                                      );
+                                    }),
+                                  ),
+                                  if (userAsync.value?.role == 'admin')
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                                      onPressed: () async {
+                                        final confirm = await showDialog<bool>(
+                                          context: context,
+                                          builder: (ctx) => AlertDialog(
+                                            title: const Text('Supprimer l\'avis'),
+                                            content: const Text('Voulez-vous vraiment supprimer cet avis ?'),
+                                            actions: [
+                                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+                                              TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Supprimer', style: TextStyle(color: Colors.red))),
+                                            ],
+                                          ),
+                                        );
+                                        if (confirm == true) {
+                                          await ref.read(reviewsActionsProvider).deleteReview(review.id, widget.product.id);
+                                        }
+                                      },
+                                    ),
+                                ],
                               ),
                             ],
                           ),
                           const SizedBox(height: 4),
                           Text(review.comment, style: Theme.of(context).textTheme.bodyMedium),
+                          if (review.images.isNotEmpty)
+                            Container(
+                              margin: const EdgeInsets.top(8),
+                              height: 80,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: review.images.length,
+                                itemBuilder: (context, imgIndex) {
+                                  return Container(
+                                    margin: const EdgeInsets.only(right: 8),
+                                    width: 80,
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      image: DecorationImage(
+                                        image: MemoryImage(base64Decode(review.images[imgIndex].split(',').last)),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                         ],
                       ),
                     );
