@@ -6,6 +6,8 @@ import '../../theme/app_theme.dart';
 import '../../providers/reviews_provider.dart';
 import '../../providers/client_providers.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../widgets/smart_image.dart';
+import '../../services/storage_service.dart';
 
 class ProductReviewsSheet extends ConsumerStatefulWidget {
   final Product product;
@@ -39,28 +41,54 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
     super.dispose();
   }
 
-  void _submitReview(String userId, String userName) async {
+  Future<void> _submitReview(String userId, String userName) async {
     if (_commentController.text.trim().isEmpty) return;
 
-    await ref.read(reviewsActionsProvider).addReview(
-      widget.product.id,
-      userId,
-      userName,
-      _rating,
-      _commentController.text.trim(),
-      images: _reviewImages,
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator()),
     );
 
-    _commentController.clear();
-    setState(() {
-      _rating = 5.0;
-      _reviewImages = [];
-    });
+    try {
+      List<String> finalImages = [];
+      for (var img in _reviewImages) {
+        if (img.startsWith('data:image')) {
+          final url = await StorageService.uploadBase64Image(img, 'reviews');
+          finalImages.add(url);
+        } else {
+          finalImages.add(img);
+        }
+      }
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Merci pour votre avis !'), backgroundColor: AppTheme.success),
+      await ref.read(reviewsActionsProvider).addReview(
+        widget.product.id,
+        userId,
+        userName,
+        _rating,
+        _commentController.text.trim(),
+        images: finalImages,
       );
+
+      _commentController.clear();
+      setState(() {
+        _rating = 5.0;
+        _reviewImages = [];
+      });
+
+      if (mounted) {
+        Navigator.pop(context); // close loader
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Merci pour votre avis !'), backgroundColor: AppTheme.success),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // close loader
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error),
+        );
+      }
     }
   }
 
@@ -92,10 +120,10 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: widget.product.imageUrl != null && widget.product.imageUrl!.startsWith('data:image')
+                  child: widget.product.imageUrl != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(16),
-                          child: Image.memory(base64Decode(widget.product.imageUrl!.split(',').last), fit: BoxFit.cover),
+                          child: SmartImage(widget.product.imageUrl!, fit: BoxFit.cover),
                         )
                       : Icon(Icons.fastfood, color: Theme.of(context).primaryColor, size: 40),
                 ),
@@ -167,7 +195,7 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
                                     image: DecorationImage(
-                                      image: MemoryImage(base64Decode(_reviewImages[index].split(',').last)),
+                                          image: SmartImage.getProvider(_reviewImages[index]),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -298,7 +326,7 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(8),
                                       image: DecorationImage(
-                                        image: MemoryImage(base64Decode(review.images[imgIndex].split(',').last)),
+                                        image: SmartImage.getProvider(review.images[imgIndex]),
                                         fit: BoxFit.cover,
                                       ),
                                     ),

@@ -8,6 +8,7 @@ import '../../providers/admin_providers.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/story_provider.dart';
 import '../../providers/notification_provider.dart';
+import '../../widgets/smart_image.dart';
 import 'client_settings_screen.dart';
 import 'plus_options_screen.dart';
 import 'client_menu_section.dart';
@@ -144,9 +145,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                                             ),
                                             child: ClipRRect(
                                               borderRadius: BorderRadius.circular(35),
-                                              child: story.imageUrl.startsWith('data:image') 
-                                                  ? Image.memory(base64Decode(story.imageUrl.split(',').last), fit: BoxFit.cover)
-                                                  : Container(color: Colors.grey),
+                                              child: SmartImage(story.imageUrl, fit: BoxFit.cover),
                                             ),
                                           ),
                                           const SizedBox(height: 4),

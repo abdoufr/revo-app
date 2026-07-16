@@ -8,6 +8,7 @@ import '../../providers/client_providers.dart';
 import '../../providers/admin_providers.dart';
 import 'product_details_screen.dart';
 import 'client_full_list_screen.dart';
+import '../../widgets/smart_image.dart';
 
 class ClientMenuSection extends ConsumerStatefulWidget {
   final bool showFavoritesOnly;
@@ -209,10 +210,10 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
                         height: 90,
                         width: 90,
                         decoration: const BoxDecoration(shape: BoxShape.circle),
-                        child: product.imageUrl != null && product.imageUrl!.startsWith('data:image')
+                        child: product.imageUrl != null 
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(45),
-                                child: Image.memory(base64Decode(product.imageUrl!.split(',').last), fit: BoxFit.cover),
+                                child: SmartImage(product.imageUrl!, fit: BoxFit.cover),
                               )
                             : const Icon(Icons.fastfood, size: 50, color: Colors.grey),
                       ),

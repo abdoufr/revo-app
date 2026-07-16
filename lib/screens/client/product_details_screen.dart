@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/product.dart';
+import '../../widgets/smart_image.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/reviews_provider.dart';
 import '../../providers/auth_providers.dart';
@@ -296,7 +297,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   image: DecorationImage(
-                    image: MemoryImage(base64Decode(imgBase64.split(',').last)),
+                    image: SmartImage.getProvider(imgBase64),
                     fit: BoxFit.cover,
                   ),
                 ),

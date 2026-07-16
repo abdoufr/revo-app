@@ -8,6 +8,8 @@ import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
 import '../../models/product.dart';
 import '../../l10n/app_translations.dart';
+import '../../widgets/smart_image.dart';
+import '../../services/storage_service.dart';
 
 class AdminMenuScreen extends ConsumerWidget {
   const AdminMenuScreen({super.key});
@@ -147,6 +149,15 @@ class AdminMenuScreen extends ConsumerWidget {
                             final bytes = await pickedFile.readAsBytes();
                             // We import dart:convert at the top of file
                             final base64String = 'data:image/jpeg;base64,' + _base64Encode(bytes);
+                            
+                            // Check size
+                            final sizeInMB = base64String.length / (1024 * 1024);
+                            if (sizeInMB > 0.5) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('⚠️ Image principale trop lourde (${sizeInMB.toStringAsFixed(2)} Mo) ! La base de données risque de refuser.'), backgroundColor: Colors.orange));
+                              }
+                            }
+
                             setState(() {
                               base64Image = base64String;
                             });
@@ -163,13 +174,10 @@ class AdminMenuScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(color: Theme.of(context).primaryColor, width: 1, style: BorderStyle.solid),
                         ),
-                        child: base64Image != null && base64Image!.startsWith('data:image')
+                        child: base64Image != null
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(16),
-                                child: Image.memory(
-                                  _decodeBase64(base64Image!),
-                                  fit: BoxFit.cover,
-                                ),
+                                child: SmartImage(base64Image!, fit: BoxFit.cover),
                               )
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -249,7 +257,7 @@ class AdminMenuScreen extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
                                 image: DecorationImage(
-                                  image: MemoryImage(_decodeBase64(imgBase64)),
+                                  image: SmartImage.getProvider(imgBase64),
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -274,6 +282,15 @@ class AdminMenuScreen extends ConsumerWidget {
                                 if (pickedFile != null) {
                                   final bytes = await pickedFile.readAsBytes();
                                   final base64String = 'data:image/jpeg;base64,' + _base64Encode(bytes);
+                                  
+                                  // Check size (Base64 string size in MB)
+                                  final sizeInMB = base64String.length / (1024 * 1024);
+                                  if (sizeInMB > 0.3) { // If larger than 300 KB
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('⚠️ L\'image choisie est trop lourde (${sizeInMB.toStringAsFixed(2)} Mo) ! La base de données va la refuser.'), backgroundColor: Colors.orange));
+                                    }
+                                  }
+
                                   setState(() {
                                     galleryImages.add(base64String);
                                   });
@@ -303,35 +320,62 @@ class AdminMenuScreen extends ConsumerWidget {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final newProduct = Product(
-                      id: product?.id ?? '',
-                      name: nameController.text,
-                      description: descController.text,
-                      price: double.tryParse(priceController.text) ?? 0.0,
-                      category: selectedCategory,
-                      isAvailable: product?.isAvailable ?? true,
-                      imageUrl: base64Image,
-                      ingredients: ingredientsController.text
-                          .split(',')
-                          .map((e) => e.trim())
-                          .where((e) => e.isNotEmpty)
-                          .toList(),
-                      gallery: galleryImages,
+                    // Show a simple loading dialog during upload
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (ctx) => const Center(child: CircularProgressIndicator()),
                     );
-                    
+
                     try {
+                      // Upload main image if it's base64
+                      String? finalImageUrl = base64Image;
+                      if (base64Image != null && base64Image!.startsWith('data:image')) {
+                        finalImageUrl = await StorageService.uploadBase64Image(base64Image!, 'products');
+                      }
+
+                      // Upload gallery images
+                      List<String> finalGallery = [];
+                      for (var img in galleryImages) {
+                        if (img.startsWith('data:image')) {
+                          final url = await StorageService.uploadBase64Image(img, 'products_gallery');
+                          finalGallery.add(url);
+                        } else {
+                          finalGallery.add(img);
+                        }
+                      }
+
+                      final newProduct = Product(
+                        id: product?.id ?? '',
+                        name: nameController.text,
+                        description: descController.text,
+                        price: double.tryParse(priceController.text) ?? 0.0,
+                        category: selectedCategory,
+                        isAvailable: product?.isAvailable ?? true,
+                        imageUrl: finalImageUrl,
+                        ingredients: ingredientsController.text
+                            .split(',')
+                            .map((e) => e.trim())
+                            .where((e) => e.isNotEmpty)
+                            .toList(),
+                        gallery: finalGallery,
+                      );
+                      
                       if (product == null) {
                         await ref.read(adminActionsProvider).addProduct(newProduct);
                       } else {
                         await ref.read(adminActionsProvider).updateProduct(newProduct);
                       }
+                      
                       if (context.mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Produit enregistré !'), backgroundColor: Colors.green));
+                        Navigator.pop(context); // Close loading dialog
+                        Navigator.pop(context); // Close product dialog
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Produit enregistré avec succès !'), backgroundColor: Colors.green));
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: L\'image est peut-être trop lourde. Essayez avec moins de photos.'), backgroundColor: Colors.red));
+                        Navigator.pop(context); // Close loading dialog
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red));
                       }
                     }
                   },

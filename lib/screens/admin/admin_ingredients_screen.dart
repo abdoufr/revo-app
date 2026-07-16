@@ -6,6 +6,8 @@ import '../../theme/app_theme.dart';
 import '../../models/ingredient.dart';
 import '../../providers/ingredient_provider.dart';
 import '../../providers/composer_provider.dart';
+import '../../widgets/smart_image.dart';
+import '../../services/storage_service.dart';
 
 class AdminIngredientsScreen extends ConsumerWidget {
   const AdminIngredientsScreen({super.key});
@@ -127,7 +129,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
                       child: base64Image != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(40),
-                              child: Image.memory(base64Decode(base64Image!.split(',').last), fit: BoxFit.cover),
+                              child: SmartImage(base64Image!, fit: BoxFit.cover),
                             )
                           : Icon(Icons.add_photo_alternate_rounded, color: Theme.of(context).primaryColor, size: 30),
                     ),
@@ -181,19 +183,40 @@ class AdminIngredientsScreen extends ConsumerWidget {
                 child: Text('Annuler', style: Theme.of(context).textTheme.bodyMedium),
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   final price = double.tryParse(priceController.text.trim()) ?? 0;
                   if (nameController.text.isNotEmpty && price > 0 && selectedCategories.isNotEmpty) {
-                    final ingredient = Ingredient(
-                      id: '',
-                      name: nameController.text.trim(),
-                      price: price,
-                      categories: selectedCategories,
-                      isAvailable: true,
-                      imageUrl: base64Image,
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (ctx) => const Center(child: CircularProgressIndicator()),
                     );
-                    ref.read(ingredientActionsProvider).addIngredient(ingredient);
-                    Navigator.pop(context);
+                    try {
+                      String? finalUrl = base64Image;
+                      if (base64Image != null && base64Image!.startsWith('data:image')) {
+                        finalUrl = await StorageService.uploadBase64Image(base64Image!, 'ingredients');
+                      }
+                      
+                      final ingredient = Ingredient(
+                        id: '',
+                        name: nameController.text.trim(),
+                        price: price,
+                        categories: selectedCategories,
+                        isAvailable: true,
+                        imageUrl: finalUrl,
+                      );
+                      await ref.read(ingredientActionsProvider).addIngredient(ingredient);
+                      
+                      if (context.mounted) {
+                        Navigator.pop(context); // close loader
+                        Navigator.pop(context); // close dialog
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        Navigator.pop(context); // close loader
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error));
+                      }
+                    }
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Remplissez tous les champs et choisissez au moins une catégorie.'), backgroundColor: AppTheme.error),
@@ -266,7 +289,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
                       child: item.imageUrl != null && item.imageUrl!.startsWith('data:image')
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(26),
-                              child: Image.memory(base64Decode(item.imageUrl!.split(',').last), fit: BoxFit.cover),
+                              child: SmartImage(item.imageUrl!, fit: BoxFit.cover),
                             )
                           : Icon(Icons.egg_alt_rounded, color: Theme.of(context).primaryColor),
                     ),

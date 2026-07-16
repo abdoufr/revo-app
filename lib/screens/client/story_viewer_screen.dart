@@ -1,6 +1,7 @@
-import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../models/story.dart';
+import '../../widgets/smart_image.dart';
 import '../../theme/app_theme.dart';
 
 class StoryViewerScreen extends StatefulWidget {
@@ -89,10 +90,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen> with SingleTicker
                 return Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.memory(
-                      base64Decode(story.imageUrl.split(',').last),
-                      fit: BoxFit.cover,
-                    ),
+                    SmartImage(story.imageUrl, fit: BoxFit.cover),
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(

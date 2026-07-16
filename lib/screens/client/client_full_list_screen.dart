@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../models/product.dart';
 import 'product_details_screen.dart';
+import '../../widgets/smart_image.dart';
 
 class ClientFullListScreen extends StatelessWidget {
   final String title;
@@ -85,13 +86,10 @@ class ClientFullListScreen extends StatelessWidget {
                     child: Container(
                       width: double.infinity,
                       decoration: const BoxDecoration(shape: BoxShape.circle),
-                      child: product.imageUrl != null && product.imageUrl!.startsWith('data:image')
+                      child: product.imageUrl != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(50),
-                              child: Image.memory(
-                                base64Decode(product.imageUrl!.split(',').last),
-                                fit: BoxFit.cover,
-                              ),
+                              child: SmartImage(product.imageUrl!, fit: BoxFit.cover),
                             )
                           : const Icon(Icons.fastfood, size: 50, color: Colors.grey),
                     ),

@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/reward_catalog_provider.dart';
+import '../../widgets/smart_image.dart';
+import '../../services/storage_service.dart';
 
 class AdminRewardsCatalogScreen extends ConsumerWidget {
   const AdminRewardsCatalogScreen({super.key});
@@ -87,11 +89,31 @@ class AdminRewardsCatalogScreen extends ConsumerWidget {
                   child: Text('Annuler', style: Theme.of(context).textTheme.bodyMedium),
                 ),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     final cost = int.tryParse(costController.text.trim()) ?? 0;
                     if (base64Image != null && nameController.text.isNotEmpty && cost > 0) {
-                      ref.read(rewardCatalogActionsProvider).addRewardItem(nameController.text.trim(), cost, base64Image!);
-                      Navigator.pop(context);
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (ctx) => const Center(child: CircularProgressIndicator()),
+                      );
+                      
+                      try {
+                        String finalUrl = base64Image!;
+                        if (base64Image!.startsWith('data:image')) {
+                          finalUrl = await StorageService.uploadBase64Image(base64Image!, 'rewards');
+                        }
+                        await ref.read(rewardCatalogActionsProvider).addRewardItem(nameController.text.trim(), cost, finalUrl);
+                        if (context.mounted) {
+                          Navigator.pop(context); // close loader
+                          Navigator.pop(context); // close dialog
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error));
+                        }
+                      }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Veuillez remplir tous les champs correctement.'), backgroundColor: AppTheme.error),
@@ -145,7 +167,7 @@ class AdminRewardsCatalogScreen extends ConsumerWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: DecorationImage(
-                          image: MemoryImage(base64Decode(item.imageUrl.split(',').last)),
+                          image: SmartImage.getProvider(item.imageUrl),
                           fit: BoxFit.cover,
                         ),
                       ),

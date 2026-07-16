@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/story_provider.dart';
+import '../../widgets/smart_image.dart';
+import '../../services/storage_service.dart';
 
 class AdminStoriesScreen extends ConsumerWidget {
   const AdminStoriesScreen({super.key});
@@ -86,10 +88,30 @@ class AdminStoriesScreen extends ConsumerWidget {
                   child: Text('Annuler', style: Theme.of(context).textTheme.bodyMedium),
                 ),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (base64Image != null && titleController.text.isNotEmpty) {
-                      ref.read(storyActionsProvider).addStory(titleController.text.trim(), base64Image!);
-                      Navigator.pop(context);
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (ctx) => const Center(child: CircularProgressIndicator()),
+                      );
+                      
+                      try {
+                        String finalUrl = base64Image!;
+                        if (base64Image!.startsWith('data:image')) {
+                          finalUrl = await StorageService.uploadBase64Image(base64Image!, 'stories');
+                        }
+                        await ref.read(storyActionsProvider).addStory(titleController.text.trim(), finalUrl);
+                        if (context.mounted) {
+                          Navigator.pop(context); // close loader
+                          Navigator.pop(context); // close dialog
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error));
+                        }
+                      }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Veuillez ajouter une image et un titre.'), backgroundColor: AppTheme.error),
@@ -144,7 +166,7 @@ class AdminStoriesScreen extends ConsumerWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       image: DecorationImage(
-                        image: MemoryImage(base64Decode(story.imageUrl.split(',').last)),
+                        image: SmartImage.getProvider(story.imageUrl),
                         fit: BoxFit.cover,
                       ),
                     ),
