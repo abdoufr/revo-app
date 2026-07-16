@@ -332,7 +332,7 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
   }
 
   Widget _buildBottomBar() {
-    final catData = _categories.firstWhere((c) => c['key'] == _selectedCategory);
+    final catData = _currentCategories.firstWhere((c) => c['key'] == _selectedCategory);
     final catColor = Color(catData['color'] as int);
 
     return Container(
