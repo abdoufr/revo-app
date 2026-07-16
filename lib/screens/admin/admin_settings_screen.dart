@@ -6,7 +6,6 @@ import '../../providers/settings_provider.dart';
 import '../../providers/theme_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'map_picker_screen.dart';
-import '../../utils/db_seeder.dart';
 
 class AdminSettingsScreen extends ConsumerStatefulWidget {
   const AdminSettingsScreen({super.key});
@@ -462,68 +461,6 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   text: 'Sauvegarder',
                   isLoading: _isLoading,
                   onPressed: _saveSettings,
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton.icon(
-                  onPressed: _isLoading
-                      ? null
-                      : () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              title: const Text('Générer Menu Réel ?'),
-                              content: const Text(
-                                'Cela va insérer de vrais produits (Burgers, Tacos, Pizzas...) et de vraies catégories dans la base de données. Continuer ?',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx, false),
-                                  child: const Text('Annuler'),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx, true),
-                                  child: const Text('Oui, Générer'),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirm == true) {
-                            setState(() => _isLoading = true);
-                            try {
-                              await DbSeeder.seedDatabase();
-                              if (mounted)
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      '✅ Menu Réel et Config générés avec succès !',
-                                    ),
-                                  ),
-                                );
-                            } catch (e) {
-                              if (mounted)
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Erreur: $e')),
-                                );
-                            } finally {
-                              if (mounted) setState(() => _isLoading = false);
-                            }
-                          }
-                        },
-                  icon: const Icon(Icons.fastfood, color: Colors.white),
-                  label: const Text(
-                    'Générer le Menu Réel (Demo)',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
                 ),
               ],
             ),

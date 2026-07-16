@@ -87,6 +87,7 @@ class AdminMenuScreen extends ConsumerWidget {
     final nameController = TextEditingController(text: product?.name ?? '');
     final descController = TextEditingController(text: product?.description ?? '');
     final priceController = TextEditingController(text: product?.price.toString() ?? '');
+    final ingredientsController = TextEditingController(text: product?.ingredients.join(', ') ?? '');
     
     String selectedCategory = product?.category ?? '';
     if (selectedCategory.isNotEmpty && !categories.contains(selectedCategory)) {
@@ -199,6 +200,14 @@ class AdminMenuScreen extends ConsumerWidget {
                         }
                       },
                     ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: ingredientsController,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      decoration: const InputDecoration(
+                        hintText: 'Ingrédients (séparés par des virgules)',
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -217,6 +226,11 @@ class AdminMenuScreen extends ConsumerWidget {
                       category: selectedCategory,
                       isAvailable: product?.isAvailable ?? true,
                       imageUrl: base64Image,
+                      ingredients: ingredientsController.text
+                          .split(',')
+                          .map((e) => e.trim())
+                          .where((e) => e.isNotEmpty)
+                          .toList(),
                     );
                     
                     if (product == null) {

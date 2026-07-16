@@ -6,8 +6,8 @@ import '../../theme/app_theme.dart';
 import '../../l10n/app_translations.dart';
 import '../../providers/client_providers.dart';
 import '../../providers/admin_providers.dart';
-import '../../providers/admin_providers.dart';
-import 'product_details_screen.dart'; // We'll create this next
+import 'product_details_screen.dart';
+import 'client_full_list_screen.dart';
 
 class ClientMenuSection extends ConsumerStatefulWidget {
   final bool showFavoritesOnly;
@@ -112,7 +112,7 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
             const SizedBox(height: 32),
 
             // Popular Food Section
-            _buildSectionHeader('Popular Food'),
+            _buildSectionHeader(context, 'Popular Food', popularProducts.isNotEmpty ? popularProducts : filteredProducts),
             const SizedBox(height: 16),
             _buildHorizontalList(popularProducts.isNotEmpty ? popularProducts : filteredProducts),
 
@@ -120,7 +120,7 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
 
             // Nearest Section (or second row)
             if (nearestProducts.isNotEmpty) ...[
-              _buildSectionHeader('Nearest'),
+              _buildSectionHeader(context, 'Nearest', nearestProducts),
               const SizedBox(height: 16),
               _buildHorizontalList(nearestProducts),
             ],
@@ -132,12 +132,22 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title, List<Product> products) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
-        Text('See All', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 14)),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ClientFullListScreen(title: title, products: products),
+              ),
+            );
+          },
+          child: Text('See All', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 14)),
+        ),
       ],
     );
   }

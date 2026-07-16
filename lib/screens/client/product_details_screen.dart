@@ -250,6 +250,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             context,
           ).textTheme.bodyMedium?.copyWith(height: 1.5, fontSize: 15),
         ),
+        _buildIngredientsSection(),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () {},
@@ -260,6 +261,60 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIngredientsSection() {
+    if (widget.product.ingredients.isEmpty) {
+      return const SizedBox();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Text(
+          'Ingrédients',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: widget.product.ingredients.map((ingredient) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Theme.of(context).primaryColor.withOpacity(0.5),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.check_circle_outline,
+                    size: 16,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    ingredient,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
         ),
       ],
     );
