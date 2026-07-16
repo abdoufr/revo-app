@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../models/ingredient.dart';
 import '../../providers/ingredient_provider.dart';
+import '../../providers/composer_provider.dart';
 
 class ComposerScreen extends ConsumerStatefulWidget {
   const ComposerScreen({super.key});
@@ -16,13 +17,7 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
   final Set<String> _selectedIngredientIds = {};
   double _totalPrice = 0.0;
   List<Ingredient> _allIngredients = [];
-
-  static const List<Map<String, dynamic>> _categories = [
-    {'key': 'pizza', 'label': 'Pizza Base', 'icon': '🍕', 'color': 0xFFE53935, 'basePrice': 400.0},
-    {'key': 'tacos', 'label': 'Tacos Base', 'icon': '🌮', 'color': 0xFFF57C00, 'basePrice': 450.0},
-    {'key': 'sandwich', 'label': 'Sandwich Base', 'icon': '🥪', 'color': 0xFF388E3C, 'basePrice': 300.0},
-    {'key': 'cheese', 'label': 'Assiette', 'icon': '🧀', 'color': 0xFFF9A825, 'basePrice': 600.0},
-  ];
+  List<Map<String, dynamic>> _currentCategories = [];
 
   void _toggleIngredient(Ingredient ingredient) {
     setState(() {
@@ -40,8 +35,8 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
       _totalPrice = 0.0;
       return;
     }
-    final catData = _categories.firstWhere((c) => c['key'] == _selectedCategory);
-    double total = catData['basePrice'] as double;
+    final catData = _currentCategories.firstWhere((c) => c['key'] == _selectedCategory);
+    double total = (catData['basePrice'] as num).toDouble();
     for (var id in _selectedIngredientIds) {
       final ing = _allIngredients.firstWhere((i) => i.id == id, orElse: () => _allIngredients.first);
       total += ing.price;
@@ -59,7 +54,7 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
 
   void _showSummary() {
     final selectedIngredients = _allIngredients.where((i) => _selectedIngredientIds.contains(i.id)).toList();
-    final catData = _categories.firstWhere((c) => c['key'] == _selectedCategory);
+    final catData = _currentCategories.firstWhere((c) => c['key'] == _selectedCategory);
 
     showDialog(
       context: context,
@@ -89,7 +84,7 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Base ${catData['label']}', style: Theme.of(context).textTheme.bodyLarge),
-                Text('${(catData['basePrice'] as double).toStringAsFixed(0)} DA',
+                Text('${(catData['basePrice'] as num).toDouble().toStringAsFixed(0)} DA',
                     style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
               ],
             ),
@@ -158,64 +153,78 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
   }
 
   Widget _buildCategoryPicker() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Que voulez-vous composer ?',
-            style: Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 22),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 40),
-          Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              children: _categories.map((cat) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = cat['key'] as String;
-                      _calculateTotal();
-                    });
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Color(cat['color'] as int).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Color(cat['color'] as int), width: 2),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(cat['icon'] as String, style: const TextStyle(fontSize: 56)),
-                        const SizedBox(height: 12),
-                        Text(
-                          cat['label'] as String,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(cat['color'] as int),
-                          ),
+    final categoriesAsync = ref.watch(composerCategoriesProvider);
+
+    return categoriesAsync.when(
+      data: (categories) {
+        _currentCategories = categories;
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Que voulez-vous composer ?',
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 22),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 40),
+              Expanded(
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  children: categories.map((cat) {
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedCategory = cat['key'] as String;
+                          _calculateTotal();
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Color(cat['color'] as int).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: Color(cat['color'] as int), width: 2),
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(cat['icon'] as String, style: const TextStyle(fontSize: 56)),
+                            const SizedBox(height: 12),
+                            Text(
+                              cat['label'] as String,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(cat['color'] as int),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'À partir de ${(cat['basePrice'] as num).toDouble().toStringAsFixed(0)} DA',
+                              style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodyMedium?.color),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
+      loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+      error: (e, s) => Center(child: Text('Erreur: $e')),
     );
   }
 
   Widget _buildIngredientPicker() {
     final ingredientsAsync = ref.watch(ingredientsByCategoryProvider(_selectedCategory!));
-    final catData = _categories.firstWhere((c) => c['key'] == _selectedCategory);
+    final catData = _currentCategories.firstWhere((c) => c['key'] == _selectedCategory);
     final catColor = Color(catData['color'] as int);
 
     return ingredientsAsync.when(

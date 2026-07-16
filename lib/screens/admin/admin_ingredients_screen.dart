@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../theme/app_theme.dart';
 import '../../models/ingredient.dart';
 import '../../providers/ingredient_provider.dart';
+import '../../providers/composer_provider.dart';
 
 class AdminIngredientsScreen extends ConsumerWidget {
   const AdminIngredientsScreen({super.key});
@@ -15,6 +16,74 @@ class AdminIngredientsScreen extends ConsumerWidget {
     {'key': 'sandwich', 'label': 'Sandwich', 'icon': '🥪'},
     {'key': 'cheese', 'label': 'Cheese', 'icon': '🧀'},
   ];
+
+  void _showEditBasePricesDialog(BuildContext context, WidgetRef ref) {
+    final categoriesAsync = ref.read(composerCategoriesProvider);
+    
+    categoriesAsync.whenData((categories) {
+      // Local copy for editing
+      List<Map<String, dynamic>> editedCategories = List.from(categories.map((c) => Map<String, dynamic>.from(c)));
+      
+      showDialog(
+        context: context,
+        builder: (ctx) => StatefulBuilder(
+          builder: (ctx, setState) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              title: Text('Prix de Base (Composer)', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: editedCategories.map((cat) {
+                    final index = editedCategories.indexOf(cat);
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        children: [
+                          Text(cat['icon'] as String, style: const TextStyle(fontSize: 24)),
+                          const SizedBox(width: 12),
+                          Expanded(child: Text(cat['label'] as String, style: Theme.of(context).textTheme.bodyLarge)),
+                          SizedBox(
+                            width: 100,
+                            child: TextFormField(
+                              initialValue: (cat['basePrice'] as double).toStringAsFixed(0),
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(suffixText: 'DA', isDense: true),
+                              onChanged: (val) {
+                                final parsed = double.tryParse(val);
+                                if (parsed != null) {
+                                  editedCategories[index]['basePrice'] = parsed;
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Annuler', style: TextStyle(color: Colors.grey)),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.read(composerActionsProvider).saveCategories(editedCategories);
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Prix de base mis à jour !')));
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
+                  child: const Text('Enregistrer', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          }
+        ),
+      );
+    });
+  }
 
   void _showAddIngredientDialog(BuildContext context, WidgetRef ref) {
     final nameController = TextEditingController();
@@ -148,6 +217,13 @@ class AdminIngredientsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Ingrédients & Catégories', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.price_change_rounded, color: Theme.of(context).primaryColor),
+            tooltip: 'Prix de Base',
+            onPressed: () => _showEditBasePricesDialog(context, ref),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddIngredientDialog(context, ref),
