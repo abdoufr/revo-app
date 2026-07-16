@@ -18,22 +18,35 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
   List<Ingredient> _allIngredients = [];
 
   static const List<Map<String, dynamic>> _categories = [
-    {'key': 'pizza', 'label': 'Pizza', 'icon': '🍕', 'color': 0xFFE53935},
-    {'key': 'tacos', 'label': 'Tacos', 'icon': '🌮', 'color': 0xFFF57C00},
-    {'key': 'sandwich', 'label': 'Sandwich', 'icon': '🥪', 'color': 0xFF388E3C},
-    {'key': 'cheese', 'label': 'Cheese', 'icon': '🧀', 'color': 0xFFF9A825},
+    {'key': 'pizza', 'label': 'Pizza Base', 'icon': '🍕', 'color': 0xFFE53935, 'basePrice': 400.0},
+    {'key': 'tacos', 'label': 'Tacos Base', 'icon': '🌮', 'color': 0xFFF57C00, 'basePrice': 450.0},
+    {'key': 'sandwich', 'label': 'Sandwich Base', 'icon': '🥪', 'color': 0xFF388E3C, 'basePrice': 300.0},
+    {'key': 'cheese', 'label': 'Assiette', 'icon': '🧀', 'color': 0xFFF9A825, 'basePrice': 600.0},
   ];
 
   void _toggleIngredient(Ingredient ingredient) {
     setState(() {
       if (_selectedIngredientIds.contains(ingredient.id)) {
         _selectedIngredientIds.remove(ingredient.id);
-        _totalPrice -= ingredient.price;
       } else {
         _selectedIngredientIds.add(ingredient.id);
-        _totalPrice += ingredient.price;
       }
+      _calculateTotal();
     });
+  }
+
+  void _calculateTotal() {
+    if (_selectedCategory == null) {
+      _totalPrice = 0.0;
+      return;
+    }
+    final catData = _categories.firstWhere((c) => c['key'] == _selectedCategory);
+    double total = catData['basePrice'] as double;
+    for (var id in _selectedIngredientIds) {
+      final ing = _allIngredients.firstWhere((i) => i.id == id, orElse: () => _allIngredients.first);
+      total += ing.price;
+    }
+    _totalPrice = total;
   }
 
   void _reset() {
@@ -72,6 +85,14 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
             Text(catData['label'] as String,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
             const Divider(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Base ${catData['label']}', style: Theme.of(context).textTheme.bodyLarge),
+                Text('${(catData['basePrice'] as double).toStringAsFixed(0)} DA',
+                    style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+              ],
+            ),
             ...selectedIngredients.map((i) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Row(
@@ -155,7 +176,12 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
               mainAxisSpacing: 16,
               children: _categories.map((cat) {
                 return GestureDetector(
-                  onTap: () => setState(() => _selectedCategory = cat['key'] as String),
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = cat['key'] as String;
+                      _calculateTotal();
+                    });
+                  },
                   child: Container(
                     decoration: BoxDecoration(
                       color: Color(cat['color'] as int).withOpacity(0.1),

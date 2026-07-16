@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'utils/db_seeder.dart';
+import 'utils/update_ingredients.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +19,7 @@ class SeederApp extends StatefulWidget {
 }
 
 class _SeederAppState extends State<SeederApp> {
-  String status = "Démarrage du remplissage...";
+  String status = "Mise à jour des ingrédients...";
 
   @override
   void initState() {
@@ -29,16 +29,16 @@ class _SeederAppState extends State<SeederApp> {
 
   Future<void> _runSeeder() async {
     try {
-      await DbSeeder.seedDatabase();
+      await UpdateIngredientsSeeder.update();
       setState(() {
-        status = "✅ SUCCÈS ! La base de données a été remplie avec le Menu Réel et la Configuration ! Vous pouvez fermer cette fenêtre.";
+        status = "✅ SUCCÈS ! Les ingrédients ont été ajoutés !";
       });
-      print("SEEDER_SUCCESS_123");
+      print("INGREDIENTS_SUCCESS_123");
     } catch (e) {
       setState(() {
         status = "❌ ERREUR : $e";
       });
-      print("SEEDER_ERROR: $e");
+      print("INGREDIENTS_ERROR: $e");
     }
   }
 
