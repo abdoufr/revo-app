@@ -193,7 +193,7 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                         IconButton(
                           icon: const Icon(Icons.add_a_photo, color: Colors.grey),
                           onPressed: () async {
-                            final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70, maxWidth: 600);
+                            final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 60, maxWidth: 400);
                             if (picked != null) {
                               final bytes = await picked.readAsBytes();
                               setState(() {

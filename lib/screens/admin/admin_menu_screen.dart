@@ -120,7 +120,7 @@ class AdminMenuScreen extends ConsumerWidget {
                       onTap: () async {
                         try {
                           final picker = _getPicker(); // Will import image_picker
-                          final pickedFile = await picker.pickImage(source: _getImageSource(), maxWidth: 800, imageQuality: 85);
+                          final pickedFile = await picker.pickImage(source: _getImageSource(), maxWidth: 500, imageQuality: 60);
                           if (pickedFile != null) {
                             final bytes = await pickedFile.readAsBytes();
                             // We import dart:convert at the top of file
@@ -248,7 +248,7 @@ class AdminMenuScreen extends ConsumerWidget {
                             onTap: () async {
                               try {
                                 final picker = _getPicker();
-                                final pickedFile = await picker.pickImage(source: _getImageSource(), maxWidth: 800, imageQuality: 85);
+                                final pickedFile = await picker.pickImage(source: _getImageSource(), maxWidth: 500, imageQuality: 60);
                                 if (pickedFile != null) {
                                   final bytes = await pickedFile.readAsBytes();
                                   final base64String = 'data:image/jpeg;base64,' + _base64Encode(bytes);
