@@ -311,13 +311,6 @@ class AdminMenuScreen extends ConsumerWidget {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    // Show a simple loading dialog during upload
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (ctx) => const Center(child: CircularProgressIndicator()),
-                    );
-
                     try {
                       // Upload main image if it's base64
                       String? finalImageUrl = base64Image;
@@ -359,13 +352,12 @@ class AdminMenuScreen extends ConsumerWidget {
                       }
                       
                       if (context.mounted) {
-                        Navigator.pop(context); // Close loading dialog
                         Navigator.pop(context); // Close product dialog
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Produit enregistré avec succès !'), backgroundColor: Colors.green));
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        Navigator.pop(context); // Close loading dialog
+                        Navigator.pop(context); // Close product dialog
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red));
                       }
                     }
