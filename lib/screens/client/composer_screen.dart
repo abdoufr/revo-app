@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
@@ -50,6 +52,15 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
       _selectedIngredientIds.clear();
       _totalPrice = 0.0;
     });
+  }
+
+  Uint8List _decodeBase64Safe(String imageUrl) {
+    try {
+      final base64Str = imageUrl.contains(',') ? imageUrl.split(',').last : imageUrl;
+      return base64Decode(base64Str);
+    } catch (_) {
+      return Uint8List(0);
+    }
   }
 
   void _showSummary() {
@@ -302,7 +313,28 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
                                 ? const Icon(Icons.check, color: Colors.white, size: 18)
                                 : null,
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 12),
+                          // Photo de l'ingrédient
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: catColor.withOpacity(0.1),
+                            ),
+                            child: ingredient.imageUrl != null && ingredient.imageUrl!.isNotEmpty
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(22),
+                                    child: Image.memory(
+                                      Uri.parse(ingredient.imageUrl!).data?.contentAsBytes() ??
+                                          _decodeBase64Safe(ingredient.imageUrl!),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (c, e, s) => Icon(Icons.fastfood_rounded, color: catColor, size: 22),
+                                    ),
+                                  )
+                                : Icon(Icons.fastfood_rounded, color: catColor, size: 22),
+                          ),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(ingredient.name,
                                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
