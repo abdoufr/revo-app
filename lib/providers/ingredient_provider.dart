@@ -41,6 +41,10 @@ class IngredientActions {
   Future<void> toggleAvailability(String id, bool isAvailable) async {
     await _firestore.collection('ingredients').doc(id).update({'is_available': isAvailable});
   }
+
+  Future<void> updateIngredient(Ingredient ingredient) async {
+    await _firestore.collection('ingredients').doc(ingredient.id).update(ingredient.toMap());
+  }
 }
 
 final ingredientActionsProvider = Provider((ref) => IngredientActions());

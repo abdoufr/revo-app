@@ -16,7 +16,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
     {'key': 'pizza', 'label': 'Pizza', 'icon': '🍕'},
     {'key': 'tacos', 'label': 'Tacos', 'icon': '🌮'},
     {'key': 'sandwich', 'label': 'Sandwich', 'icon': '🥪'},
-    {'key': 'cheese', 'label': 'Cheese', 'icon': '🧀'},
+    {'key': 'cheese', 'label': 'Cheese', 'icon': '🍔'},
   ];
 
   void _showEditBasePricesDialog(BuildContext context, WidgetRef ref) {
@@ -233,6 +233,141 @@ class AdminIngredientsScreen extends ConsumerWidget {
     );
   }
 
+  void _showEditIngredientDialog(BuildContext context, WidgetRef ref, Ingredient item) {
+    final nameController = TextEditingController(text: item.name);
+    final priceController = TextEditingController(text: item.price.toStringAsFixed(0));
+    List<String> selectedCategories = List.from(item.categories);
+    String? base64Image = item.imageUrl;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            title: Text('Modifier Ingrédient',
+                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Image picker
+                  GestureDetector(
+                    onTap: () async {
+                      try {
+                        final picker = ImagePicker();
+                        final f = await picker.pickImage(source: ImageSource.gallery, maxWidth: 250, imageQuality: 20);
+                        if (f != null) {
+                          final bytes = await f.readAsBytes();
+                          setState(() => base64Image = 'data:image/jpeg;base64,${base64Encode(bytes)}');
+                        }
+                      } catch (_) {}
+                    },
+                    child: Container(
+                      height: 80,
+                      width: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        border: Border.all(color: Theme.of(context).primaryColor),
+                      ),
+                      child: base64Image != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(40),
+                              child: SmartImage(base64Image!, fit: BoxFit.cover),
+                            )
+                          : Icon(Icons.add_photo_alternate_rounded, color: Theme.of(context).primaryColor, size: 30),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Nom', isDense: true),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: priceController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Prix (DA)', isDense: true, suffixText: 'DA'),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Disponible dans :', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: _categories.map((cat) {
+                      final isSelected = selectedCategories.contains(cat['key']);
+                      return FilterChip(
+                        label: Text('${cat['icon']} ${cat['label']}'),
+                        selected: isSelected,
+                        selectedColor: Theme.of(context).primaryColor,
+                        checkmarkColor: Colors.white,
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                        backgroundColor: Theme.of(context).cardColor,
+                        onSelected: (val) {
+                          setState(() {
+                            if (val) {
+                              selectedCategories.add(cat['key'] as String);
+                            } else {
+                              selectedCategories.remove(cat['key']);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Annuler', style: Theme.of(context).textTheme.bodyMedium),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final price = double.tryParse(priceController.text.trim()) ?? 0;
+                  if (nameController.text.isNotEmpty && price > 0 && selectedCategories.isNotEmpty) {
+                    try {
+                      String? finalUrl = base64Image;
+                      if (base64Image != null && base64Image!.startsWith('data:image')) {
+                        finalUrl = await StorageService.uploadBase64Image(base64Image!, 'ingredients');
+                      }
+                      final updated = Ingredient(
+                        id: item.id,
+                        name: nameController.text.trim(),
+                        price: price,
+                        categories: selectedCategories,
+                        isAvailable: item.isAvailable,
+                        imageUrl: finalUrl,
+                      );
+                      await ref.read(ingredientActionsProvider).updateIngredient(updated);
+                      if (context.mounted) Navigator.pop(context);
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error));
+                      }
+                    }
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Remplissez tous les champs.'), backgroundColor: AppTheme.error),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
+                child: const Text('Enregistrer', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ingredientsAsync = ref.watch(ingredientsProvider);
@@ -321,6 +456,10 @@ class AdminIngredientsScreen extends ConsumerWidget {
                           value: item.isAvailable,
                           activeColor: Theme.of(context).primaryColor,
                           onChanged: (val) => ref.read(ingredientActionsProvider).toggleAvailability(item.id, val),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.edit_outlined, color: Theme.of(context).primaryColor),
+                          onPressed: () => _showEditIngredientDialog(context, ref, item),
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete_outline, color: AppTheme.error),
