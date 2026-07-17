@@ -278,19 +278,10 @@ class AdminMenuScreen extends ConsumerWidget {
                             onTap: () async {
                               try {
                                 final picker = _getPicker();
-                                final pickedFile = await picker.pickImage(source: _getImageSource(), maxWidth: 500, imageQuality: 60);
+                                final pickedFile = await picker.pickImage(source: _getImageSource(), maxWidth: 400, imageQuality: 40);
                                 if (pickedFile != null) {
                                   final bytes = await pickedFile.readAsBytes();
                                   final base64String = 'data:image/jpeg;base64,' + _base64Encode(bytes);
-                                  
-                                  // Check size (Base64 string size in MB)
-                                  final sizeInMB = base64String.length / (1024 * 1024);
-                                  if (sizeInMB > 0.3) { // If larger than 300 KB
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('⚠️ L\'image choisie est trop lourde (${sizeInMB.toStringAsFixed(2)} Mo) ! La base de données va la refuser.'), backgroundColor: Colors.orange));
-                                    }
-                                  }
-
                                   setState(() {
                                     galleryImages.add(base64String);
                                   });
