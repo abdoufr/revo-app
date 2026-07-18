@@ -2,8 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/cart_item.dart';
 import 'package:uuid/uuid.dart';
 
-class CartNotifier extends StateNotifier<List<CartItem>> {
-  CartNotifier() : super([]);
+class CartNotifier extends Notifier<List<CartItem>> {
+  @override
+  List<CartItem> build() => [];
 
   final _uuid = const Uuid();
 
@@ -83,6 +84,6 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
   }
 }
 
-final cartProvider = StateNotifierProvider<CartNotifier, List<CartItem>>((ref) {
+final cartProvider = NotifierProvider<CartNotifier, List<CartItem>>(() {
   return CartNotifier();
 });

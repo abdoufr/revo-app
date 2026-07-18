@@ -277,7 +277,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   }
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('$_quantityx ${widget.product.name} ajouté au panier'),
+                      content: Text('${_quantity}x ${widget.product.name} ajouté au panier'),
                       backgroundColor: AppTheme.success,
                       duration: const Duration(seconds: 2),
                     ),
