@@ -7,6 +7,8 @@ import '../../providers/auth_providers.dart';
 import '../../providers/admin_providers.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/story_provider.dart';
+import '../../providers/cart_provider.dart';
+import 'client_cart_screen.dart';
 import '../../providers/notification_provider.dart';
 import '../../widgets/smart_image.dart';
 import 'client_settings_screen.dart';
@@ -95,11 +97,47 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                             ),
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.notifications_none_rounded, size: 28),
-                          onPressed: () {
-                            _showNotificationsSheet(context, ref);
-                          },
+                        Row(
+                          children: [
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.shopping_cart_outlined, size: 28),
+                                  onPressed: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientCartScreen()));
+                                  },
+                                ),
+                                Consumer(
+                                  builder: (context, ref, child) {
+                                    final totalItems = ref.watch(cartProvider.notifier).totalItems;
+                                    if (totalItems == 0) return const SizedBox();
+                                    return Positioned(
+                                      right: 4,
+                                      top: 4,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(
+                                          color: AppTheme.error,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Text(
+                                          '$totalItems',
+                                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.notifications_none_rounded, size: 28),
+                              onPressed: () {
+                                _showNotificationsSheet(context, ref);
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),

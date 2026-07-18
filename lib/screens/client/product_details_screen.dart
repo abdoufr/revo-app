@@ -7,6 +7,7 @@ import '../../theme/app_theme.dart';
 import '../../providers/reviews_provider.dart';
 import '../../providers/auth_providers.dart';
 import '../../providers/client_providers.dart';
+import '../../providers/cart_provider.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
@@ -22,6 +23,7 @@ class ProductDetailsScreen extends ConsumerStatefulWidget {
 class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   int _rating = 5;
   final _commentController = TextEditingController();
+  int _quantity = 1;
 
   @override
   void dispose() {
@@ -207,6 +209,100 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: _buildAddToCartBar(),
+    );
+  }
+
+  Widget _buildAddToCartBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            // Quantity Selector
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove),
+                    color: Theme.of(context).primaryColor,
+                    onPressed: () {
+                      if (_quantity > 1) {
+                        setState(() => _quantity--);
+                      }
+                    },
+                  ),
+                  Text(
+                    '$_quantity',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    color: Theme.of(context).primaryColor,
+                    onPressed: () {
+                      setState(() => _quantity++);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Add to Cart Button
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  for (int i = 0; i < _quantity; i++) {
+                    ref.read(cartProvider.notifier).addItem(
+                          title: widget.product.name,
+                          subtitle: widget.product.category,
+                          price: widget.product.price,
+                          imageUrl: widget.product.imageUrl,
+                        );
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('$_quantityx ${widget.product.name} ajouté au panier'),
+                      backgroundColor: AppTheme.success,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text(
+                  'Ajouter au Panier',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

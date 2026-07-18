@@ -6,6 +6,7 @@ import '../../theme/app_theme.dart';
 import '../../models/ingredient.dart';
 import '../../providers/ingredient_provider.dart';
 import '../../providers/composer_provider.dart';
+import '../../providers/cart_provider.dart';
 
 class ComposerScreen extends ConsumerStatefulWidget {
   const ComposerScreen({super.key});
@@ -130,11 +131,28 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
           ),
           ElevatedButton.icon(
             onPressed: () {
+              // Construct subtitle from ingredients
+              final ingredientsList = selectedIngredients.map((i) => i.name).join(', ');
+              
+              ref.read(cartProvider.notifier).addItem(
+                title: 'Composition ${catData['label']}',
+                subtitle: ingredientsList.isNotEmpty ? ingredientsList : 'Base seule',
+                price: _totalPrice,
+              );
+              
               Navigator.pop(ctx);
               _reset();
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Composition ajoutée au panier'),
+                  backgroundColor: AppTheme.success,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
             },
-            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-            label: const Text('Nouvelle composition', style: TextStyle(color: Colors.white)),
+            icon: const Icon(Icons.shopping_cart_checkout, color: Colors.white),
+            label: const Text('Ajouter au panier', style: TextStyle(color: Colors.white)),
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
           ),
         ],
