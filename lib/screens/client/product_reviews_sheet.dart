@@ -313,7 +313,7 @@ class _ProductReviewsSheetState extends ConsumerState<ProductReviewsSheet> {
                           Text(review.comment, style: Theme.of(context).textTheme.bodyMedium),
                           if (review.images.isNotEmpty)
                             Container(
-                              margin: const EdgeInsets.top(8),
+                              margin: const EdgeInsets.only(top: 8),
                               height: 80,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
