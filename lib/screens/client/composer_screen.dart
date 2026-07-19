@@ -9,7 +9,16 @@ import '../../providers/composer_provider.dart';
 import '../../providers/cart_provider.dart';
 
 class ComposerScreen extends ConsumerStatefulWidget {
-  const ComposerScreen({super.key});
+  final String? editingCartItemId;
+  final String? initialCategoryKey;
+  final List<String>? initialIngredientIds;
+
+  const ComposerScreen({
+    super.key,
+    this.editingCartItemId,
+    this.initialCategoryKey,
+    this.initialIngredientIds,
+  });
 
   @override
   ConsumerState<ComposerScreen> createState() => _ComposerScreenState();
@@ -21,6 +30,17 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
   double _totalPrice = 0.0;
   List<Ingredient> _allIngredients = [];
   List<Map<String, dynamic>> _currentCategories = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialCategoryKey != null) {
+      _selectedCategory = widget.initialCategoryKey;
+    }
+    if (widget.initialIngredientIds != null) {
+      _selectedIngredientIds.addAll(widget.initialIngredientIds!);
+    }
+  }
 
   void _toggleIngredient(Ingredient ingredient) {
     setState(() {
@@ -134,25 +154,40 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
               // Construct subtitle from ingredients
               final ingredientsList = selectedIngredients.map((i) => i.name).join(', ');
               
-              ref.read(cartProvider.notifier).addItem(
-                title: 'Composition ${catData['label']}',
-                subtitle: ingredientsList.isNotEmpty ? ingredientsList : 'Base seule',
-                price: _totalPrice,
-              );
+              if (widget.editingCartItemId != null) {
+                ref.read(cartProvider.notifier).updateItem(
+                  id: widget.editingCartItemId!,
+                  title: 'Composition ${catData['label']}',
+                  subtitle: ingredientsList.isNotEmpty ? ingredientsList : 'Base seule',
+                  price: _totalPrice,
+                  isComposition: true,
+                  compositionCategoryKey: _selectedCategory,
+                  compositionIngredientIds: _selectedIngredientIds.toList(),
+                );
+              } else {
+                ref.read(cartProvider.notifier).addItem(
+                  title: 'Composition ${catData['label']}',
+                  subtitle: ingredientsList.isNotEmpty ? ingredientsList : 'Base seule',
+                  price: _totalPrice,
+                  isComposition: true,
+                  compositionCategoryKey: _selectedCategory,
+                  compositionIngredientIds: _selectedIngredientIds.toList(),
+                );
+              }
               
-              Navigator.pop(ctx);
-              _reset();
+              Navigator.pop(ctx); // Close dialog
+              Navigator.pop(context); // Close composer (if opened as modal/route)
               
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('Composition ajoutée au panier'),
+                  content: Text(widget.editingCartItemId != null ? 'Composition mise à jour' : 'Composition ajoutée au panier'),
                   backgroundColor: AppTheme.success,
                   duration: const Duration(seconds: 2),
                 ),
               );
             },
-            icon: const Icon(Icons.shopping_cart_checkout, color: Colors.white),
-            label: const Text('Ajouter au panier', style: TextStyle(color: Colors.white)),
+            icon: Icon(widget.editingCartItemId != null ? Icons.save : Icons.shopping_cart_checkout, color: Colors.white),
+            label: Text(widget.editingCartItemId != null ? 'Enregistrer' : 'Ajouter au panier', style: const TextStyle(color: Colors.white)),
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
           ),
         ],

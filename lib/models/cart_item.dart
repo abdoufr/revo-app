@@ -5,6 +5,9 @@ class CartItem {
   final double price;
   final int quantity;
   final String? imageUrl;
+  final bool isComposition;
+  final String? compositionCategoryKey;
+  final List<String>? compositionIngredientIds;
 
   CartItem({
     required this.id,
@@ -13,6 +16,9 @@ class CartItem {
     required this.price,
     required this.quantity,
     this.imageUrl,
+    this.isComposition = false,
+    this.compositionCategoryKey,
+    this.compositionIngredientIds,
   });
 
   CartItem copyWith({
@@ -22,6 +28,9 @@ class CartItem {
     double? price,
     int? quantity,
     String? imageUrl,
+    bool? isComposition,
+    String? compositionCategoryKey,
+    List<String>? compositionIngredientIds,
   }) {
     return CartItem(
       id: id ?? this.id,
@@ -30,6 +39,9 @@ class CartItem {
       price: price ?? this.price,
       quantity: quantity ?? this.quantity,
       imageUrl: imageUrl ?? this.imageUrl,
+      isComposition: isComposition ?? this.isComposition,
+      compositionCategoryKey: compositionCategoryKey ?? this.compositionCategoryKey,
+      compositionIngredientIds: compositionIngredientIds ?? this.compositionIngredientIds,
     );
   }
 
@@ -42,6 +54,9 @@ class CartItem {
       'price': price,
       'quantity': quantity,
       'imageUrl': imageUrl,
+      'isComposition': isComposition,
+      'compositionCategoryKey': compositionCategoryKey,
+      'compositionIngredientIds': compositionIngredientIds,
     };
   }
 
@@ -53,6 +68,11 @@ class CartItem {
       price: map['price'].toDouble(),
       quantity: map['quantity'],
       imageUrl: map['imageUrl'],
+      isComposition: map['isComposition'] ?? false,
+      compositionCategoryKey: map['compositionCategoryKey'],
+      compositionIngredientIds: map['compositionIngredientIds'] != null
+          ? List<String>.from(map['compositionIngredientIds'])
+          : null,
     );
   }
 }

@@ -13,10 +13,13 @@ class CartNotifier extends Notifier<List<CartItem>> {
     required String subtitle,
     required double price,
     String? imageUrl,
+    bool isComposition = false,
+    String? compositionCategoryKey,
+    List<String>? compositionIngredientIds,
   }) {
     // Check if item with exact same title and subtitle exists
     final existingIndex = state.indexWhere(
-      (item) => item.title == title && item.subtitle == subtitle,
+      (item) => item.title == title && item.subtitle == subtitle && item.isComposition == isComposition,
     );
 
     if (existingIndex >= 0) {
@@ -35,8 +38,39 @@ class CartNotifier extends Notifier<List<CartItem>> {
         price: price,
         quantity: 1,
         imageUrl: imageUrl,
+        isComposition: isComposition,
+        compositionCategoryKey: compositionCategoryKey,
+        compositionIngredientIds: compositionIngredientIds,
       );
       state = [...state, newItem];
+    }
+  }
+
+  void updateItem({
+    required String id,
+    required String title,
+    required String subtitle,
+    required double price,
+    String? imageUrl,
+    bool isComposition = false,
+    String? compositionCategoryKey,
+    List<String>? compositionIngredientIds,
+  }) {
+    final index = state.indexWhere((item) => item.id == id);
+    if (index >= 0) {
+      final existingItem = state[index];
+      final updatedItem = existingItem.copyWith(
+        title: title,
+        subtitle: subtitle,
+        price: price,
+        imageUrl: imageUrl,
+        isComposition: isComposition,
+        compositionCategoryKey: compositionCategoryKey,
+        compositionIngredientIds: compositionIngredientIds,
+      );
+      final newState = [...state];
+      newState[index] = updatedItem;
+      state = newState;
     }
   }
 

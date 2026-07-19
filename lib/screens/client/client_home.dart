@@ -105,7 +105,12 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                                 IconButton(
                                   icon: const Icon(Icons.shopping_cart_outlined, size: 28),
                                   onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientCartScreen()));
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (_) => const ClientCartScreen(),
+                                    );
                                   },
                                 ),
                                 Consumer(
