@@ -227,7 +227,6 @@ class ClientCartScreen extends ConsumerWidget {
                                   ),
                                 ],
                               ),
-                              ),
                             ),
                           ],
                         ),
