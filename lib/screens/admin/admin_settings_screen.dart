@@ -22,6 +22,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
   final _newCategoryController = TextEditingController();
   final _latController = TextEditingController();
   final _lngController = TextEditingController();
+  final _radiusController = TextEditingController();
   final _newMessageController = TextEditingController();
   List<String> _geofenceMessages = [];
   bool _isLoading = false;
@@ -35,6 +36,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     _newCategoryController.dispose();
     _latController.dispose();
     _lngController.dispose();
+    _radiusController.dispose();
     _newMessageController.dispose();
     super.dispose();
   }
@@ -50,6 +52,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             _bannerController.text.trim(),
             double.tryParse(_latController.text.trim()) ?? 0.0,
             double.tryParse(_lngController.text.trim()) ?? 0.0,
+            double.tryParse(_radiusController.text.trim()) ?? 100.0,
             _geofenceMessages,
           );
       if (mounted) {
@@ -95,6 +98,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             _bannerController.text = settings.announcementBanner;
             _latController.text = settings.storeLat.toString();
             _lngController.text = settings.storeLng.toString();
+            _radiusController.text = settings.geofenceRadius.toString();
             _geofenceMessages = List.from(settings.geofenceMessages);
             _isInit = true;
           }
@@ -294,8 +298,21 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
+                TextField(
+                  controller: _radiusController,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Rayon de détection (en mètres)',
+                    prefixIcon: Icon(
+                      Icons.radar,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Text(
-                  'Messages d\'approche (100m)',
+                  'Messages d\'approche (s\'affichent quand le client entre dans le rayon)',
                   style: Theme.of(
                     context,
                   ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),

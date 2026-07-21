@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 final firebaseAuthProvider = Provider<FirebaseAuth>(
   (ref) => FirebaseAuth.instance,
@@ -69,9 +70,25 @@ class AuthController {
         await _createUserDoc(userCredential.user!);
       }
     } else {
-      throw Exception(
-        "La connexion Google n'est actuellement configurée que pour le Web.",
+      // Mobile Google Sign-In
+      // We must provide the Web Client ID as serverClientId for Android
+      await GoogleSignIn.instance.initialize(
+        serverClientId: '984076605218-ksbem2023heiukvg8elqf38nq216oh50.apps.googleusercontent.com',
       );
+      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
+      
+      if (googleUser != null) {
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
+        final UserCredential userCredential = await _auth.signInWithCredential(credential);
+        if (userCredential.user != null) {
+          await _createUserDoc(userCredential.user!);
+        }
+      } else {
+        throw Exception("Connexion Google annulée.");
+      }
     }
   }
 

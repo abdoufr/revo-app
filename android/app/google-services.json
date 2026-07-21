@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "984076605218",
+    "project_id": "revo-app-16462",
+    "storage_bucket": "revo-app-16462.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:984076605218:android:265236c2635e57a0aeb77b",
+        "android_client_info": {
+          "package_name": "revo.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "984076605218-sur99aab9ju1cg2cjbn8917mvh4k49ld.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "revo.app",
+            "certificate_hash": "729ce8e054cd23fb370097aa147002ba1437846f"
+          }
+        },
+        {
+          "client_id": "984076605218-ksbem2023heiukvg8elqf38nq216oh50.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtaVXK2Pxms8Y3p_I2ZKvRJR4T9eHxicM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "984076605218-ksbem2023heiukvg8elqf38nq216oh50.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

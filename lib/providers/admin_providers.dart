@@ -177,6 +177,7 @@ class AdminActions {
     String banner,
     double lat,
     double lng,
+    double radius,
     List<String> messages,
   ) async {
     await _firestore.collection('config').doc('fastfood').set({
@@ -185,6 +186,7 @@ class AdminActions {
       'announcementBanner': banner,
       'storeLat': lat,
       'storeLng': lng,
+      'geofenceRadius': radius,
       'geofenceMessages': messages,
     }, SetOptions(merge: true));
   }

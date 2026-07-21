@@ -9,7 +9,14 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Cette application utilise votre position pour afficher la carte et l'adresse de livraison.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Cette application utilise votre position pour la livraison en temps réel.</string>
+	<string>Cette application utilise votre position pour la livraison en temps réel et pour vous envoyer des notifications quand vous passez à proximité du restaurant.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Cette application utilise votre position pour vous envoyer des notifications quand vous passez à proximité du restaurant même quand l'application est en arrière-plan.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>location</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

@@ -56,12 +56,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
       settingsAsync.whenData((settings) {
         _geofenceChecked = true;
         Future.microtask(() {
-          GeofenceService.checkLocationAndNotify(
-            context,
-            settings.storeLat,
-            settings.storeLng,
-            settings.geofenceMessages,
-          );
+          GeofenceService.requestBackgroundPermission(context);
         });
       });
     }

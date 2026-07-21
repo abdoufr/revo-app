@@ -14,6 +14,7 @@ final appSettingsProvider = StreamProvider<AppSettings>((ref) {
       announcementBanner: '',
       storeLat: 0.0,
       storeLng: 0.0,
+      geofenceRadius: 100.0,
       geofenceMessages: ['Vous êtes à côté ! Venez nous voir !'],
     );
   });

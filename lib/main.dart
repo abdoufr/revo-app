@@ -13,6 +13,8 @@ import 'providers/client_providers.dart';
 import 'services/vip_tier_service.dart';
 import 'screens/client/pending_approval_screen.dart';
 
+import 'services/background_location_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -20,6 +22,7 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    await BackgroundLocationService.init();
   } catch (e) {
     debugPrint("Firebase init error: $e");
   }
