@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:workmanager/workmanager.dart';
@@ -14,58 +15,7 @@ void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     if (kIsWeb) return Future.value(true);
     try {
-      // 1. Initialiser Firebase
-      await Firebase.initializeApp();
-
-      // 2. Vérifier les permissions de localisation
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return Future.value(true);
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-        return Future.value(true);
-      }
-
-      // 3. Obtenir la position actuelle
-      Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
-      );
-
-      // 4. Obtenir les paramètres du magasin depuis Firebase
-      final doc = await FirebaseFirestore.instance.collection('config').doc('fastfood').get();
-      if (!doc.exists || doc.data() == null) return Future.value(true);
-
-      final data = doc.data()!;
-      final double storeLat = (data['storeLat'] ?? 0.0).toDouble();
-      final double storeLng = (data['storeLng'] ?? 0.0).toDouble();
-      final double radius = (data['geofenceRadius'] ?? 100.0).toDouble();
-      final List<String> messages = List<String>.from(data['geofenceMessages'] ?? ['Vous êtes à côté !']);
-
-      if (storeLat == 0.0 && storeLng == 0.0) return Future.value(true);
-
-      // 5. Calculer la distance
-      double distanceInMeters = Geolocator.distanceBetween(
-        position.latitude,
-        position.longitude,
-        storeLat,
-        storeLng,
-      );
-
-      // 6. Vérifier si l'utilisateur est dans le rayon
-      if (distanceInMeters <= radius) {
-        final prefs = await SharedPreferences.getInstance();
-        final lastChecked = prefs.getInt('last_geofence_notification') ?? 0;
-        final now = DateTime.now().millisecondsSinceEpoch;
-
-        // Limite : 1 notification par 24h
-        if (now - lastChecked > 86400000) {
-          await prefs.setInt('last_geofence_notification', now);
-          
-          final randomMessage = messages[Random().nextInt(messages.length)];
-          await BackgroundLocationService.showNotification(randomMessage);
-        }
-      }
-
+      await BackgroundLocationService.checkLocationAndNotify();
     } catch (e) {
       debugPrint("Background task error: $e");
     }
@@ -75,15 +25,67 @@ void callbackDispatcher() {
 
 class BackgroundLocationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  static Timer? _webTimer;
+
+  static Future<void> checkLocationAndNotify() async {
+    // 1. Initialiser Firebase si nécessaire
+    try {
+      await Firebase.initializeApp();
+    } catch(e) {
+      // Déjà initialisé
+    }
+
+    // 2. Vérifier les permissions de localisation
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      return;
+    }
+
+    // 3. Obtenir la position actuelle
+    Position position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+    );
+
+    // 4. Obtenir les paramètres du magasin depuis Firebase
+    final doc = await FirebaseFirestore.instance.collection('config').doc('fastfood').get();
+    if (!doc.exists || doc.data() == null) return;
+
+    final data = doc.data()!;
+    final double storeLat = (data['storeLat'] ?? 0.0).toDouble();
+    final double storeLng = (data['storeLng'] ?? 0.0).toDouble();
+    final double radius = (data['geofenceRadius'] ?? 100.0).toDouble();
+    final List<String> messages = List<String>.from(data['geofenceMessages'] ?? ['Vous êtes à côté !']);
+
+    if (storeLat == 0.0 && storeLng == 0.0) return;
+
+    // 5. Calculer la distance
+    double distanceInMeters = Geolocator.distanceBetween(
+      position.latitude,
+      position.longitude,
+      storeLat,
+      storeLng,
+    );
+
+    // 6. Vérifier si l'utilisateur est dans le rayon
+    if (distanceInMeters <= radius) {
+      final prefs = await SharedPreferences.getInstance();
+      final lastChecked = prefs.getInt('last_geofence_notification') ?? 0;
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      // Limite : 1 notification par 24h
+      if (now - lastChecked > 86400000) {
+        await prefs.setInt('last_geofence_notification', now);
+        
+        final randomMessage = messages[Random().nextInt(messages.length)];
+        await BackgroundLocationService.showNotification(randomMessage);
+      }
+    }
+  }
 
   static Future<void> init() async {
-    if (kIsWeb) return;
-
-    // Demander la permission sur Android 13+
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
-
     // Initialiser les notifications
     const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
     const DarwinInitializationSettings initializationSettingsDarwin = DarwinInitializationSettings();
@@ -96,7 +98,30 @@ class BackgroundLocationService {
       initializationSettings,
     );
 
-    // Initialiser WorkManager
+    if (kIsWeb) {
+      // Sur le web, demander la permission native du navigateur
+      await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<WebFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions();
+
+      // Sur le Web on lance un timer au lieu du WorkManager
+      _webTimer?.cancel();
+      _webTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
+        try {
+          await checkLocationAndNotify();
+        } catch (e) {
+          debugPrint("Web timer error: $e");
+        }
+      });
+      return; 
+    }
+
+    // Demander la permission sur Android 13+
+    await _notificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+
+    // Initialiser WorkManager (Android/iOS seulement)
     Workmanager().initialize(
       callbackDispatcher,
       isInDebugMode: false,
@@ -114,8 +139,6 @@ class BackgroundLocationService {
   }
 
   static Future<void> showNotification(String message) async {
-    if (kIsWeb) return;
-
     const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'geofence_channel', 
       'Notifications de proximité',
