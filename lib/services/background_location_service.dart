@@ -95,7 +95,7 @@ class BackgroundLocationService {
     );
 
     await _notificationsPlugin.initialize(
-      initializationSettings: initializationSettings,
+      settings: initializationSettings,
     );
 
     if (kIsWeb) {
