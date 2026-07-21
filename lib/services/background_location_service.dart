@@ -95,15 +95,10 @@ class BackgroundLocationService {
     );
 
     await _notificationsPlugin.initialize(
-      initializationSettings,
+      initializationSettings: initializationSettings,
     );
 
     if (kIsWeb) {
-      // Sur le web, demander la permission native du navigateur
-      await _notificationsPlugin
-          .resolvePlatformSpecificImplementation<WebFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions();
-
       // Sur le Web on lance un timer au lieu du WorkManager
       _webTimer?.cancel();
       _webTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
@@ -153,10 +148,10 @@ class BackgroundLocationService {
     );
 
     await _notificationsPlugin.show(
-      0,
-      'Vous êtes tout près ! 🍔',
-      message,
-      platformChannelSpecifics,
+      id: 0,
+      title: 'Vous êtes tout près ! 🍔',
+      body: message,
+      notificationDetails: platformChannelSpecifics,
     );
   }
 }
