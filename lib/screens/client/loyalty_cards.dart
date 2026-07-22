@@ -37,18 +37,15 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
         String vipTierName = VipTierService.getTierName(lifetimePoints);
         Color vipColor = VipTierService.getTierColor(lifetimePoints);
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildPrivilegeCard(vipTierName, vipColor, lifetimePoints),
-              const SizedBox(height: 24),
-              _buildStampCard(userPoints, pointsForReward, vipColor),
-              const SizedBox(height: 24),
-              _buildRewardsButton(vipColor),
-            ],
-          ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildPrivilegeCard(vipTierName, vipColor, lifetimePoints),
+            const SizedBox(height: 24),
+            _buildStampCard(userPoints, pointsForReward, vipColor),
+            const SizedBox(height: 24),
+            _buildRewardsButton(vipColor),
+          ],
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -76,34 +73,39 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('CARTE PRIVILÈGE', style: TextStyle(color: Colors.white70, fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text('Membre $vipTierName', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('CARTE PRIVILÈGE', style: TextStyle(color: Colors.white70, fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text('Membre $vipTierName', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.stars_rounded, color: Colors.white, size: 16),
                         const SizedBox(width: 4),
-                        Text(vipTierName.toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                        Text(vipTierName.toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   GestureDetector(
                     onTap: () => _showVipTiersInfo(context),
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
-                      child: const Icon(Icons.info_outline_rounded, color: Colors.white, size: 20),
+                      child: const Icon(Icons.info_outline_rounded, color: Colors.white, size: 18),
                     ),
                   ),
                 ],
@@ -160,25 +162,33 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Text('Ma Carte de Tampons', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      IconButton(
-                        icon: Icon(_isStampView ? Icons.swap_horiz_rounded : Icons.grid_view_rounded, size: 20, color: Colors.grey),
-                        onPressed: () => setState(() => _isStampView = !_isStampView),
-                      ),
-                    ],
-                  ),
-                  if (completedRewards > 0)
-                    Text('🎁 $completedRewards cadeau${completedRewards > 1 ? 'x' : ''} disponible${completedRewards > 1 ? 's' : ''} !', style: TextStyle(color: vipColor, fontSize: 13, fontWeight: FontWeight.bold))
-                  else
-                    Text('$displayStamps / $totalStamps tampons actifs', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text('Ma Carte de Tampons', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                        ),
+                        IconButton(
+                          padding: const EdgeInsets.all(4),
+                          constraints: const BoxConstraints(),
+                          icon: Icon(_isStampView ? Icons.swap_horiz_rounded : Icons.grid_view_rounded, size: 20, color: Colors.grey),
+                          onPressed: () => setState(() => _isStampView = !_isStampView),
+                        ),
+                      ],
+                    ),
+                    if (completedRewards > 0)
+                      Text('🎁 $completedRewards cadeau${completedRewards > 1 ? 'x' : ''} disponible${completedRewards > 1 ? 's' : ''} !', style: TextStyle(color: vipColor, fontSize: 13, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)
+                    else
+                      Text('$displayStamps / $totalStamps tampons actifs', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () => _showQrScannerSheet(context),
                 icon: const Icon(Icons.qr_code_scanner_rounded, size: 16),
@@ -187,7 +197,8 @@ class _LoyaltyCardsCarouselState extends ConsumerState<LoyaltyCardsCarousel> {
                   backgroundColor: vipColor,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ),
             ],
