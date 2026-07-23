@@ -22,7 +22,6 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    await BackgroundLocationService.init();
   } catch (e) {
     debugPrint("Firebase init error: $e");
   }
@@ -32,6 +31,10 @@ void main() async {
       child: RevoApp(),
     ),
   );
+
+  BackgroundLocationService.init().catchError((e) {
+    debugPrint("BackgroundLocationService init error: $e");
+  });
 }
 
 class RevoApp extends ConsumerWidget {
