@@ -357,6 +357,12 @@ class AdminMenuScreen extends ConsumerWidget {
                 ),
               ],
             );
+          },
+        );
+      },
+    );
+  }
+
   void _showCategoryManagementDialog(BuildContext context, WidgetRef ref, List<String> categories) {
     final controller = TextEditingController();
     showDialog(

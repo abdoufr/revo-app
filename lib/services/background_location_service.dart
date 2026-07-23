@@ -133,7 +133,7 @@ class BackgroundLocationService {
     );
   }
 
-  static Future<void> showNotification(String message) async {
+  static Future<void> showNotification(String message, {String title = 'Vous êtes tout près ! 🍔'}) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'geofence_channel', 
       'Notifications de proximité',
@@ -148,8 +148,8 @@ class BackgroundLocationService {
     );
 
     await _notificationsPlugin.show(
-      id: 0,
-      title: 'Vous êtes tout près ! 🍔',
+      id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      title: title,
       body: message,
       notificationDetails: platformChannelSpecifics,
     );

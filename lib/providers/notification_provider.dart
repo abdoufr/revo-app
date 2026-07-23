@@ -41,7 +41,7 @@ class NotificationActions {
       'created_at': FieldValue.serverTimestamp(),
     });
     try {
-      await BackgroundLocationService.showNotification(title, message);
+      await BackgroundLocationService.showNotification(message, title: title);
     } catch (_) {}
   }
 

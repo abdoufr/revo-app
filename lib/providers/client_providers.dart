@@ -9,6 +9,7 @@ class ClientUser {
   final String name;
   final String? email;
   final String? phone;
+  final String? photoUrl;
   final String status;
   final int loyaltyPoints;
   final int lifetimePoints;
@@ -22,6 +23,7 @@ class ClientUser {
     required this.name,
     this.email,
     this.phone,
+    this.photoUrl,
     required this.status,
     required this.loyaltyPoints,
     required this.lifetimePoints,
@@ -37,6 +39,7 @@ class ClientUser {
       name: data['name'] ?? 'Client',
       email: data['email'],
       phone: data['phone'],
+      photoUrl: data['photo_url'],
       status: data['status'] ?? 'active',
       loyaltyPoints: data['loyalty_points'] ?? 0,
       lifetimePoints: data['lifetime_points'] ?? (data['loyalty_points'] ?? 0),
