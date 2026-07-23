@@ -8,7 +8,22 @@ import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'web_notification_helper.dart';
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  try {
+    await Firebase.initializeApp();
+  } catch (_) {}
+  final notification = message.notification;
+  if (notification != null) {
+    await BackgroundLocationService.showNotification(
+      notification.body ?? '',
+      title: notification.title ?? 'Nouvelle Notification 🔔',
+    );
+  }
+}
 
 // Tâche en arrière-plan
 @pragma('vm:entry-point')
@@ -178,6 +193,30 @@ class BackgroundLocationService {
 
     // Démarrer l'écoute temps réel des annonces
     listenToAnnouncements();
+
+    if (!kIsWeb) {
+      try {
+        FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+        final messaging = FirebaseMessaging.instance;
+        await messaging.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+        await messaging.subscribeToTopic('all_users');
+        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+          final notification = message.notification;
+          if (notification != null) {
+            showNotification(
+              notification.body ?? '',
+              title: notification.title ?? 'Nouvelle Notification 🔔',
+            );
+          }
+        });
+      } catch (e) {
+        debugPrint("FCM setup error: $e");
+      }
+    }
 
     if (kIsWeb) {
       requestWebNotificationPermission();
