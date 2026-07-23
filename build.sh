@@ -6,9 +6,9 @@ set -e
 echo ">>> Removing old Flutter installation..."
 rm -rf flutter
 
-echo ">>> Cloning Flutter 3.44.5 (stable, shallow)..."
+echo ">>> Cloning Flutter (stable, shallow)..."
 git clone https://github.com/flutter/flutter.git \
-  -b 3.44.5 \
+  -b stable \
   --depth 1 \
   --single-branch \
   flutter
