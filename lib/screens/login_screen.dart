@@ -69,6 +69,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       'assets/images/logo.png',
                       height: 110,
                       fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.fastfood_rounded,
+                          size: 70,
+                          color: Theme.of(context).primaryColor,
+                        );
+                      },
                     ),
                     const SizedBox(height: 16),
                     Text(
