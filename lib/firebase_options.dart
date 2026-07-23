@@ -49,8 +49,8 @@ class DefaultFirebaseOptions {
   // For simplicity since the user only generated a web app, we'll try to use it across,
   // but normally they need to register an Android app. We will just use the web options for now.
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDNAZn0fXq2Yz9eJAgWqzX_uP7ax_C1P4A',
-    appId: '1:984076605218:web:b4f45561dcd8fe68aeb77b',
+    apiKey: 'AIzaSyCtaVXK2Pxms8Y3p_I2ZKvRJR4T9eHxicM',
+    appId: '1:984076605218:android:265236c2635e57a0aeb77b',
     messagingSenderId: '984076605218',
     projectId: 'revo-app-16462',
     authDomain: 'revo-app-16462.firebaseapp.com',

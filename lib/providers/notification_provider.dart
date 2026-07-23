@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/background_location_service.dart';
@@ -40,6 +43,35 @@ class NotificationActions {
       'message': message,
       'created_at': FieldValue.serverTimestamp(),
     });
+
+    try {
+      await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'key=AIzaSyCtaVXK2Pxms8Y3p_I2ZKvRJR4T9eHxicM',
+        },
+        body: jsonEncode({
+          'to': '/topics/all_users',
+          'priority': 'high',
+          'notification': {
+            'title': title,
+            'body': message,
+            'sound': 'default',
+            'android_channel_id': 'announcements_channel',
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK'
+          },
+          'data': {
+            'title': title,
+            'body': message,
+            'type': 'announcement'
+          }
+        }),
+      );
+    } catch (e) {
+      debugPrint("FCM push error: $e");
+    }
+
     try {
       await BackgroundLocationService.showNotification(message, title: title);
     } catch (_) {}
