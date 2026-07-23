@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'web_notification_helper.dart';
 
 // Tâche en arrière-plan
 @pragma('vm:entry-point')
@@ -179,6 +180,7 @@ class BackgroundLocationService {
     listenToAnnouncements();
 
     if (kIsWeb) {
+      requestWebNotificationPermission();
       _webTimer?.cancel();
       _webTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
         try {
@@ -208,6 +210,11 @@ class BackgroundLocationService {
   }
 
   static Future<void> showNotification(String message, {String title = 'Vous êtes tout près ! 🍔'}) async {
+    if (kIsWeb) {
+      showWebNotification(title, message);
+      return;
+    }
+
     const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'announcements_channel', 
       'Notifications & Annonces',
