@@ -72,6 +72,36 @@ class RevoApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       home: const AuthWrapper(),
+      builder: (context, child) {
+        if (!kIsWeb) return child ?? const SizedBox();
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth > 550) {
+              return Container(
+                color: const Color(0xFF0F0F12),
+                child: Center(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 30,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      child: child ?? const SizedBox(),
+                    ),
+                  ),
+                ),
+              );
+            }
+            return child ?? const SizedBox();
+          },
+        );
+      },
     );
   }
 }
