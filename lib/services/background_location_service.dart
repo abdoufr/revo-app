@@ -26,6 +26,38 @@ void callbackDispatcher() {
 class BackgroundLocationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
   static Timer? _webTimer;
+  static StreamSubscription? _announcementsSubscription;
+  static DateTime? _initTime;
+
+  static void listenToAnnouncements() {
+    _announcementsSubscription?.cancel();
+    _initTime = DateTime.now();
+
+    _announcementsSubscription = FirebaseFirestore.instance
+        .collection('announcements')
+        .orderBy('created_at', descending: true)
+        .limit(5)
+        .snapshots()
+        .listen((snapshot) {
+      for (var change in snapshot.docChanges) {
+        if (change.type == DocumentChangeType.added) {
+          final data = change.doc.data();
+          if (data != null) {
+            final createdAt = (data['created_at'] as Timestamp?)?.toDate();
+            if (createdAt == null || (_initTime != null && createdAt.isAfter(_initTime!))) {
+              final title = data['title'] as String? ?? 'Nouvelle Notification 🔔';
+              final message = data['message'] as String? ?? '';
+              if (message.isNotEmpty) {
+                showNotification(message, title: title);
+              }
+            }
+          }
+        }
+      }
+    }, onError: (e) {
+      debugPrint("Announcements stream error: $e");
+    });
+  }
 
   static Future<void> checkLocationAndNotify() async {
     // 1. Initialiser Firebase si nécessaire
@@ -33,6 +65,34 @@ class BackgroundLocationService {
       await Firebase.initializeApp();
     } catch(e) {
       // Déjà initialisé
+    }
+
+    // Check for new announcements in background
+    try {
+      final annSnapshot = await FirebaseFirestore.instance
+          .collection('announcements')
+          .orderBy('created_at', descending: true)
+          .limit(3)
+          .get();
+      
+      final prefs = await SharedPreferences.getInstance();
+      List<String> seenIds = prefs.getStringList('seen_announcements') ?? [];
+
+      for (var doc in annSnapshot.docs) {
+        if (!seenIds.contains(doc.id)) {
+          seenIds.add(doc.id);
+          final data = doc.data();
+          final title = data['title'] as String? ?? 'Nouvelle Notification 🔔';
+          final message = data['message'] as String? ?? '';
+          if (message.isNotEmpty) {
+            await showNotification(message, title: title);
+          }
+        }
+      }
+      if (seenIds.length > 20) seenIds = seenIds.sublist(seenIds.length - 20);
+      await prefs.setStringList('seen_announcements', seenIds);
+    } catch (e) {
+      debugPrint("Background announcement check error: $e");
     }
 
     // 2. Vérifier les permissions de localisation
@@ -98,8 +158,27 @@ class BackgroundLocationService {
       settings: initializationSettings,
     );
 
+    // Demander la permission et créer le canal sur Android 13+
+    final androidImplementation = _notificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+    if (androidImplementation != null) {
+      await androidImplementation.requestNotificationsPermission();
+
+      const AndroidNotificationChannel channel = AndroidNotificationChannel(
+        'announcements_channel',
+        'Notifications & Annonces',
+        description: 'Canal pour recevoir les annonces du fastfood',
+        importance: Importance.max,
+        playSound: true,
+      );
+      await androidImplementation.createNotificationChannel(channel);
+    }
+
+    // Démarrer l'écoute temps réel des annonces
+    listenToAnnouncements();
+
     if (kIsWeb) {
-      // Sur le Web on lance un timer au lieu du WorkManager
       _webTimer?.cancel();
       _webTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
         try {
@@ -110,11 +189,6 @@ class BackgroundLocationService {
       });
       return; 
     }
-
-    // Demander la permission sur Android 13+
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
 
     // Initialiser WorkManager (Android/iOS seulement)
     Workmanager().initialize(
@@ -128,19 +202,20 @@ class BackgroundLocationService {
       "geofence_check",
       frequency: const Duration(minutes: 15),
       constraints: Constraints(
-        networkType: NetworkType.connected, // Nécessaire pour fetch Firebase
+        networkType: NetworkType.connected,
       ),
     );
   }
 
   static Future<void> showNotification(String message, {String title = 'Vous êtes tout près ! 🍔'}) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'geofence_channel', 
-      'Notifications de proximité',
-      channelDescription: 'Notifications lorsque vous êtes proche de notre magasin',
+      'announcements_channel', 
+      'Notifications & Annonces',
+      channelDescription: 'Canal pour recevoir les annonces du fastfood',
       importance: Importance.max,
       priority: Priority.high,
-      showWhen: false,
+      showWhen: true,
+      playSound: true,
     );
     const NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
