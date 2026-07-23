@@ -87,6 +87,18 @@ class AdminActions {
     });
   }
 
+  Future<void> addCategory(String category) async {
+    await _firestore.collection('config').doc('categories').set({
+      'list': FieldValue.arrayUnion([category])
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> deleteCategory(String category) async {
+    await _firestore.collection('config').doc('categories').update({
+      'list': FieldValue.arrayRemove([category])
+    });
+  }
+
   Future<void> updateRewardConfig(RewardConfig config) async {
     await _firestore.collection('config').doc('rewards').set(config.toMap());
   }

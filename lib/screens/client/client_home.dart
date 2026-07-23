@@ -90,7 +90,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                                     child: hasPhoto
                                         ? ClipRRect(
                                             borderRadius: BorderRadius.circular(22),
-                                            child: SmartImage(user!.photoUrl!, fit: BoxFit.cover, width: 44, height: 44),
+                                            child: SizedBox(width: 44, height: 44, child: SmartImage(user!.photoUrl!, fit: BoxFit.cover)),
                                           )
                                         : Text(
                                             user?.name.isNotEmpty == true ? user!.name[0].toUpperCase() : 'U',
