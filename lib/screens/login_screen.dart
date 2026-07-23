@@ -88,218 +88,72 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 40),
 
                     // Inputs
-                    if (_isPhoneLogin) ...[
-                      if (!_otpSent)
-                        TextFormField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          decoration: InputDecoration(
-                            hintText: 'Numéro de téléphone (ex: +213...)',
-                            prefixIcon: Icon(
-                              Icons.phone,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                        )
-                      else
-                        TextFormField(
-                          controller: _otpController,
-                          keyboardType: TextInputType.number,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          decoration: InputDecoration(
-                            hintText: 'Code SMS à 6 chiffres',
-                            prefixIcon: Icon(
-                              Icons.message,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                        ),
-                    ] else ...[
-                      TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        decoration: InputDecoration(
-                          hintText: 'Email',
-                          prefixIcon: Icon(
-                            Icons.email,
-                            color: Theme.of(context).primaryColor,
-                          ),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      decoration: InputDecoration(
+                        hintText: 'Email',
+                        prefixIcon: Icon(
+                          Icons.email,
+                          color: Theme.of(context).primaryColor,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: true,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        decoration: InputDecoration(
-                          hintText: 'Mot de passe',
-                          prefixIcon: Icon(
-                            Icons.lock,
-                            color: Theme.of(context).primaryColor,
-                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      decoration: InputDecoration(
+                        hintText: 'Mot de passe',
+                        prefixIcon: Icon(
+                          Icons.lock,
+                          color: Theme.of(context).primaryColor,
                         ),
                       ),
-                      if (_isSignUp) ...[
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _signupPhoneController,
-                          keyboardType: TextInputType.phone,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          decoration: InputDecoration(
-                            hintText: 'Numéro de téléphone (optionnel)',
-                            prefixIcon: Icon(
-                              Icons.phone,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+                    ),
 
                     const SizedBox(height: 32),
 
                     // Primary Button
                     PrimaryButton(
-                      text: _isPhoneLogin
-                          ? (_otpSent
-                                ? 'Confirmer le Code'
-                                : 'Envoyer le Code SMS')
-                          : (_isSignUp ? 'Créer mon compte' : 'Se Connecter'),
+                      text: _isSignUp ? 'Créer mon compte' : 'Se Connecter',
                       isLoading: _isLoading,
                       onPressed: () async {
-                        if (_isPhoneLogin) {
-                          if (!_otpSent) {
-                            String phone = _phoneController.text.trim();
-                            if (phone.isEmpty) return;
-
-                            // Auto-format for Algeria if starts with 0
-                            if (phone.startsWith('0')) {
-                              phone = '+213${phone.substring(1)}';
-                            } else if (!phone.startsWith('+')) {
-                              phone = '+$phone';
-                            }
-
-                            setState(() => _isLoading = true);
-                            try {
-                              _confirmationResult = await ref
-                                  .read(authControllerProvider)
-                                  .verifyPhoneNumber(phone);
-                              setState(() => _otpSent = true);
-                            } catch (e) {
-                              if (mounted)
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Erreur: $e')),
+                        if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Veuillez remplir l\'email et le mot de passe')),
+                          );
+                          return;
+                        }
+                        setState(() => _isLoading = true);
+                        try {
+                          if (_isSignUp) {
+                            await ref.read(authControllerProvider).signUpWithEmail(
+                                  _emailController.text.trim(),
+                                  _passwordController.text.trim(),
                                 );
-                            } finally {
-                              if (mounted) setState(() => _isLoading = false);
-                            }
                           } else {
-                            if (_otpController.text.isEmpty ||
-                                _confirmationResult == null)
-                              return;
-                            setState(() => _isLoading = true);
-                            try {
-                              await ref
-                                  .read(authControllerProvider)
-                                  .verifyOTP(
-                                    _confirmationResult!,
-                                    _otpController.text.trim(),
-                                  );
-                            } catch (e) {
-                              if (mounted)
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Code invalide ou expiré'),
-                                  ),
+                            await ref.read(authControllerProvider).signInWithEmail(
+                                  _emailController.text.trim(),
+                                  _passwordController.text.trim(),
                                 );
-                            } finally {
-                              if (mounted) setState(() => _isLoading = false);
-                            }
                           }
-                        } else {
-                          if (_emailController.text.isEmpty ||
-                              _passwordController.text.isEmpty)
-                            return;
-                          setState(() => _isLoading = true);
-                          try {
-                            if (_isSignUp) {
-                              String? phoneStr = _signupPhoneController.text
-                                  .trim();
-                              if (phoneStr.isNotEmpty) {
-                                // Auto-format for Algeria if starts with 0
-                                if (phoneStr.startsWith('0')) {
-                                  phoneStr = '+213${phoneStr.substring(1)}';
-                                } else if (!phoneStr.startsWith('+')) {
-                                  phoneStr = '+$phoneStr';
-                                }
-                              } else {
-                                phoneStr = null;
-                              }
-
-                              await ref
-                                  .read(authControllerProvider)
-                                  .signUpWithEmail(
-                                    _emailController.text.trim(),
-                                    _passwordController.text.trim(),
-                                    phone: phoneStr,
-                                  );
-                            } else {
-                              await ref
-                                  .read(authControllerProvider)
-                                  .signInWithEmail(
-                                    _emailController.text.trim(),
-                                    _passwordController.text.trim(),
-                                  );
-                            }
-                          } catch (e) {
-                            if (mounted)
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Erreur: $e')),
-                              );
-                          } finally {
-                            if (mounted) setState(() => _isLoading = false);
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Erreur: $e')),
+                            );
                           }
+                        } finally {
+                          if (mounted) setState(() => _isLoading = false);
                         }
                       },
                     ),
 
                     const SizedBox(height: 24),
 
-                    if (!_isPhoneLogin)
-                      TextButton(
-                        onPressed: () => setState(() => _isSignUp = !_isSignUp),
-                        child: Text(
-                          _isSignUp
-                              ? 'Déjà un compte ? Se connecter'
-                              : 'Pas de compte ? S\'inscrire',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-
-                    if (!_otpSent)
-                      TextButton(
-                        onPressed: _toggleLoginType,
-                        child: Text(
-                          _isPhoneLogin
-                              ? 'Utiliser l\'Email au lieu'
-                              : 'Utiliser le Numéro au lieu',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-
-                    if (!_otpSent) ...[
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
                             child: Divider(
                               color: Theme.of(context).dividerColor,
                               thickness: 0.5,

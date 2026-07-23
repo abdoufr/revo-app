@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+import '../../widgets/smart_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -230,88 +233,140 @@ class ClientSettingsScreen extends ConsumerWidget {
   ) async {
     final nameController = TextEditingController(text: user.name);
     final phoneController = TextEditingController(text: user.phone ?? '');
+    String? base64Image = user.photoUrl;
 
     await showDialog(
       context: context,
       builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Modifier mon profil',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Prénom',
-                    prefixIcon: Icon(Icons.person_rounded),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: phoneController,
-                  decoration: const InputDecoration(
-                    labelText: 'Téléphone',
-                    prefixIcon: Icon(Icons.phone_rounded),
-                  ),
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 24),
-                PrimaryButton(
-                  text: 'Enregistrer',
-                  onPressed: () async {
-                    try {
-                      await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(user.id)
-                          .update({
-                            'name': nameController.text.trim(),
-                            'phone': phoneController.text.trim(),
-                          });
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Profil mis à jour !'),
-                            backgroundColor: AppTheme.success,
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Modifier mon profil',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () async {
+                        try {
+                          final picker = ImagePicker();
+                          final f = await picker.pickImage(source: ImageSource.gallery, maxWidth: 300, imageQuality: 40);
+                          if (f != null) {
+                            final bytes = await f.readAsBytes();
+                            setState(() => base64Image = 'data:image/jpeg;base64,${base64Encode(bytes)}');
+                          }
+                        } catch (e) {
+                          debugPrint('Error picking image: $e');
+                        }
+                      },
+                      child: Stack(
+                        children: [
+                          Container(
+                            height: 90,
+                            width: 90,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Theme.of(context).primaryColor.withOpacity(0.1),
+                              border: Border.all(color: Theme.of(context).primaryColor, width: 2),
+                            ),
+                            child: base64Image != null && base64Image!.isNotEmpty
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(45),
+                                    child: SmartImage(base64Image!, fit: BoxFit.cover),
+                                  )
+                                : Icon(Icons.person_rounded, color: Theme.of(context).primaryColor, size: 50),
                           ),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Erreur: $e'),
-                            backgroundColor: AppTheme.error,
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 16),
+                            ),
                           ),
-                        );
-                      }
-                    }
-                  },
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nom / Prénom',
+                        prefixIcon: Icon(Icons.person_rounded),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: phoneController,
+                      decoration: const InputDecoration(
+                        labelText: 'Téléphone',
+                        prefixIcon: Icon(Icons.phone_rounded),
+                      ),
+                      keyboardType: TextInputType.phone,
+                    ),
+                    const SizedBox(height: 24),
+                    PrimaryButton(
+                      text: 'Enregistrer',
+                      onPressed: () async {
+                        try {
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(user.id)
+                              .update({
+                                'name': nameController.text.trim(),
+                                'phone': phoneController.text.trim(),
+                                'photo_url': base64Image,
+                              });
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Profil mis à jour !'),
+                                backgroundColor: AppTheme.success,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Erreur: $e'),
+                                backgroundColor: AppTheme.error,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        'Annuler',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'Annuler',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

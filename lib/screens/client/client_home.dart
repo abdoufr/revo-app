@@ -79,17 +79,45 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                       children: [
                         GestureDetector(
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientSettingsScreen())),
-                          child: CircleAvatar(
-                            radius: 24,
-                            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                            child: userAsync.when(
-                              data: (user) => Text(
-                                user?.name.isNotEmpty == true ? user!.name[0].toUpperCase() : 'U',
-                                style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 20),
+                          child: Row(
+                            children: [
+                              userAsync.when(
+                                data: (user) {
+                                  final hasPhoto = user?.photoUrl != null && user!.photoUrl!.isNotEmpty;
+                                  return CircleAvatar(
+                                    radius: 22,
+                                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                                    child: hasPhoto
+                                        ? ClipRRect(
+                                            borderRadius: BorderRadius.circular(22),
+                                            child: SmartImage(user!.photoUrl!, fit: BoxFit.cover, width: 44, height: 44),
+                                          )
+                                        : Text(
+                                            user?.name.isNotEmpty == true ? user!.name[0].toUpperCase() : 'U',
+                                            style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 18),
+                                          ),
+                                  );
+                                },
+                                loading: () => const CircleAvatar(radius: 22, child: CircularProgressIndicator(strokeWidth: 2)),
+                                error: (_, __) => CircleAvatar(radius: 22, child: Icon(Icons.person, color: Theme.of(context).primaryColor)),
                               ),
-                              loading: () => const CircularProgressIndicator(strokeWidth: 2),
-                              error: (_, __) => Icon(Icons.person, color: Theme.of(context).primaryColor),
-                            ),
+                              const SizedBox(width: 10),
+                              userAsync.when(
+                                data: (user) => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text('Bonjour 👋', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                                    Text(
+                                      user?.name ?? 'Client',
+                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 15),
+                                    ),
+                                  ],
+                                ),
+                                loading: () => const SizedBox(),
+                                error: (_, __) => const SizedBox(),
+                              ),
+                            ],
                           ),
                         ),
                         Row(
@@ -131,10 +159,37 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                                 ),
                               ],
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.notifications_none_rounded, size: 28),
-                              onPressed: () {
-                                _showNotificationsSheet(context, ref);
+                            Consumer(
+                              builder: (context, ref, child) {
+                                final announcementsAsync = ref.watch(announcementsProvider);
+                                final count = announcementsAsync.asData?.value.length ?? 0;
+                                return Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.notifications_none_rounded, size: 28),
+                                      onPressed: () {
+                                        _showNotificationsSheet(context, ref);
+                                      },
+                                    ),
+                                    if (count > 0)
+                                      Positioned(
+                                        right: 6,
+                                        top: 6,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(5),
+                                          decoration: const BoxDecoration(
+                                            color: AppTheme.error,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            '$count',
+                                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                );
                               },
                             ),
                           ],
@@ -263,6 +318,28 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: Consumer(
+        builder: (context, ref, child) {
+          final totalItems = ref.watch(cartProvider.notifier).totalItems;
+          return FloatingActionButton.extended(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const ClientCartScreen(),
+              );
+            },
+            backgroundColor: Theme.of(context).primaryColor,
+            elevation: 8,
+            icon: const Icon(Icons.shopping_bag_rounded, color: Colors.white),
+            label: Text(
+              totalItems > 0 ? 'Panier ($totalItems)' : 'Panier',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+            ),
+          );
+        },
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );

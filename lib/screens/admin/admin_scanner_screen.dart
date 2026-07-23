@@ -6,6 +6,8 @@ import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
 import '../../providers/auth_providers.dart';
 
+import '../../models/claimed_reward.dart';
+
 class AdminScannerScreen extends ConsumerStatefulWidget {
   const AdminScannerScreen({super.key});
 
@@ -25,6 +27,7 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
   Map<String, dynamic>? _scannedUser;
   bool _isEligibleForReward = false;
   int _requiredPoints = 0;
+  List<ClaimedReward> _pendingRewards = [];
 
   @override
   void dispose() {
@@ -65,11 +68,23 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
         if (configDoc.exists && configDoc.data() != null) {
           reqPoints = configDoc.data()!['pointsRequiredForReward'] ?? 50;
         }
+
+        // Fetch pending claimed rewards
+        final rewardsSnap = await FirebaseFirestore.instance
+            .collection('claimed_rewards')
+            .where('userId', isEqualTo: userId)
+            .where('status', isEqualTo: 'pending')
+            .get();
+
+        final rewardsList = rewardsSnap.docs
+            .map((d) => ClaimedReward.fromMap(d.id, d.data()))
+            .toList();
+
         setState(() {
           _scannedUser = data;
           _requiredPoints = reqPoints;
-          _isEligibleForReward =
-              (data['loyalty_points'] ?? 0) >= reqPoints;
+          _isEligibleForReward = (data['loyalty_points'] ?? 0) >= reqPoints;
+          _pendingRewards = rewardsList;
         });
       } else {
         if (mounted) {
@@ -90,6 +105,29 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _markRewardAsClaimed(String rewardId) async {
+    try {
+      await FirebaseFirestore.instance.collection('claimed_rewards').doc(rewardId).update({
+        'status': 'claimed',
+        'claimedAt': DateTime.now().millisecondsSinceEpoch,
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cadeau marqué comme remis au client !'), backgroundColor: AppTheme.success),
+        );
+      }
+      if (_clientIdController.text.isNotEmpty) {
+        _fetchUserDetails(_clientIdController.text.trim());
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error),
+        );
+      }
     }
   }
 
@@ -377,6 +415,53 @@ class _AdminScannerScreenState extends ConsumerState<AdminScannerScreen> {
                         ),
                       ],
                     ),
+                    if (_pendingRewards.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '🎁 Cadeau(x) à remettre :',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Column(
+                        children: _pendingRewards.map((reward) {
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF9800).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFFFF9800)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.card_giftcard, color: Color(0xFFFF9800)),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(reward.rewardTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                      Text('Provenance: ${reward.source}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                    ],
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => _markRewardAsClaimed(reward.id),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.success,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  ),
+                                  child: const Text('Remettre', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
                     if (_isEligibleForReward) ...[
                       const SizedBox(height: 16),
                       Container(

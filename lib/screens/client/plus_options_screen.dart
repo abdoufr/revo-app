@@ -66,17 +66,6 @@ class PlusOptionsScreen extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          
-          SoftCard(
-            padding: EdgeInsets.zero,
-            child: _buildOptionTile(
-              context,
-              icon: Icons.settings_rounded,
-              title: 'settings'.tr(context),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientSettingsScreen())),
-            ),
-          ),
           const SizedBox(height: 40),
         ],
       ),

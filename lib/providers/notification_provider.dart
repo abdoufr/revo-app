@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../services/background_location_service.dart';
 
 class Announcement {
   final String id;
@@ -39,6 +40,9 @@ class NotificationActions {
       'message': message,
       'created_at': FieldValue.serverTimestamp(),
     });
+    try {
+      await BackgroundLocationService.showNotification(title, message);
+    } catch (_) {}
   }
 
   Future<void> deleteNotification(String id) async {

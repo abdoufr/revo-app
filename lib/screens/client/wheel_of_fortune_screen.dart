@@ -53,6 +53,17 @@ class _WheelOfFortuneScreenState extends ConsumerState<WheelOfFortuneScreen> {
     // Wait for animation
     await Future.delayed(const Duration(seconds: 5));
     
+    final wonPrize = config.wheelPrizes[randomIndex];
+    if (authUser != null && !wonPrize.toLowerCase().contains('perdu') && !wonPrize.toLowerCase().contains('rien')) {
+      await FirebaseFirestore.instance.collection('claimed_rewards').add({
+        'userId': authUser.uid,
+        'rewardTitle': wonPrize,
+        'source': 'Roue de la Fortune',
+        'status': 'pending',
+        'createdAt': DateTime.now().millisecondsSinceEpoch,
+      });
+    }
+
     if (mounted) {
       setState(() => _isSpinning = false);
       showDialog(

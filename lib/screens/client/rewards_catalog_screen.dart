@@ -31,6 +31,13 @@ class RewardsCatalogScreen extends ConsumerWidget {
               final authUser = ref.read(authStateProvider).value;
               if (authUser != null) {
                 await ref.read(clientActionsProvider).deductPoints(authUser.uid, item.pointsCost);
+                await FirebaseFirestore.instance.collection('claimed_rewards').add({
+                  'userId': authUser.uid,
+                  'rewardTitle': item.name,
+                  'source': 'Boutique',
+                  'status': 'pending',
+                  'createdAt': DateTime.now().millisecondsSinceEpoch,
+                });
               }
               if (context.mounted) {
                 showDialog(

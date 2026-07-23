@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../providers/notification_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/admin_providers.dart';
 import '../../theme/app_theme.dart';
 
 class AdminNotificationsScreen extends ConsumerStatefulWidget {
@@ -13,6 +15,73 @@ class AdminNotificationsScreen extends ConsumerStatefulWidget {
 }
 
 class _AdminNotificationsScreenState extends ConsumerState<AdminNotificationsScreen> {
+  void _showGeofenceSettingsDialog(BuildContext context, WidgetRef ref) async {
+    final settings = ref.read(appSettingsProvider).value;
+    final radiusController = TextEditingController(text: settings?.geofenceRadius.toString() ?? '100');
+    final messageController = TextEditingController(
+      text: (settings?.geofenceMessages.isNotEmpty == true) ? settings!.geofenceMessages.first : 'Vous êtes tout près ! Venez découvrir nos délices 🍔',
+    );
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Notification de Proximité'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: radiusController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Rayon de détection (mètres)',
+                  suffixText: 'm',
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: messageController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Message de proximité',
+                  hintText: 'ex: Vous êtes tout près !',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+            ElevatedButton(
+              onPressed: () async {
+                final r = double.tryParse(radiusController.text.trim()) ?? 100.0;
+                final msg = messageController.text.trim();
+                if (settings != null) {
+                  await ref.read(adminActionsProvider).updateAppSettings(
+                        settings.fastfoodName,
+                        settings.fastfoodDescription,
+                        settings.announcementBanner,
+                        settings.storeLat,
+                        settings.storeLng,
+                        r,
+                        [msg],
+                      );
+                }
+                if (ctx.mounted) {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Réglages de proximité enregistrés !'), backgroundColor: AppTheme.success),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
+              child: const Text('Enregistrer', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
   void _showSendNotificationDialog(BuildContext context, WidgetRef ref) {
     final titleController = TextEditingController();
     final messageController = TextEditingController();
@@ -124,6 +193,13 @@ class _AdminNotificationsScreenState extends ConsumerState<AdminNotificationsScr
         title: const Text('Notifications', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share_location_rounded),
+            tooltip: 'Réglages de proximité (Géofencing)',
+            onPressed: () => _showGeofenceSettingsDialog(context, ref),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showSendNotificationDialog(context, ref),

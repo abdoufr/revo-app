@@ -25,24 +25,10 @@ class AdminMenuScreen extends ConsumerWidget {
         title: Text('Gérer le Menu', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.bug_report),
-            onPressed: () async {
-              try {
-                final snapshot = await FirebaseFirestore.instance.collection('products').limit(1).get();
-                final doc = snapshot.docs.first;
-                final data = doc.data();
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Debug Info'),
-                    content: Text('ID: ${doc.id}\nKeys: ${data.keys.join(', ')}\nGallery isList: ${data['gallery'] is List}\nGallery length: ${data['gallery']?.length ?? 0}'),
-                  ),
-                );
-              } catch (e) {
-                print(e);
-              }
-            },
-          )
+            icon: const Icon(Icons.category_rounded),
+            tooltip: 'Gérer les catégories',
+            onPressed: () => _showCategoryManagementDialog(context, ref, availableCategories),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -371,9 +357,69 @@ class AdminMenuScreen extends ConsumerWidget {
                 ),
               ],
             );
-          }
-        );
-      },
+  void _showCategoryManagementDialog(BuildContext context, WidgetRef ref, List<String> categories) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) {
+          return AlertDialog(
+            title: const Text('Gérer les Catégories'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: controller,
+                        decoration: const InputDecoration(labelText: 'Nouvelle catégorie', isDense: true),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle, color: AppTheme.success),
+                      onPressed: () async {
+                        final val = controller.text.trim();
+                        if (val.isNotEmpty) {
+                          await ref.read(adminActionsProvider).addCategory(val);
+                          controller.clear();
+                          if (ctx.mounted) Navigator.pop(ctx);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 200,
+                  width: double.maxFinite,
+                  child: ListView.builder(
+                    itemCount: categories.length,
+                    itemBuilder: (ctx, index) {
+                      final cat = categories[index];
+                      return ListTile(
+                        title: Text(cat),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete_outline, color: Colors.red),
+                          onPressed: () async {
+                            await ref.read(adminActionsProvider).deleteCategory(cat);
+                            if (ctx.mounted) Navigator.pop(ctx);
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Fermer')),
+            ],
+          );
+        },
+      ),
     );
   }
 }

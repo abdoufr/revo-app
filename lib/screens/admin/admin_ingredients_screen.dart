@@ -185,7 +185,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
               ElevatedButton(
                 onPressed: () async {
                   final price = double.tryParse(priceController.text.trim()) ?? 0;
-                  if (nameController.text.isNotEmpty && price > 0 && selectedCategories.isNotEmpty) {
+                  if (nameController.text.isNotEmpty && price >= 0 && selectedCategories.isNotEmpty) {
                     showDialog(
                       context: context,
                       barrierDismissible: false,
@@ -289,7 +289,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
                   TextField(
                     controller: priceController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Prix (DA)', isDense: true, suffixText: 'DA'),
+                    decoration: const InputDecoration(labelText: 'Prix de base (DA) (0 = Inclus)', isDense: true, suffixText: 'DA'),
                   ),
                   const SizedBox(height: 16),
                   Text('Disponible dans :', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),

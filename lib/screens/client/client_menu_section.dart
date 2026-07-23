@@ -60,7 +60,7 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
                   child: TextField(
                     onChanged: (val) => setState(() => _searchQuery = val),
                     decoration: InputDecoration(
-                      hintText: 'Search',
+                      hintText: 'Rechercher un plat...',
                       prefixIcon: const Icon(Icons.search, color: Colors.grey),
                       filled: true,
                       fillColor: Theme.of(context).cardColor,
@@ -95,10 +95,11 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
                       decoration: BoxDecoration(
                         color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
                         borderRadius: BorderRadius.circular(20),
+                        border: isSelected ? null : Border.all(color: Colors.grey.withOpacity(0.2)),
                       ),
                       child: Center(
                         child: Text(
-                          category,
+                          category == 'All' ? 'Tous' : category,
                           style: TextStyle(
                             color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
@@ -110,21 +111,32 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
                 },
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
-            // Popular Food Section
-            _buildSectionHeader(context, 'Popular Food', popularProducts.isNotEmpty ? popularProducts : filteredProducts),
+            // All Products Grid
+            _buildSectionHeader(context, _selectedCategory == 'All' ? 'Tous le Menu (${filteredProducts.length})' : '$_selectedCategory (${filteredProducts.length})', filteredProducts),
             const SizedBox(height: 16),
-            _buildHorizontalList(popularProducts.isNotEmpty ? popularProducts : filteredProducts),
-
-            const SizedBox(height: 32),
-
-            // Nearest Section (or second row)
-            if (nearestProducts.isNotEmpty) ...[
-              _buildSectionHeader(context, 'Nearest', nearestProducts),
-              const SizedBox(height: 16),
-              _buildHorizontalList(nearestProducts),
-            ],
+            filteredProducts.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Text('Aucun produit trouvé.', style: Theme.of(context).textTheme.bodyMedium),
+                    ),
+                  )
+                : GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.72,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      return _buildProductCard(filteredProducts[index]);
+                    },
+                  ),
           ],
         );
       },
@@ -188,8 +200,6 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
       child: Opacity(
         opacity: product.isAvailable ? 1.0 : 0.5,
         child: Container(
-          width: 160,
-          margin: const EdgeInsets.only(right: 16, bottom: 8, top: 4),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(24),
