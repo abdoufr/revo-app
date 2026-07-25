@@ -38,7 +38,11 @@ class _BouncingCartIconState extends ConsumerState<BouncingCartIcon> with Single
       final prevCount = previous?.fold(0, (sum, item) => sum + item.quantity) ?? 0;
       final nextCount = next.fold(0, (sum, item) => sum + item.quantity);
       if (nextCount > prevCount) {
-        _controller.forward(from: 0.0);
+        Future.delayed(const Duration(milliseconds: 400), () {
+          if (mounted) {
+            _controller.forward(from: 0.0);
+          }
+        });
       }
     });
 
