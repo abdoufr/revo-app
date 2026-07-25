@@ -50,6 +50,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
     final userAsync = ref.watch(clientUserProvider);
     final storiesAsync = ref.watch(storiesProvider);
     final settingsAsync = ref.watch(appSettingsProvider);
+    ref.watch(initLastReadTimeProvider);
 
     // Trigger geofence check once per session when settings are loaded
     if (!_geofenceChecked) {
@@ -125,20 +126,22 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                             Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                IconButton(
-                                  icon: const Icon(Icons.shopping_cart_outlined, size: 28),
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      isScrollControlled: true,
-                                      backgroundColor: Colors.transparent,
-                                      builder: (_) => const ClientCartScreen(),
-                                    );
-                                  },
+                                BouncingCartIcon(
+                                  child: IconButton(
+                                    icon: const Icon(Icons.shopping_cart_outlined, size: 28),
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (_) => const ClientCartScreen(),
+                                      );
+                                    },
+                                  ),
                                 ),
                                 Consumer(
                                   builder: (context, ref, child) {
-                                    final totalItems = ref.watch(cartProvider.notifier).totalItems;
+                                    final totalItems = ref.watch(cartProvider).fold(0, (sum, item) => sum + item.quantity);
                                     if (totalItems == 0) return const SizedBox();
                                     return Positioned(
                                       right: 4,
@@ -161,8 +164,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                             ),
                             Consumer(
                               builder: (context, ref, child) {
-                                final announcementsAsync = ref.watch(announcementsProvider);
-                                final count = announcementsAsync.asData?.value.length ?? 0;
+                                final count = ref.watch(unreadAnnouncementsCountProvider);
                                 return Stack(
                                   clipBehavior: Clip.none,
                                   children: [
@@ -321,22 +323,24 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
       ),
       floatingActionButton: Consumer(
         builder: (context, ref, child) {
-          final totalItems = ref.watch(cartProvider.notifier).totalItems;
-          return FloatingActionButton.extended(
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (_) => const ClientCartScreen(),
-              );
-            },
-            backgroundColor: Theme.of(context).primaryColor,
-            elevation: 8,
-            icon: const Icon(Icons.shopping_bag_rounded, color: Colors.white),
-            label: Text(
-              totalItems > 0 ? 'Panier ($totalItems)' : 'Panier',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+          final totalItems = ref.watch(cartProvider).fold(0, (sum, item) => sum + item.quantity);
+          return BouncingCartIcon(
+            child: FloatingActionButton.extended(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => const ClientCartScreen(),
+                );
+              },
+              backgroundColor: Theme.of(context).primaryColor,
+              elevation: 8,
+              icon: const Icon(Icons.shopping_bag_rounded, color: Colors.white),
+              label: Text(
+                totalItems > 0 ? 'Panier ($totalItems)' : 'Panier',
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+              ),
             ),
           );
         },
@@ -346,6 +350,7 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
   }
 
   void _showNotificationsSheet(BuildContext context, WidgetRef initialRef) {
+    markAnnouncementsAsRead(initialRef);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,

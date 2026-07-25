@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/background_location_service.dart';
 
 class Announcement {
@@ -33,6 +34,39 @@ final announcementsProvider = StreamProvider<List<Announcement>>((ref) {
     return snapshot.docs.map((doc) => Announcement.fromMap(doc.data(), doc.id)).toList();
   });
 });
+
+final lastReadTimeProvider = StateProvider<DateTime?>((ref) => null);
+
+final initLastReadTimeProvider = FutureProvider<void>((ref) async {
+  final prefs = await SharedPreferences.getInstance();
+  final timestamp = prefs.getInt('last_read_announcements');
+  if (timestamp != null) {
+    ref.read(lastReadTimeProvider.notifier).state = DateTime.fromMillisecondsSinceEpoch(timestamp);
+  } else {
+    ref.read(lastReadTimeProvider.notifier).state = DateTime.fromMillisecondsSinceEpoch(0);
+  }
+});
+
+final unreadAnnouncementsCountProvider = Provider<int>((ref) {
+  final announcementsAsync = ref.watch(announcementsProvider);
+  final lastRead = ref.watch(lastReadTimeProvider);
+  
+  if (lastRead == null) return 0;
+
+  return announcementsAsync.maybeWhen(
+    data: (announcements) {
+      return announcements.where((ann) => ann.createdAt.isAfter(lastRead)).length;
+    },
+    orElse: () => 0,
+  );
+});
+
+Future<void> markAnnouncementsAsRead(WidgetRef ref) async {
+  final now = DateTime.now();
+  ref.read(lastReadTimeProvider.notifier).state = now;
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setInt('last_read_announcements', now.millisecondsSinceEpoch);
+}
 
 class NotificationActions {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
