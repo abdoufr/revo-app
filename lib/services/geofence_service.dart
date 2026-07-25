@@ -11,8 +11,8 @@ class GeofenceService {
       if (context.mounted) {
         _showPermissionDialog(
           context, 
-          'Localisation désactivée', 
-          'Veuillez activer le GPS pour recevoir nos offres lorsque vous passez près du magasin !'
+          'Localisation dÃ©sactivÃ©e', 
+          'Veuillez activer le GPS pour recevoir nos offres lorsque vous passez prÃ¨s du magasin !'
         );
       }
       return;
@@ -25,31 +25,28 @@ class GeofenceService {
         if (context.mounted) {
           _showPermissionDialog(
             context,
-            'Permission refusée',
-            'L\'application a besoin de la localisation pour vous avertir lorsque vous êtes à proximité de notre fastfood.'
+            'Permission refusÃ©e',
+            'L\'application a besoin de la localisation pour vous avertir lorsque vous Ãªtes Ã  proximitÃ© de notre fastfood.'
           );
         }
         return;
       }
     }
     
-    // Pour Android 10+ et iOS, on doit demander "Always" pour l'arrière-plan
+    // Pour Android 10+ et iOS, on doit demander "Always" pour l'arriÃ¨re-plan
+    // Nous ne montrons plus ce popup Ã  chaque dÃ©marrage pour ne pas dÃ©ranger l'utilisateur
     if (permission == LocationPermission.whileInUse) {
-      if (context.mounted) {
-        _showPermissionDialog(
-          context,
-          'Permission requise',
-          'Pour recevoir des notifications en arrière-plan (même quand l\'application est fermée), veuillez choisir "Toujours autoriser" dans les paramètres.'
-        );
-      }
+      // L'utilisateur a donnÃ© la permission d'utilisation, on peut s'en contenter
+      // sans le harceler pour la permission "Toujours".
+      return;
     }
 
     if (permission == LocationPermission.deniedForever) {
       if (context.mounted) {
         _showPermissionDialog(
           context,
-          'Permission bloquée',
-          'Vous avez bloqué la localisation de manière permanente. Allez dans les paramètres de votre appareil pour l\'activer et profiter de nos alertes de proximité.'
+          'Permission bloquÃ©e',
+          'Vous avez bloquÃ© la localisation de maniÃ¨re permanente. Allez dans les paramÃ¨tres de votre appareil pour l\'activer et profiter de nos alertes de proximitÃ©.'
         );
       }
       return;
@@ -72,7 +69,7 @@ class GeofenceService {
               Navigator.of(ctx).pop();
               Geolocator.openAppSettings();
             },
-            child: const Text('Ouvrir Paramètres'),
+            child: const Text('Ouvrir ParamÃ¨tres'),
           ),
         ],
       ),
