@@ -4,6 +4,7 @@ import '../../theme/app_theme.dart';
 import '../../providers/admin_providers.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../models/app_settings.dart';
 import 'package:latlong2/latlong.dart';
 import 'map_picker_screen.dart';
 
