@@ -65,17 +65,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Logo and Title
-                    Image.asset(
-                      'assets/images/logo.png',
-                      height: 110,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.fastfood_rounded,
-                          size: 70,
-                          color: Theme.of(context).primaryColor,
-                        );
-                      },
+                    Icon(
+                      Icons.fastfood_rounded, // Icône plus dans le thème food
+                      size: 70,
+                      color: Theme.of(context).primaryColor,
                     ),
                     const SizedBox(height: 16),
                     Text(
