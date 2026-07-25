@@ -21,6 +21,7 @@ import 'client_leaderboard_screen.dart';
 import 'wheel_of_fortune_screen.dart';
 import 'composer_screen.dart';
 import '../../services/geofence_service.dart';
+import '../../widgets/bouncing_cart_icon.dart';
 
 class ClientHome extends ConsumerStatefulWidget {
   const ClientHome({super.key});

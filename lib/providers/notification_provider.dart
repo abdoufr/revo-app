@@ -35,15 +35,24 @@ final announcementsProvider = StreamProvider<List<Announcement>>((ref) {
   });
 });
 
-final lastReadTimeProvider = StateProvider<DateTime?>((ref) => null);
+class LastReadTimeNotifier extends Notifier<DateTime?> {
+  @override
+  DateTime? build() => null;
+  
+  void updateState(DateTime? value) {
+    state = value;
+  }
+}
+
+final lastReadTimeProvider = NotifierProvider<LastReadTimeNotifier, DateTime?>(() => LastReadTimeNotifier());
 
 final initLastReadTimeProvider = FutureProvider<void>((ref) async {
   final prefs = await SharedPreferences.getInstance();
   final timestamp = prefs.getInt('last_read_announcements');
   if (timestamp != null) {
-    ref.read(lastReadTimeProvider.notifier).state = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    ref.read(lastReadTimeProvider.notifier).updateState(DateTime.fromMillisecondsSinceEpoch(timestamp));
   } else {
-    ref.read(lastReadTimeProvider.notifier).state = DateTime.fromMillisecondsSinceEpoch(0);
+    ref.read(lastReadTimeProvider.notifier).updateState(DateTime.fromMillisecondsSinceEpoch(0));
   }
 });
 
@@ -63,7 +72,7 @@ final unreadAnnouncementsCountProvider = Provider<int>((ref) {
 
 Future<void> markAnnouncementsAsRead(WidgetRef ref) async {
   final now = DateTime.now();
-  ref.read(lastReadTimeProvider.notifier).state = now;
+  ref.read(lastReadTimeProvider.notifier).updateState(now);
   final prefs = await SharedPreferences.getInstance();
   await prefs.setInt('last_read_announcements', now.millisecondsSinceEpoch);
 }
