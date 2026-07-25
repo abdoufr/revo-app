@@ -216,11 +216,14 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   options: MapOptions(
                     initialCenter: _selectedLocation!,
                     initialZoom: 16.0,
+                    onTap: (tapPosition, point) {
+                      _mapController.move(point, _mapController.camera.zoom);
+                    },
                   ),
                   children: [
                     TileLayer(
                       urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
                       userAgentPackageName: 'com.revo.app',
                     ),
                   ],
@@ -355,14 +358,41 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 Positioned(
                   bottom: 100,
                   right: 16,
-                  child: FloatingActionButton(
-                    heroTag: 'my_location_btn',
-                    onPressed: _moveToCurrentLocation,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.my_location,
-                      color: Theme.of(context).primaryColor,
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FloatingActionButton(
+                        heroTag: 'zoom_in_btn',
+                        mini: true,
+                        onPressed: () {
+                          final currentZoom = _mapController.camera.zoom;
+                          _mapController.move(_mapController.camera.center, currentZoom + 1);
+                        },
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.add, color: Theme.of(context).primaryColor),
+                      ),
+                      const SizedBox(height: 8),
+                      FloatingActionButton(
+                        heroTag: 'zoom_out_btn',
+                        mini: true,
+                        onPressed: () {
+                          final currentZoom = _mapController.camera.zoom;
+                          _mapController.move(_mapController.camera.center, currentZoom - 1);
+                        },
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.remove, color: Theme.of(context).primaryColor),
+                      ),
+                      const SizedBox(height: 16),
+                      FloatingActionButton(
+                        heroTag: 'my_location_btn',
+                        onPressed: _moveToCurrentLocation,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.my_location,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Positioned(

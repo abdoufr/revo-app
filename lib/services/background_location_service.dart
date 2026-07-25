@@ -151,8 +151,8 @@ class BackgroundLocationService {
       final lastChecked = prefs.getInt('last_geofence_notification') ?? 0;
       final now = DateTime.now().millisecondsSinceEpoch;
 
-      // Limite : 1 notification par 24h
-      if (now - lastChecked > 86400000) {
+      // Limite pour les tests : 1 minute (60000 ms)
+      if (now - lastChecked > 60000) {
         await prefs.setInt('last_geofence_notification', now);
         
         final randomMessage = messages[Random().nextInt(messages.length)];
