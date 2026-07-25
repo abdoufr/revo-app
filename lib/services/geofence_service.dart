@@ -34,11 +34,15 @@ class GeofenceService {
     }
     
     // Pour Android 10+ et iOS, on doit demander "Always" pour l'arrière-plan
-    // Nous ne montrons plus ce popup à chaque démarrage pour ne pas déranger l'utilisateur
+    // Requis pour le "Plan B" (Foreground Service) pour une réactivité maximale
     if (permission == LocationPermission.whileInUse) {
-      // L'utilisateur a donné la permission d'utilisation, on peut s'en contenter
-      // sans le harceler pour la permission "Toujours".
-      return;
+      if (context.mounted) {
+        _showPermissionDialog(
+          context,
+          'GPS en continu (Plan B)',
+          'Pour que l\'application puisse détecter le magasin à la seconde près même quand elle est fermée, veuillez choisir "Toujours autoriser" dans les paramètres.'
+        );
+      }
     }
 
     if (permission == LocationPermission.deniedForever) {

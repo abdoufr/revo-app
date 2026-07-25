@@ -1,4 +1,7 @@
+import 'dart:ui';
 import 'dart:math';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -231,19 +234,22 @@ class BackgroundLocationService {
       return; 
     }
 
-    // Initialiser WorkManager (Android/iOS seulement)
-    Workmanager().initialize(
-      callbackDispatcher,
-      isInDebugMode: false,
-    );
-
-    // Enregistrer la tâche périodique (15 minutes minimum)
-    Workmanager().registerPeriodicTask(
-      "1",
-      "geofence_check",
-      frequency: const Duration(minutes: 15),
-      constraints: Constraints(
-        networkType: NetworkType.connected,
+    // Initialiser le Foreground Service (Plan B)
+    final service = FlutterBackgroundService();
+    await service.configure(
+      androidConfiguration: AndroidConfiguration(
+        onStart: onBackgroundServiceStart,
+        autoStart: true,
+        isForegroundMode: true,
+        notificationChannelId: 'announcements_channel',
+        initialNotificationTitle: 'Revo App',
+        initialNotificationContent: 'Localisation active (Plan B)',
+        foregroundServiceNotificationId: 888,
+      ),
+      iosConfiguration: IosConfiguration(
+        autoStart: true,
+        onForeground: onBackgroundServiceStart,
+        onBackground: onIosBackground,
       ),
     );
   }
@@ -275,4 +281,35 @@ class BackgroundLocationService {
       notificationDetails: platformChannelSpecifics,
     );
   }
+}
+
+@pragma('vm:entry-point')
+Future<bool> onIosBackground(ServiceInstance service) async {
+  return true;
+}
+
+@pragma('vm:entry-point')
+void onBackgroundServiceStart(ServiceInstance service) async {
+  DartPluginRegistrant.ensureInitialized();
+  
+  if (service is AndroidServiceInstance) {
+    service.on('setAsForeground').listen((event) {
+      service.setAsForegroundService();
+    });
+    service.on('setAsBackground').listen((event) {
+      service.setAsBackgroundService();
+    });
+  }
+  service.on('stopService').listen((event) {
+    service.stopSelf();
+  });
+
+  // Vérifier la position toutes les 60 secondes en arrière-plan
+  Timer.periodic(const Duration(seconds: 60), (timer) async {
+    try {
+      await BackgroundLocationService.checkLocationAndNotify();
+    } catch (e) {
+      debugPrint("Foreground service check error: $e");
+    }
+  });
 }
