@@ -22,6 +22,7 @@ class MapPickerScreen extends StatefulWidget {
 }
 
 class _MapPickerScreenState extends State<MapPickerScreen> {
+  static const String _mapboxToken = 'VOTRE_CLE_API_MAPBOX_ICI';
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
@@ -52,9 +53,9 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
 
     _debounce = Timer(const Duration(milliseconds: 500), () async {
       try {
-        // Using Photon API which is much better for autocomplete/typo tolerance
+        // Using Mapbox API
         final url = Uri.parse(
-          'https://photon.komoot.io/api/?q=${Uri.encodeComponent(query)}&limit=5',
+          'https://api.mapbox.com/geocoding/v5/mapbox.places/${Uri.encodeComponent(query)}.json?access_token=$_mapboxToken&autocomplete=true&limit=5',
         );
         final response = await http.get(url);
 
@@ -78,14 +79,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
     final coords = feature['geometry']['coordinates'];
     final lat = (coords[1] as num).toDouble();
     final lon = (coords[0] as num).toDouble();
-    final props = feature['properties'];
-
-    String name = props['name'] ?? '';
-    if (props['city'] != null && props['city'] != name) {
-      name += ', ${props['city']}';
-    } else if (props['state'] != null) {
-      name += ', ${props['state']}';
-    }
+    String name = feature['place_name'] ?? feature['text'] ?? '';
 
     _searchController.text = name;
     FocusScope.of(context).unfocus();
@@ -220,8 +214,12 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   children: [
                     TileLayer(
                       urlTemplate:
-                          'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+                          'https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/256/{z}/{x}/{y}@2x?access_token=$_mapboxToken',
                       userAgentPackageName: 'com.revo.app',
+                      additionalOptions: const {
+                        'accessToken': _mapboxToken,
+                        'id': 'mapbox.mapbox-streets-v8',
+                      },
                     ),
                   ],
                 ),
@@ -305,13 +303,8 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                                 const Divider(height: 1),
                             itemBuilder: (ctx, index) {
                               final feature = _searchResults[index];
-                              final props = feature['properties'];
-                              final name = props['name'] ?? 'Inconnu';
-                              final city =
-                                  props['city'] ??
-                                  props['state'] ??
-                                  props['country'] ??
-                                  '';
+                              final name = feature['text'] ?? 'Inconnu';
+                              final city = feature['place_name']?.replaceAll(name + ', ', '') ?? '';
 
                               return ListTile(
                                 leading: const Icon(

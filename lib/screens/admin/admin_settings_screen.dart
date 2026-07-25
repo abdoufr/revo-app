@@ -20,6 +20,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
   final _bannerController = TextEditingController();
+  final _latController = TextEditingController();
+  final _lngController = TextEditingController();
   bool _isLoading = false;
   bool _isInit = false;
 
@@ -28,6 +30,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     _nameController.dispose();
     _descController.dispose();
     _bannerController.dispose();
+    _latController.dispose();
+    _lngController.dispose();
     super.dispose();
   }
 
@@ -40,8 +44,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             _nameController.text.trim(),
             _descController.text.trim(),
             _bannerController.text.trim(),
-            settings.storeLat,
-            settings.storeLng,
+            double.tryParse(_latController.text.trim()) ?? 0.0,
+            double.tryParse(_lngController.text.trim()) ?? 0.0,
             settings.geofenceRadius,
             settings.geofenceMessages,
           );
@@ -85,6 +89,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             _nameController.text = settings.fastfoodName;
             _descController.text = settings.fastfoodDescription;
             _bannerController.text = settings.announcementBanner;
+            _latController.text = settings.storeLat.toString();
+            _lngController.text = settings.storeLng.toString();
             _isInit = true;
           }
 
@@ -230,6 +236,57 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                       color: Theme.of(context).primaryColor,
                     ),
                   ),
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  'Localisation du Magasin',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Gérez la position GPS du magasin.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Lat: ${_latController.text.isNotEmpty ? _latController.text : "0.0"}\nLng: ${_lngController.text.isNotEmpty ? _lngController.text : "0.0"}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final lat = double.tryParse(_latController.text) ?? 0.0;
+                        final lng = double.tryParse(_lngController.text) ?? 0.0;
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MapPickerScreen(
+                              initialLat: lat,
+                              initialLng: lng,
+                            ),
+                          ),
+                        );
+                        if (result != null && result is LatLng) {
+                          setState(() {
+                            _latController.text = result.latitude.toString();
+                            _lngController.text = result.longitude.toString();
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.map),
+                      label: const Text('Ouvrir la carte'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 32),
                 PrimaryButton(
