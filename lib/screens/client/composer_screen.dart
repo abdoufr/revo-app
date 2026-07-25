@@ -234,8 +234,8 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
               ),
               const SizedBox(height: 40),
               Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
+                child: GridView.extent(
+                  maxCrossAxisExtent: 220,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                   children: categories.map((cat) {

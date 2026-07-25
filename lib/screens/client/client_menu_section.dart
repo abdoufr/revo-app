@@ -126,8 +126,8 @@ class _ClientMenuSectionState extends ConsumerState<ClientMenuSection> {
                 : GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 220,
                       childAspectRatio: 0.72,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
