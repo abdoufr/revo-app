@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/background_location_service.dart';
+import '../services/fcm_v1_service.dart';
 
 class Announcement {
   final String id;
@@ -88,28 +89,11 @@ class NotificationActions {
     });
 
     try {
-      await http.post(
-        Uri.parse('https://fcm.googleapis.com/fcm/send'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'key=AIzaSyCtaVXK2Pxms8Y3p_I2ZKvRJR4T9eHxicM',
-        },
-        body: jsonEncode({
-          'to': '/topics/all_users',
-          'priority': 'high',
-          'notification': {
-            'title': title,
-            'body': message,
-            'sound': 'default',
-            'android_channel_id': 'announcements_channel',
-            'click_action': 'FLUTTER_NOTIFICATION_CLICK'
-          },
-          'data': {
-            'title': title,
-            'body': message,
-            'type': 'announcement'
-          }
-        }),
+      await FcmV1Service.sendNotification(
+        projectId: 'revo-app-16462', // Remplacez si votre Project ID est différent
+        title: title,
+        body: message,
+        topic: 'all_users',
       );
     } catch (e) {
       debugPrint("FCM push error: $e");
