@@ -147,6 +147,10 @@ class BackgroundLocationService {
       storeLat,
       storeLng,
     );
+    
+    debugPrint("Geofence Check: User at (${position.latitude}, ${position.longitude})");
+    debugPrint("Geofence Check: Store at ($storeLat, $storeLng)");
+    debugPrint("Geofence Check: Distance = $distanceInMeters meters (Radius: $radius meters)");
 
     // 6. Vérifier si l'utilisateur est dans le rayon
     if (distanceInMeters <= radius) {
