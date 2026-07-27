@@ -270,7 +270,7 @@ class BackgroundLocationService {
       android: initializationSettingsAndroid,
       iOS: initializationSettingsDarwin,
     );
-    await _notificationsPlugin.initialize(initializationSettings);
+    await _notificationsPlugin.initialize(settings: initializationSettings);
 
     const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'announcements_channel', 
