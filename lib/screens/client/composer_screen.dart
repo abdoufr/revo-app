@@ -27,9 +27,23 @@ class ComposerScreen extends ConsumerStatefulWidget {
 class _ComposerScreenState extends ConsumerState<ComposerScreen> {
   String? _selectedCategory;
   final Set<String> _selectedIngredientIds = {};
-  double _totalPrice = 0.0;
   List<Ingredient> _allIngredients = [];
   List<Map<String, dynamic>> _currentCategories = [];
+
+  double get _totalPrice {
+    if (_selectedCategory == null || _currentCategories.isEmpty) return 0.0;
+    try {
+      final catData = _currentCategories.firstWhere((c) => c['key'] == _selectedCategory);
+      double total = (catData['basePrice'] as num).toDouble();
+      for (var id in _selectedIngredientIds) {
+        final ing = _allIngredients.firstWhere((i) => i.id == id);
+        total += ing.price;
+      }
+      return total;
+    } catch (_) {
+      return 0.0;
+    }
+  }
 
   @override
   void initState() {
@@ -49,29 +63,13 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
       } else {
         _selectedIngredientIds.add(ingredient.id);
       }
-      _calculateTotal();
     });
-  }
-
-  void _calculateTotal() {
-    if (_selectedCategory == null) {
-      _totalPrice = 0.0;
-      return;
-    }
-    final catData = _currentCategories.firstWhere((c) => c['key'] == _selectedCategory);
-    double total = (catData['basePrice'] as num).toDouble();
-    for (var id in _selectedIngredientIds) {
-      final ing = _allIngredients.firstWhere((i) => i.id == id, orElse: () => _allIngredients.first);
-      total += ing.price;
-    }
-    _totalPrice = total;
   }
 
   void _reset() {
     setState(() {
       _selectedCategory = null;
       _selectedIngredientIds.clear();
-      _totalPrice = 0.0;
     });
   }
 
@@ -197,6 +195,8 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final categoriesAsync = ref.watch(composerCategoriesProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Composer mon Plat 🍕',
@@ -209,20 +209,22 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
             ),
         ],
       ),
-      body: _selectedCategory == null ? _buildCategoryPicker() : _buildIngredientPicker(),
+      body: categoriesAsync.when(
+        data: (categories) {
+          _currentCategories = categories;
+          return _selectedCategory == null ? _buildCategoryPicker(categories) : _buildIngredientPicker();
+        },
+        loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        error: (e, s) => Center(child: Text('Erreur: $e')),
+      ),
       bottomNavigationBar: _selectedCategory != null && _selectedIngredientIds.isNotEmpty
           ? _buildBottomBar()
           : null,
     );
   }
 
-  Widget _buildCategoryPicker() {
-    final categoriesAsync = ref.watch(composerCategoriesProvider);
-
-    return categoriesAsync.when(
-      data: (categories) {
-        _currentCategories = categories;
-        return Padding(
+  Widget _buildCategoryPicker(List<Map<String, dynamic>> categories) {
+    return Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -243,7 +245,6 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
                       onTap: () {
                         setState(() {
                           _selectedCategory = cat['key'] as String;
-                          _calculateTotal();
                         });
                       },
                       child: Container(
@@ -280,10 +281,7 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
             ],
           ),
         );
-      },
-      loading: () => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
-      error: (e, s) => Center(child: Text('Erreur: $e')),
-    );
+        );
   }
 
   Widget _buildIngredientPicker() {
