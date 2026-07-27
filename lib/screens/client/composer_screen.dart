@@ -281,7 +281,6 @@ class _ComposerScreenState extends ConsumerState<ComposerScreen> {
             ],
           ),
         );
-        );
   }
 
   Widget _buildIngredientPicker() {
