@@ -198,8 +198,9 @@ class AdminIngredientsScreen extends ConsumerWidget {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final price = double.tryParse(priceController.text.trim()) ?? 0;
-                  if (nameController.text.isNotEmpty && price >= 0 && selectedCategories.isNotEmpty) {
+                  final parsedPrice = double.tryParse(priceController.text.trim());
+                  if (nameController.text.isNotEmpty && parsedPrice != null && parsedPrice >= 0 && selectedCategories.isNotEmpty) {
+                    final price = parsedPrice;
                     showDialog(
                       context: context,
                       barrierDismissible: false,
@@ -344,8 +345,9 @@ class AdminIngredientsScreen extends ConsumerWidget {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final price = double.tryParse(priceController.text.trim()) ?? 0;
-                  if (nameController.text.isNotEmpty && price > 0 && selectedCategories.isNotEmpty) {
+                  final parsedPrice = double.tryParse(priceController.text.trim());
+                  if (nameController.text.isNotEmpty && parsedPrice != null && parsedPrice >= 0 && selectedCategories.isNotEmpty) {
+                    final price = parsedPrice;
                     try {
                       String? finalUrl = base64Image;
                       if (base64Image != null && base64Image!.startsWith('data:image')) {
