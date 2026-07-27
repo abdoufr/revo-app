@@ -19,10 +19,19 @@ class AdminIngredientsScreen extends ConsumerWidget {
     {'key': 'cheese', 'label': 'Cheese', 'icon': '🍔'},
   ];
 
-  void _showEditBasePricesDialog(BuildContext context, WidgetRef ref) {
-    final categoriesAsync = ref.read(composerCategoriesProvider);
-    
-    categoriesAsync.whenData((categories) {
+  Future<void> _showEditBasePricesDialog(BuildContext context, WidgetRef ref) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final categories = await ref.read(composerCategoriesProvider.future);
+      if (context.mounted) Navigator.pop(context); // fermer le loader
+      
+      if (!context.mounted) return;
+      
       // Local copy for editing
       List<Map<String, dynamic>> editedCategories = List.from(categories.map((c) => Map<String, dynamic>.from(c)));
       
@@ -84,7 +93,12 @@ class AdminIngredientsScreen extends ConsumerWidget {
           }
         ),
       );
-    });
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // fermer le loader si erreur
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error));
+      }
+    }
   }
 
   void _showAddIngredientDialog(BuildContext context, WidgetRef ref) {
