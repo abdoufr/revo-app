@@ -57,7 +57,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
                           SizedBox(
                             width: 100,
                             child: TextFormField(
-                              initialValue: (cat['basePrice'] as double).toStringAsFixed(0),
+                              initialValue: (cat['basePrice'] as num).toDouble().toStringAsFixed(0),
                               keyboardType: TextInputType.number,
                               decoration: const InputDecoration(suffixText: 'DA', isDense: true),
                               onChanged: (val) {
