@@ -21,7 +21,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
 
   void _showEditBasePricesDialog(BuildContext context, WidgetRef ref) {
     final categoriesAsync = ref.read(composerCategoriesProvider);
-    final categories = categoriesAsync.valueOrNull ?? [
+    final categories = categoriesAsync.asData?.value ?? [
       {'key': 'pizza', 'label': 'Pizza', 'icon': '🍕', 'color': 0xFFE53935, 'basePrice': 400.0},
       {'key': 'tacos', 'label': 'Tacos', 'icon': '🌮', 'color': 0xFFF57C00, 'basePrice': 450.0},
       {'key': 'sandwich', 'label': 'Sandwich', 'icon': '🥪', 'color': 0xFF388E3C, 'basePrice': 300.0},
