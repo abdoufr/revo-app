@@ -19,86 +19,76 @@ class AdminIngredientsScreen extends ConsumerWidget {
     {'key': 'cheese', 'label': 'Cheese', 'icon': '🍔'},
   ];
 
-  Future<void> _showEditBasePricesDialog(BuildContext context, WidgetRef ref) async {
+  void _showEditBasePricesDialog(BuildContext context, WidgetRef ref) {
+    final categoriesAsync = ref.read(composerCategoriesProvider);
+    final categories = categoriesAsync.valueOrNull ?? [
+      {'key': 'pizza', 'label': 'Pizza', 'icon': '🍕', 'color': 0xFFE53935, 'basePrice': 400.0},
+      {'key': 'tacos', 'label': 'Tacos', 'icon': '🌮', 'color': 0xFFF57C00, 'basePrice': 450.0},
+      {'key': 'sandwich', 'label': 'Sandwich', 'icon': '🥪', 'color': 0xFF388E3C, 'basePrice': 300.0},
+      {'key': 'cheese', 'label': 'Assiette', 'icon': '🧀', 'color': 0xFFF9A825, 'basePrice': 600.0},
+    ];
+
+    // Local copy for editing
+    List<Map<String, dynamic>> editedCategories = List.from(categories.map((c) => Map<String, dynamic>.from(c)));
+
     showDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (ctx) => const Center(child: CircularProgressIndicator()),
-    );
-
-    try {
-      final categories = await ref.read(composerCategoriesProvider.future);
-      if (context.mounted) Navigator.pop(context); // fermer le loader
-      
-      if (!context.mounted) return;
-      
-      // Local copy for editing
-      List<Map<String, dynamic>> editedCategories = List.from(categories.map((c) => Map<String, dynamic>.from(c)));
-      
-      showDialog(
-        context: context,
-        builder: (ctx) => StatefulBuilder(
-          builder: (ctx, setState) {
-            return AlertDialog(
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              title: Text('Prix de Base (Composer)', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: editedCategories.map((cat) {
-                    final index = editedCategories.indexOf(cat);
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Row(
-                        children: [
-                          Text(cat['icon'] as String, style: const TextStyle(fontSize: 24)),
-                          const SizedBox(width: 12),
-                          Expanded(child: Text(cat['label'] as String, style: Theme.of(context).textTheme.bodyLarge)),
-                          SizedBox(
-                            width: 100,
-                            child: TextFormField(
-                              initialValue: (cat['basePrice'] as num).toDouble().toStringAsFixed(0),
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(suffixText: 'DA', isDense: true),
-                              onChanged: (val) {
-                                final parsed = double.tryParse(val);
-                                if (parsed != null) {
-                                  editedCategories[index]['basePrice'] = parsed;
-                                }
-                              },
-                            ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) {
+          return AlertDialog(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            title: Text('Prix de Base (Composer)', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: editedCategories.map((cat) {
+                  final index = editedCategories.indexOf(cat);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      children: [
+                        Text(cat['icon'] as String, style: const TextStyle(fontSize: 24)),
+                        const SizedBox(width: 12),
+                        Expanded(child: Text(cat['label'] as String, style: Theme.of(context).textTheme.bodyLarge)),
+                        SizedBox(
+                          width: 100,
+                          child: TextFormField(
+                            initialValue: (cat['basePrice'] as num).toDouble().toStringAsFixed(0),
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(suffixText: 'DA', isDense: true),
+                            onChanged: (val) {
+                              final parsed = double.tryParse(val);
+                              if (parsed != null) {
+                                editedCategories[index]['basePrice'] = parsed;
+                              }
+                            },
                           ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Annuler', style: TextStyle(color: Colors.grey)),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    ref.read(composerActionsProvider).saveCategories(editedCategories);
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Prix de base mis à jour !')));
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
-                  child: const Text('Enregistrer', style: TextStyle(color: Colors.white)),
-                ),
-              ],
-            );
-          }
-        ),
-      );
-    } catch (e) {
-      if (context.mounted) {
-        Navigator.pop(context); // fermer le loader si erreur
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error));
-      }
-    }
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Annuler', style: TextStyle(color: Colors.grey)),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  ref.read(composerActionsProvider).saveCategories(editedCategories);
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Prix de base mis à jour !')));
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
+                child: const Text('Enregistrer', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          );
+        }
+      ),
+    );
   }
 
   void _showAddIngredientDialog(BuildContext context, WidgetRef ref) {
@@ -387,6 +377,7 @@ class AdminIngredientsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ingredientsAsync = ref.watch(ingredientsProvider);
+    ref.watch(composerCategoriesProvider);
 
     return Scaffold(
       appBar: AppBar(
