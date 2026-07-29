@@ -17,8 +17,10 @@ final adminOrdersProvider = StreamProvider<List<OrderModel>>((ref) {
 });
 
 final clientOrdersProvider = StreamProvider<List<OrderModel>>((ref) {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return const Stream.empty();
+  final user = ref.watch(authStateProvider).value ?? ref.watch(firebaseAuthProvider).currentUser;
+  if (user == null) {
+    return Stream.value([]);
+  }
 
   return FirebaseFirestore.instance
       .collection('orders')

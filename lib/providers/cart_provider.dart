@@ -1,10 +1,39 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cart_item.dart';
 import 'package:uuid/uuid.dart';
 
 class CartNotifier extends Notifier<List<CartItem>> {
+  static const _cartKey = 'saved_cart_items';
+
   @override
-  List<CartItem> build() => [];
+  List<CartItem> build() {
+    _loadFromPrefs();
+    return [];
+  }
+
+  Future<void> _loadFromPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(_cartKey);
+      if (jsonStr != null && jsonStr.isNotEmpty) {
+        final List<dynamic> decoded = jsonDecode(jsonStr);
+        final loadedItems = decoded
+            .map((item) => CartItem.fromMap(Map<String, dynamic>.from(item)))
+            .toList();
+        state = loadedItems;
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveToPrefs(List<CartItem> items) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = jsonEncode(items.map((i) => i.toMap()).toList());
+      await prefs.setString(_cartKey, jsonStr);
+    } catch (_) {}
+  }
 
   final _uuid = const Uuid();
 
@@ -17,20 +46,17 @@ class CartNotifier extends Notifier<List<CartItem>> {
     String? compositionCategoryKey,
     List<String>? compositionIngredientIds,
   }) {
-    // Check if item with exact same title and subtitle exists
     final existingIndex = state.indexWhere(
       (item) => item.title == title && item.subtitle == subtitle && item.isComposition == isComposition,
     );
 
+    List<CartItem> newState;
     if (existingIndex >= 0) {
-      // Increment quantity
       final existingItem = state[existingIndex];
       final updatedItem = existingItem.copyWith(quantity: existingItem.quantity + 1);
-      final newState = [...state];
+      newState = [...state];
       newState[existingIndex] = updatedItem;
-      state = newState;
     } else {
-      // Add new item
       final newItem = CartItem(
         id: _uuid.v4(),
         title: title,
@@ -42,8 +68,10 @@ class CartNotifier extends Notifier<List<CartItem>> {
         compositionCategoryKey: compositionCategoryKey,
         compositionIngredientIds: compositionIngredientIds,
       );
-      state = [...state, newItem];
+      newState = [...state, newItem];
     }
+    state = newState;
+    _saveToPrefs(newState);
   }
 
   void updateItem({
@@ -71,6 +99,7 @@ class CartNotifier extends Notifier<List<CartItem>> {
       final newState = [...state];
       newState[index] = updatedItem;
       state = newState;
+      _saveToPrefs(newState);
     }
   }
 
@@ -82,6 +111,7 @@ class CartNotifier extends Notifier<List<CartItem>> {
       final newState = [...state];
       newState[index] = updatedItem;
       state = newState;
+      _saveToPrefs(newState);
     }
   }
 
@@ -94,19 +124,22 @@ class CartNotifier extends Notifier<List<CartItem>> {
         final newState = [...state];
         newState[index] = updatedItem;
         state = newState;
+        _saveToPrefs(newState);
       } else {
-        // Remove item if quantity becomes 0
         removeItem(id);
       }
     }
   }
 
   void removeItem(String id) {
-    state = state.where((item) => item.id != id).toList();
+    final newState = state.where((item) => item.id != id).toList();
+    state = newState;
+    _saveToPrefs(newState);
   }
 
   void clearCart() {
     state = [];
+    _saveToPrefs([]);
   }
 
   double get totalPrice {
