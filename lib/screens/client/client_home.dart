@@ -19,6 +19,7 @@ import 'composer_screen.dart';
 import 'client_history_screen.dart';
 import 'client_orders_screen.dart';
 import '../../providers/orders_provider.dart';
+import '../../models/order_model.dart';
 import 'client_leaderboard_screen.dart';
 import 'wheel_of_fortune_screen.dart';
 import 'composer_screen.dart';
