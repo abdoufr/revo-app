@@ -17,6 +17,8 @@ import 'client_menu_section.dart';
 import 'story_viewer_screen.dart';
 import 'composer_screen.dart';
 import 'client_history_screen.dart';
+import 'client_orders_screen.dart';
+import '../../providers/orders_provider.dart';
 import 'client_leaderboard_screen.dart';
 import 'wheel_of_fortune_screen.dart';
 import 'composer_screen.dart';
@@ -124,6 +126,47 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                         ),
                         Row(
                           children: [
+                            Consumer(
+                              builder: (context, ref, child) {
+                                final clientOrdersAsync = ref.watch(clientOrdersProvider);
+                                final activeCount = clientOrdersAsync.asData?.value
+                                        .where((o) => o.status != OrderStatus.livree && o.status != OrderStatus.annulee)
+                                        .length ??
+                                    0;
+
+                                return Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.receipt_long_rounded, size: 26),
+                                      tooltip: 'Mes Commandes 🛍️',
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => const ClientOrdersScreen()),
+                                        );
+                                      },
+                                    ),
+                                    if (activeCount > 0)
+                                      Positioned(
+                                        right: 4,
+                                        top: 4,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: const BoxDecoration(
+                                            color: AppTheme.success,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            '$activeCount',
+                                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
                             Stack(
                               clipBehavior: Clip.none,
                               children: [
@@ -306,6 +349,51 @@ class _ClientHomeState extends ConsumerState<ClientHome> {
                               ),
                               child: const Icon(Icons.restaurant_rounded, color: Colors.white, size: 32),
                             ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Suivi de mes Commandes Quick Card
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientOrdersScreen())),
+                      child: Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 24),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.receipt_long_rounded, color: Theme.of(context).primaryColor, size: 26),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Suivi de mes Commandes 🛍️', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Consultez vos commandes et leur statut en temps réel',
+                                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Theme.of(context).primaryColor),
                           ],
                         ),
                       ),

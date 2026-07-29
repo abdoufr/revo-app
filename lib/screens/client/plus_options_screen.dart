@@ -5,6 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../l10n/app_translations.dart';
 import 'loyalty_cards.dart';
 import 'client_history_screen.dart';
+import 'client_orders_screen.dart';
 import 'wheel_of_fortune_screen.dart';
 import 'composer_screen.dart';
 import 'client_leaderboard_screen.dart';
@@ -42,6 +43,13 @@ class PlusOptionsScreen extends ConsumerWidget {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
+                _buildOptionTile(
+                  context,
+                  icon: Icons.receipt_long_rounded,
+                  title: 'Mes Commandes 🛍️',
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ClientOrdersScreen())),
+                ),
+                const Divider(height: 1, indent: 56),
                 _buildOptionTile(
                   context,
                   icon: Icons.history_rounded,
