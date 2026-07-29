@@ -53,10 +53,10 @@ class CartItem {
       'subtitle': subtitle,
       'price': price,
       'quantity': quantity,
-      'imageUrl': imageUrl,
       'isComposition': isComposition,
-      'compositionCategoryKey': compositionCategoryKey,
-      'compositionIngredientIds': compositionIngredientIds,
+      if (compositionCategoryKey != null) 'compositionCategoryKey': compositionCategoryKey,
+      if (compositionIngredientIds != null) 'compositionIngredientIds': compositionIngredientIds,
+      if (imageUrl != null && !imageUrl!.startsWith('data:image')) 'imageUrl': imageUrl,
     };
   }
 

@@ -113,6 +113,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ),
+                    if (_isSignUp) ...[
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _signupPhoneController,
+                        keyboardType: TextInputType.phone,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        decoration: InputDecoration(
+                          hintText: 'Numéro de Téléphone (Obligatoire)',
+                          prefixIcon: Icon(
+                            Icons.phone,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
 
                     const SizedBox(height: 32),
 
@@ -121,9 +136,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       text: _isSignUp ? 'Créer mon compte' : 'Se Connecter',
                       isLoading: _isLoading,
                       onPressed: () async {
-                        if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+                        if (_emailController.text.isEmpty || _passwordController.text.isEmpty || (_isSignUp && _signupPhoneController.text.trim().isEmpty)) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Veuillez remplir l\'email et le mot de passe')),
+                            const SnackBar(content: Text('Veuillez remplir tous les champs (Email, Mot de passe et Téléphone)')),
                           );
                           return;
                         }
@@ -133,6 +148,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             await ref.read(authControllerProvider).signUpWithEmail(
                                   _emailController.text.trim(),
                                   _passwordController.text.trim(),
+                                  phone: _signupPhoneController.text.trim(),
                                 );
                           } else {
                             await ref.read(authControllerProvider).signInWithEmail(

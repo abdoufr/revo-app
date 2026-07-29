@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/auth_providers.dart';
 import '../../providers/orders_provider.dart';
@@ -275,7 +276,7 @@ class ClientCartScreen extends ConsumerWidget {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () => _showCheckoutBottomSheet(context, ref, totalPrice),
+                        onPressed: () => _handleCheckout(context, ref, totalPrice),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -298,186 +299,166 @@ class ClientCartScreen extends ConsumerWidget {
     );
   }
 
-  void _showCheckoutBottomSheet(BuildContext context, WidgetRef ref, double totalPrice) {
+  Future<void> _handleCheckout(BuildContext context, WidgetRef ref, double totalPrice) async {
     final user = ref.read(authStateProvider).value;
-    final userDoc = user != null ? ref.read(userDocStreamProvider(user.uid)).value?.data() : null;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez vous connecter pour passer une commande.'), backgroundColor: AppTheme.error),
+      );
+      return;
+    }
 
-    final nameController = TextEditingController(text: userDoc?['displayName'] ?? userDoc?['fullName'] ?? user?.displayName ?? '');
-    final phoneController = TextEditingController(text: userDoc?['phone'] ?? userDoc?['phoneNumber'] ?? '');
-
-    showModalBottomSheet(
+    // Show quick loader while fetching user details
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) {
-          bool isLoading = false;
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+    );
 
-          return Container(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-              top: 24,
-              left: 24,
-              right: 24,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(ctx).colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[400],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Validation de votre commande 🛍️',
-                  style: Theme.of(ctx).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Veuillez confirmer vos coordonnées pour que le restaurant puisse vous contacter.',
-                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
+    try {
+      final docSnap = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (context.mounted) Navigator.pop(context); // close loader
 
-                // Name field
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nom & Prénom',
-                    prefixIcon: Icon(Icons.person_outline),
-                    isDense: true,
-                  ),
-                ),
-                const SizedBox(height: 16),
+      final data = docSnap.data() ?? {};
 
-                // Phone field
-                TextField(
-                  controller: phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Numéro de Téléphone',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                    isDense: true,
-                  ),
-                ),
-                const SizedBox(height: 20),
+      String clientName = data['name'] ?? data['displayName'] ?? data['fullName'] ?? user.displayName ?? user.email?.split('@')[0] ?? 'Client';
+      String clientPhone = data['phone'] ?? data['phoneNumber'] ?? user.phoneNumber ?? '';
 
-                // Total recap
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(ctx).primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Total à payer :', style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                        '${totalPrice.toStringAsFixed(0)} DA',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(ctx).primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
+      if (clientPhone.isNotEmpty) {
+        // Phone exists: place order immediately without showing any form!
+        if (context.mounted) {
+          _submitOrder(context, ref, userId: user.uid, name: clientName, phone: clientPhone, totalPrice: totalPrice);
+        }
+      } else {
+        // Phone missing: prompt once and save it to account profile
+        if (context.mounted) {
+          _showMissingPhoneDialog(context, ref, user.uid, clientName, totalPrice);
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // close loader
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error),
+        );
+      }
+    }
+  }
 
-                // Confirm button
-                ElevatedButton(
-                  onPressed: isLoading
-                      ? null
-                      : () async {
-                          final name = nameController.text.trim();
-                          final phone = phoneController.text.trim();
+  Future<void> _submitOrder(
+    BuildContext context,
+    WidgetRef ref, {
+    required String userId,
+    required String name,
+    required String phone,
+    required double totalPrice,
+  }) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator()),
+    );
 
-                          if (name.isEmpty || phone.isEmpty) {
-                            ScaffoldMessenger.of(ctx).showSnackBar(
-                              const SnackBar(
-                                content: Text('Veuillez remplir votre nom et votre numéro de téléphone.'),
-                                backgroundColor: AppTheme.error,
-                              ),
-                            );
-                            return;
-                          }
+    try {
+      final cartItems = ref.read(cartProvider);
 
-                          setState(() => isLoading = true);
-
-                          try {
-                            final cartItems = ref.read(cartProvider);
-                            final userId = user?.uid ?? 'guest';
-
-                            await ref.read(orderActionsProvider).createOrder(
-                                  userId: userId,
-                                  clientName: name,
-                                  clientPhone: phone,
-                                  items: cartItems,
-                                  totalPrice: totalPrice,
-                                );
-
-                            ref.read(cartProvider.notifier).clearCart();
-
-                            if (ctx.mounted) Navigator.pop(ctx); // Close sheet
-                            if (context.mounted) Navigator.pop(context); // Close cart
-
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Commande envoyée au restaurant avec succès ! 🎉'),
-                                  backgroundColor: AppTheme.success,
-                                ),
-                              );
-
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const ClientOrdersScreen()),
-                              );
-                            }
-                          } catch (e) {
-                            setState(() => isLoading = false);
-                            if (ctx.mounted) {
-                              ScaffoldMessenger.of(ctx).showSnackBar(
-                                SnackBar(content: Text('Erreur: $e'), backgroundColor: AppTheme.error),
-                              );
-                            }
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(ctx).primaryColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                        )
-                      : const Text(
-                          'Confirmer la commande',
-                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                ),
-              ],
-            ),
+      await ref.read(orderActionsProvider).createOrder(
+            userId: userId,
+            clientName: name,
+            clientPhone: phone,
+            items: cartItems,
+            totalPrice: totalPrice,
           );
-        },
+
+      ref.read(cartProvider.notifier).clearCart();
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loader
+        Navigator.pop(context); // Close cart bottom sheet
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Commande envoyée au restaurant avec succès ! 🎉'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ClientOrdersScreen()),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // Close loader
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors de l\'envoi de la commande: $e'), backgroundColor: AppTheme.error),
+        );
+      }
+    }
+  }
+
+  void _showMissingPhoneDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String userId,
+    String clientName,
+    double totalPrice,
+  ) {
+    final phoneController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: const Text('Numéro de téléphone requis 📞', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Veuillez entrer votre numéro de téléphone. Il sera enregistré sur votre compte pour toutes vos futures commandes.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: phoneController,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                labelText: 'Numéro de téléphone',
+                prefixIcon: Icon(Icons.phone),
+                isDense: true,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuler', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final phone = phoneController.text.trim();
+              if (phone.isEmpty) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  const SnackBar(content: Text('Veuillez entrer un numéro valide.'), backgroundColor: AppTheme.error),
+                );
+                return;
+              }
+
+              // Save phone number to user doc in Firestore
+              await FirebaseFirestore.instance.collection('users').doc(userId).set({
+                'phone': phone,
+              }, SetOptions(merge: true));
+
+              if (ctx.mounted) Navigator.pop(ctx); // Close phone dialog
+
+              if (context.mounted) {
+                _submitOrder(context, ref, userId: userId, name: clientName, phone: phone, totalPrice: totalPrice);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
+            child: const Text('Valider & Commander', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
