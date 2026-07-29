@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_providers.dart';
 import '../../models/claimed_reward.dart';
+import 'client_orders_screen.dart';
 
 final clientHistoryProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
   final user = ref.watch(authStateProvider).value;
@@ -51,15 +52,16 @@ class ClientHistoryScreen extends ConsumerWidget {
     final rewardsAsync = ref.watch(clientClaimedRewardsProvider);
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Mon Historique', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
+          title: Text('Mon Activité & Commandes', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
           bottom: TabBar(
             indicatorColor: Theme.of(context).primaryColor,
             labelColor: Theme.of(context).primaryColor,
             unselectedLabelColor: Colors.grey,
             tabs: const [
+              Tab(text: 'Commandes 🛍️'),
               Tab(text: 'Transactions'),
               Tab(text: 'Mes Cadeaux'),
             ],
@@ -67,6 +69,7 @@ class ClientHistoryScreen extends ConsumerWidget {
         ),
         body: TabBarView(
           children: [
+            const ClientOrdersScreen(),
             // Tab 1: Transactions
             historyAsync.when(
               data: (transactions) {

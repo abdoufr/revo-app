@@ -17,6 +17,7 @@ import 'admin_analytics_screen.dart';
 import 'admin_ingredients_screen.dart';
 import 'admin_history_screen.dart';
 import 'admin_notifications_screen.dart';
+import 'admin_orders_screen.dart';
 
 class AdminHome extends ConsumerWidget {
   const AdminHome({super.key});
@@ -96,6 +97,17 @@ class AdminHome extends ConsumerWidget {
                     Text(
                       'Actions',
                       style: Theme.of(context).textTheme.displayMedium,
+                    ),
+                    const SizedBox(height: 16),
+
+                    _buildTrendyActionCard(
+                      context,
+                      title: 'Commandes Clients 🛍️',
+                      subtitle: 'Voir et traiter les commandes en direct',
+                      icon: Icons.shopping_bag_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AdminOrdersScreen()));
+                      },
                     ),
                     const SizedBox(height: 16),
                     
